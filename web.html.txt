@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meine Testseite</title>
+</head>
+<body>
+  <h1>Willkommen auf meiner Website!</h1>
+  <p>Dies ist eine einfache Testseite, gehostet mit GitHub Pages.</p>
+</body>
+</html>
