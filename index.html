@@ -1,43 +1,546 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <title>Hello Max</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wer würde eher...?</title>
+    
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for the results diagram -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts for a clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        /* Custom styles to complement Tailwind */
         body {
-            background: #000;
-            color: white;
-            text-align: center;
-            padding: 50px;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
         }
-
-        h1 {
-            font-size: 80px;
-            font-weight: bold;
-            background: linear-gradient(
-                to right,
-                red,
-                orange,
-                yellow,
-                green,
-                blue,
-                indigo,
-                violet
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 50px;
+        .screen {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            animation: fadeIn 0.5s ease-in-out;
         }
-
-        img {
-            max-width: 90%;
-            height: auto;
+        .screen.active {
+            display: flex; /* Shown when active */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .btn {
+            @apply px-6 py-3 rounded-lg font-semibold text-white transition-transform duration-200 ease-in-out;
+        }
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 active:scale-95;
+        }
+        .btn-secondary {
+            @apply bg-gray-600 hover:bg-gray-700 active:scale-95;
+        }
+        .card {
+            @apply bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-700 w-full max-w-md;
+        }
+        .player-card {
+            @apply bg-gray-700 p-4 rounded-lg text-center cursor-pointer border-2 border-transparent transition-all duration-200;
+        }
+        .player-card.selected {
+            @apply border-blue-500 bg-blue-900/50 scale-105;
+        }
+        #timer-progress-ring {
+            transition: stroke-dashoffset 1s linear;
         }
     </style>
 </head>
-<body>
-    <h1>Hello Max</h1>
-    <img src="https://cdn.discordapp.com/attachments/1259134805975765045/1393371461447581881/image.png?ex=6872edcb&is=68719c4b&hm=ae199d8c1d2f766d30fbabfd6a4baa1cf2b230383c72829e02895e68b36cfa5f" alt="Bild" />
+<body class="antialiased">
+
+    <!-- Main container for all screens -->
+    <div id="app-container">
+
+        <!-- Screen 1: Name Entry -->
+        <div id="name-screen" class="screen active">
+            <div class="card text-center">
+                <h1 class="text-4xl font-bold mb-2">Wer würde eher...?</h1>
+                <p class="text-gray-400 mb-8">Das ultimative Freundschaftsspiel</p>
+                <div class="space-y-4">
+                    <input type="text" id="name-input" placeholder="Dein Name" class="w-full bg-gray-700 text-white p-4 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none text-center text-lg">
+                    <input type="text" id="lobby-id-input" placeholder="Lobby-ID (optional)" class="w-full bg-gray-700 text-white p-4 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none text-center text-lg">
+                    <button id="join-btn" class="btn btn-primary w-full text-lg">Spiel beitreten / erstellen</button>
+                </div>
+                 <p id="error-message" class="text-red-400 mt-4 h-5"></p>
+            </div>
+        </div>
+
+        <!-- Screen 2: Lobby -->
+        <div id="lobby-screen" class="screen">
+            <div class="card text-center">
+                <h2 class="text-3xl font-bold mb-4">Lobby</h2>
+                <div class="bg-gray-900 p-3 rounded-lg mb-4">
+                    <p class="text-gray-400 text-sm">Lobby-ID zum Teilen:</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span id="lobby-id-display" class="text-2xl font-mono tracking-widest"></span>
+                        <button id="copy-lobby-id-btn" class="bg-gray-700 p-2 rounded-lg hover:bg-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                                <path d="M4 1.5H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">Spieler (<span id="player-count"></span>)</h3>
+                <div id="player-list" class="space-y-2 mb-6 min-h-[100px]">
+                    <!-- Player names will be injected here -->
+                </div>
+                <div id="host-controls" class="hidden space-y-4">
+                    <select id="category-select" class="w-full bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <!-- Categories will be injected here -->
+                    </select>
+                    <button id="start-game-btn" class="btn btn-primary w-full text-lg">Spiel starten</button>
+                </div>
+                <div id="player-waiting-message" class="hidden">
+                    <p class="text-gray-400 text-lg animate-pulse">Warte, bis der Host das Spiel startet...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Game -->
+        <div id="game-screen" class="screen relative">
+             <!-- Circular Timer -->
+            <div id="circular-timer" class="absolute top-4 right-4 w-20 h-20">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <!-- Background circle -->
+                    <circle class="text-gray-700" stroke-width="10" cx="50" cy="50" r="45" fill="transparent"></circle>
+                    <!-- Progress circle -->
+                    <circle id="timer-progress-ring" class="text-blue-500" stroke-width="10" cx="50" cy="50" r="45" fill="transparent"
+                            stroke-linecap="round"
+                            transform="rotate(-90 50 50)"></circle>
+                </svg>
+                <span id="timer-text" class="absolute inset-0 flex items-center justify-center text-2xl font-bold">20</span>
+            </div>
+
+            <div class="w-full max-w-3xl text-center">
+                <div class="mb-6 mt-16 sm:mt-0">
+                    <p class="text-gray-400 text-lg">Wer würde eher...</p>
+                    <h2 id="question-text" class="text-3xl sm:text-4xl font-bold min-h-[100px]"></h2>
+                </div>
+                
+                <!-- Waiting GIF Container -->
+                <div id="waiting-gif-container" class="my-8" style="display: none;">
+                    <img src="hood-irony-ghetto-smosh.gif" alt="Warten auf andere Spieler..." class="mx-auto h-48 rounded-lg">
+                    <p id="vote-message" class="text-yellow-400 mt-4 h-5 animate-pulse"></p>
+                </div>
+
+                <div id="vote-options" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" style="display: none;">
+                    <!-- Player cards for voting will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Results -->
+        <div id="results-screen" class="screen">
+            <div class="card text-center w-full max-w-2xl">
+                <p class="text-gray-400 mb-2">Die Stimmen sind da!</p>
+                <h2 id="results-question-text" class="text-2xl font-bold mb-6"></h2>
+                <div class="relative w-full h-64 sm:h-80 mb-6">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="results-summary" class="text-xl mb-6"></div>
+                <div id="host-next-round-controls" class="hidden">
+                    <button id="next-round-btn" class="btn btn-primary w-full text-lg">Nächste Runde</button>
+                </div>
+                <div id="player-next-round-waiting-message" class="hidden">
+                     <p class="text-gray-400 text-lg animate-pulse">Warte, bis der Host die nächste Runde startet...</p>
+                </div>
+                 <div id="score-board" class="mt-6 text-left">
+                    <h3 class="font-bold text-xl mb-2">Punktestand</h3>
+                    <!-- Scores will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // IMPORTANT: Replace with your own Firebase project configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyANV7_AKN8oZIpJ1JjIVuokO2Q6Gc-iN04",
+          authDomain: "wer-wuerde-eher-70d61.firebaseapp.com",
+          projectId: "wer-wuerde-eher-70d61",
+          storageBucket: "wer-wuerde-eher-70d61.firebasestorage.app",
+          messagingSenderId: "301727904397",
+          appId: "1:301727904397:web:eec5b088e46425946b68c4",
+        };
+        
+        // Use placeholder config if the user hasn't replaced it
+        const finalFirebaseConfig = firebaseConfig.projectId === "YOUR_PROJECT_ID" 
+            ? JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}')
+            : firebaseConfig;
+
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- GAME DATA ---
+        const questions = {
+            "🤪 Absurder Alltag": [
+                "eine Socke in der Chipstüte verlieren.", "vergessen, wie man eine Tür öffnet.", "mit einer Taube über das Wetter streiten.", "im Supermarkt aus Versehen in den falschen Einkaufswagen greifen.", "den Pizzaboten zum Abendessen einladen.", "versuchen, eine Wassermelone durch einen Strohhalm zu essen.", "beim Zähneputzen einschlafen.", "die Fernbedienung im Kühlschrank suchen.", "einem Roboter einen Witz erzählen und auf eine Reaktion warten.", "sich mit einer Pflanze unterhalten.", "in Socken und Sandalen zur Arbeit gehen.", "ein ganzes Gespräch führen, bevor er merkt, dass er telefoniert.", "im Kino laut mit dem Film reden.", "Ketchup auf ein Eis machen.", "versuchen, ein Auto mit dem Fahrradschlüssel zu starten.", "beim Ausparken die eigene Garage rammen.", "den Namen des eigenen Haustiers vergessen.", "einen Streit mit dem Navi anfangen.", "in der Badewanne Pizza essen.", "im Schlaf eine Fremdsprache sprechen.",
+            ],
+            "🎉 Party & Festival": [
+                "auf dem Tisch tanzen.", "sich mit dem DJ anfreunden und die Musik übernehmen.", "als erster einschlafen.", "am nächsten Morgen nichts mehr wissen.", "den ganzen Abend nur am Buffet stehen.", "im Moshpit die Schuhe verlieren.", "versuchen, mit dem Sicherheitspersonal zu flirten.", "alleine tanzen, als ob niemand zusieht.", "am Ende der Party beim Aufräumen helfen.", "eine Polonaise durch die ganze Location starten.", "Glitzer ins Gesicht von allen schmieren.", "betrunken eine tiefgründige Rede halten.", "die Snacks für alle organisieren.", "einen peinlichen Tanzmove auspacken.", "mit einer völlig fremden Gruppe mitfeiern.", "sein Handy verlieren.", "am lautesten mitsingen, obwohl er den Text nicht kann.", "einen Wodka-Redbull als Wasser ausgeben.", "der 'Party-Fotograf' sein.", "einen Kater für drei Tage haben.",
+            ],
+            "❤️ Liebe & Beziehung": [
+                "beim ersten Date heiraten wollen.", "den Jahrestag vergessen.", "ein furchtbares, aber gut gemeintes Geschenk machen.", "eine romantische Komödie nachspielen.", "auf einer Dating-App nach rechts swipen, während der Partner daneben sitzt.", "einen Liebesbrief mit Rechtschreibfehlern schreiben.", "eifersüchtig auf ein Haustier sein.", "die Fernbedienung im Streit als Geisel nehmen.", "den Beziehungsstatus auf Facebook minütlich ändern.", "heimlich die Süßigkeiten des Partners essen.", "einen Streit anfangen, weil er schlecht geträumt hat.", "immer Recht haben wollen, auch wenn er im Unrecht ist.", "das gemeinsame Netflix-Profil versauen.", "im Restaurant für den Partner mitbestellen.", "'Ich liebe dich' per SMS sagen, um einer echten Konversation zu entgehen.", "die Kleidung des Partners klauen.", "für den Partner kochen und dabei die Küche abfackeln.", "einen peinlichen Kosenamen in der Öffentlichkeit benutzen.", "den Ex-Partner auf Social Media stalken.", "eine ganze Serie ohne den Partner weiterschauen.",
+            ]
+        };
+
+        // --- APPLICATION STATE ---
+        let app, auth, db;
+        let currentUser = null;
+        let currentLobbyId = null;
+        let lobbyUnsubscribe = null;
+        let resultsChart = null;
+        let timerInterval = null;
+        let timerRingCircumference;
+
+        // --- DOM ELEMENTS ---
+        const screens = { name: document.getElementById('name-screen'), lobby: document.getElementById('lobby-screen'), game: document.getElementById('game-screen'), results: document.getElementById('results-screen'), };
+        const nameInput = document.getElementById('name-input');
+        const lobbyIdInput = document.getElementById('lobby-id-input');
+        const joinBtn = document.getElementById('join-btn');
+        const errorMessage = document.getElementById('error-message');
+        const lobbyIdDisplay = document.getElementById('lobby-id-display');
+        const copyLobbyIdBtn = document.getElementById('copy-lobby-id-btn');
+        const playerCount = document.getElementById('player-count');
+        const playerList = document.getElementById('player-list');
+        const hostControls = document.getElementById('host-controls');
+        const playerWaitingMessage = document.getElementById('player-waiting-message');
+        const categorySelect = document.getElementById('category-select');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const questionText = document.getElementById('question-text');
+        const voteOptions = document.getElementById('vote-options');
+        const voteMessage = document.getElementById('vote-message');
+        const resultsQuestionText = document.getElementById('results-question-text');
+        const resultsSummary = document.getElementById('results-summary');
+        const hostNextRoundControls = document.getElementById('host-next-round-controls');
+        const nextRoundBtn = document.getElementById('next-round-btn');
+        const playerNextRoundWaitingMessage = document.getElementById('player-next-round-waiting-message');
+        const scoreBoard = document.getElementById('score-board');
+        const timerProgressRing = document.getElementById('timer-progress-ring');
+        const timerText = document.getElementById('timer-text');
+        const waitingGifContainer = document.getElementById('waiting-gif-container');
+        
+        // --- INITIALIZATION ---
+        function initialize() {
+            if (Object.values(finalFirebaseConfig).some(v => v === "" || v.startsWith("YOUR_"))) {
+                showError("Firebase ist nicht konfiguriert. Bitte ersetze die Platzhalter in der Konfiguration.");
+                joinBtn.disabled = true;
+                joinBtn.classList.remove('btn-primary');
+                joinBtn.classList.add('btn-secondary');
+                return;
+            }
+            app = initializeApp(finalFirebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    currentUser = user;
+                } else {
+                    signInAnonymously(auth).catch(error => {
+                        console.error("Anonymous sign-in failed:", error);
+                        showError("Authentifizierung fehlgeschlagen.");
+                    });
+                }
+            });
+
+            const radius = timerProgressRing.r.baseVal.value;
+            timerRingCircumference = 2 * Math.PI * radius;
+            timerProgressRing.style.strokeDasharray = `${timerRingCircumference} ${timerRingCircumference}`;
+            timerProgressRing.style.strokeDashoffset = timerRingCircumference;
+
+            setupEventListeners();
+            populateCategories();
+        }
+
+        function setupEventListeners() {
+            joinBtn.addEventListener('click', handleJoinGame);
+            startGameBtn.addEventListener('click', handleStartGame);
+            nextRoundBtn.addEventListener('click', handleNextRound);
+            copyLobbyIdBtn.addEventListener('click', copyLobbyId);
+        }
+
+        function populateCategories() {
+            categorySelect.innerHTML = ''; // Clear existing options
+            for (const category in questions) {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            }
+        }
+
+        // --- SCREEN MANAGEMENT ---
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            if (screens[screenName]) {
+                screens[screenName].classList.add('active');
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            setTimeout(() => errorMessage.textContent = '', 3000);
+        }
+
+        // --- GAME LOGIC ---
+        async function handleJoinGame() {
+            const name = nameInput.value.trim();
+            if (!name) { showError("Bitte gib einen Namen ein."); return; }
+            if (!currentUser) { showError("Warte auf Authentifizierung..."); return; }
+            const lobbyId = lobbyIdInput.value.trim().toUpperCase();
+            if (lobbyId) { await joinLobby(lobbyId, name); } 
+            else { await createLobby(name); }
+        }
+        
+        async function createLobby(playerName) {
+            const lobbyId = generateLobbyId();
+            currentLobbyId = lobbyId;
+            const lobbyRef = doc(db, "lobbies", lobbyId);
+            const newPlayer = { id: currentUser.uid, name: playerName, score: 0 };
+            const lobbyData = {
+                hostId: currentUser.uid, gameState: "lobby", players: [newPlayer],
+                currentCategory: Object.keys(questions)[0], currentQuestionIndex: 0,
+                votes: {}, createdAt: serverTimestamp()
+            };
+            try {
+                await setDoc(lobbyRef, lobbyData);
+                listenToLobby(lobbyId);
+            } catch (error) {
+                console.error("Error creating lobby:", error);
+                showError("Lobby konnte nicht erstellt werden.");
+            }
+        }
+
+        async function joinLobby(lobbyId, playerName) {
+            const lobbyRef = doc(db, "lobbies", lobbyId);
+            try {
+                const lobbySnap = await getDoc(lobbyRef);
+                if (!lobbySnap.exists()) { showError("Lobby nicht gefunden. Überprüfe die ID."); return; }
+                const lobbyData = lobbySnap.data();
+                if (!lobbyData.players.some(p => p.id === currentUser.uid)) {
+                    const newPlayer = { id: currentUser.uid, name: playerName, score: 0 };
+                    await updateDoc(lobbyRef, { players: [...lobbyData.players, newPlayer] });
+                }
+                currentLobbyId = lobbyId;
+                listenToLobby(lobbyId);
+            } catch (error) {
+                console.error("Error joining lobby:", error);
+                showError("Beitritt zur Lobby fehlgeschlagen.");
+            }
+        }
+
+        function listenToLobby(lobbyId) {
+            if (lobbyUnsubscribe) lobbyUnsubscribe();
+            lobbyUnsubscribe = onSnapshot(doc(db, "lobbies", lobbyId), (doc) => {
+                if (!doc.exists()) {
+                    alert("Die Lobby wurde geschlossen.");
+                    window.location.reload();
+                    return;
+                }
+                updateUI(doc.data());
+            });
+        }
+
+        async function handleStartGame() {
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            try {
+                await updateDoc(lobbyRef, { 
+                    gameState: "playing", 
+                    currentCategory: categorySelect.value, 
+                    currentQuestionIndex: 0, 
+                    votes: {} 
+                });
+            } catch (error) {
+                console.error("Error starting game:", error);
+            }
+        }
+        
+        async function handleVote(votedForPlayerId) {
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            try {
+                await updateDoc(lobbyRef, { [`votes.${currentUser.uid}`]: votedForPlayerId });
+            } catch(error) {
+                console.error("Error submitting vote:", error);
+            }
+        }
+
+        async function handleNextRound() {
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            const lobbySnap = await getDoc(lobbyRef);
+            if (!lobbySnap.exists()) return;
+            const lobbyData = lobbySnap.data();
+            const nextQuestionIndex = lobbyData.currentQuestionIndex + 1;
+            
+            const categoryQuestions = questions[lobbyData.currentCategory] || [];
+            if (nextQuestionIndex >= categoryQuestions.length) {
+                await updateDoc(lobbyRef, { gameState: "lobby" });
+            } else {
+                await updateDoc(lobbyRef, { 
+                    gameState: "playing", 
+                    currentQuestionIndex: nextQuestionIndex, 
+                    votes: {} 
+                });
+            }
+        }
+
+        // --- UI UPDATES ---
+        function updateUI(lobbyData) {
+            if (!currentUser) return;
+
+            playerCount.textContent = lobbyData.players.length;
+            playerList.innerHTML = lobbyData.players.map(p => `
+                <div class="bg-gray-700 p-2 rounded-lg flex items-center justify-between">
+                    <span>${p.name} ${p.id === lobbyData.hostId ? '👑' : ''}</span>
+                    <span class="font-bold text-blue-400">${p.score} Pkt.</span>
+                </div>`).join('');
+            
+            showScreen(lobbyData.gameState);
+
+            if (lobbyData.gameState === "lobby") {
+                lobbyIdDisplay.textContent = currentLobbyId;
+                const isHost = currentUser.uid === lobbyData.hostId;
+                hostControls.classList.toggle('hidden', !isHost);
+                playerWaitingMessage.classList.toggle('hidden', isHost);
+            } else if (lobbyData.gameState === "playing") {
+                renderGameScreen(lobbyData);
+            } else if (lobbyData.gameState === "results") {
+                renderResultsScreen(lobbyData);
+            }
+        }
+        
+        function renderGameScreen(lobbyData) {
+            const categoryQuestions = questions[lobbyData.currentCategory] || [];
+            const question = categoryQuestions[lobbyData.currentQuestionIndex] || "Frage wird geladen...";
+            questionText.textContent = `...${question}`;
+            
+            const myVote = lobbyData.votes[currentUser.uid];
+            
+            if (myVote) {
+                voteOptions.style.display = 'none';
+                waitingGifContainer.style.display = 'block';
+                voteMessage.textContent = "Warte auf die anderen Spieler...";
+            } else {
+                voteOptions.style.display = 'grid';
+                waitingGifContainer.style.display = 'none';
+                voteOptions.innerHTML = lobbyData.players.map(p => `
+                    <div class="player-card" data-player-id="${p.id}">
+                        <span class="text-lg font-semibold">${p.name}</span>
+                    </div>`).join('');
+                
+                voteOptions.querySelectorAll('.player-card').forEach(card => {
+                    card.onclick = () => handleVote(card.dataset.playerId);
+                });
+            }
+            
+            if (timerInterval) clearInterval(timerInterval);
+            let timeLeft = 20;
+            timerText.textContent = timeLeft;
+            timerProgressRing.style.strokeDashoffset = 0;
+            
+            timerInterval = setInterval(async () => {
+                timeLeft--;
+                if (timeLeft < 0) timeLeft = 0;
+
+                timerText.textContent = timeLeft;
+                const offset = timerRingCircumference - (timeLeft / 20) * timerRingCircumference;
+                timerProgressRing.style.strokeDashoffset = offset;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if(currentUser.uid === lobbyData.hostId) {
+                        const lobbyRef = doc(db, "lobbies", currentLobbyId);
+                        const lobbySnap = await getDoc(lobbyRef);
+                        if (!lobbySnap.exists() || lobbySnap.data().gameState !== 'playing') return;
+                        
+                        const currentLobbyData = lobbySnap.data();
+                        const voteCounts = {};
+                        currentLobbyData.players.forEach(p => voteCounts[p.id] = { name: p.name, count: 0 });
+                        Object.values(currentLobbyData.votes).forEach(vId => { if(voteCounts[vId]) voteCounts[vId].count++; });
+                        const sortedVotes = Object.entries(voteCounts).sort(([,a],[,b]) => b.count - a.count);
+
+                        let newPlayers = currentLobbyData.players;
+                        if (sortedVotes.length > 0 && sortedVotes[0][1].count > 0) {
+                            const winnerId = sortedVotes[0][0];
+                            newPlayers = currentLobbyData.players.map(p => 
+                                currentLobbyData.votes[p.id] === winnerId ? { ...p, score: p.score + 10 } : p
+                            );
+                        }
+                        await updateDoc(lobbyRef, { gameState: "results", players: newPlayers });
+                    }
+                }
+            }, 1000);
+        }
+        
+        function renderResultsScreen(lobbyData) {
+            if(timerInterval) clearInterval(timerInterval);
+            const categoryQuestions = questions[lobbyData.currentCategory] || [];
+            const question = categoryQuestions[lobbyData.currentQuestionIndex] || "";
+            resultsQuestionText.textContent = `Wer würde eher... ${question}`;
+
+            const voteCounts = {};
+            lobbyData.players.forEach(p => voteCounts[p.id] = { name: p.name, count: 0 });
+            Object.values(lobbyData.votes).forEach(vId => { if(voteCounts[vId]) voteCounts[vId].count++; });
+            const sortedVotes = Object.entries(voteCounts).sort(([,a],[,b]) => b.count - a.count);
+            
+            if (sortedVotes.length > 0 && sortedVotes[0][1].count > 0) {
+                resultsSummary.innerHTML = `<span class="font-bold text-blue-400 text-2xl">${sortedVotes[0][1].name}</span> wurde am häufigsten gewählt!`;
+            } else {
+                resultsSummary.textContent = "Niemand hat eine Stimme erhalten!";
+            }
+            
+            const chartData = {
+                labels: sortedVotes.filter(v => v[1].count > 0).map(v => v[1].name),
+                datasets: [{ data: sortedVotes.filter(v => v[1].count > 0).map(v => v[1].count), backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#ec4899', '#8b5cf6', '#f59e0b'], borderColor: '#1f2937', borderWidth: 2, }]
+            };
+
+            if (resultsChart) resultsChart.destroy();
+            resultsChart = new Chart(document.getElementById('results-chart').getContext('2d'), {
+                type: 'doughnut', data: chartData,
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#d1d5db', font: { size: 14 } } } } }
+            });
+
+            scoreBoard.innerHTML = `<h3 class="font-bold text-xl mb-2">Punktestand</h3>` + lobbyData.players.sort((a, b) => b.score - a.score)
+                .map(p => `<div class="flex justify-between items-center bg-gray-700/50 p-2 rounded-md mb-1"><span>${p.name}</span><span class="font-bold text-lg">${p.score}</span></div>`).join('');
+
+            const isHost = currentUser.uid === lobbyData.hostId;
+            hostNextRoundControls.classList.toggle('hidden', !isHost);
+            playerNextRoundWaitingMessage.classList.toggle('hidden', isHost);
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function generateLobbyId() { return Math.random().toString(36).substring(2, 7).toUpperCase(); }
+        
+        function copyLobbyId() {
+            navigator.clipboard.writeText(lobbyIdDisplay.textContent).then(() => {
+                const originalHTML = copyLobbyIdBtn.innerHTML;
+                copyLobbyIdBtn.innerHTML = '✓';
+                setTimeout(() => { copyLobbyIdBtn.innerHTML = originalHTML; }, 1500);
+            });
+        }
+        
+        // --- START THE APP ---
+        initialize();
+    </script>
 </body>
 </html>
