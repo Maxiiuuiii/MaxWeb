@@ -140,7 +140,7 @@
                     <p id="vote-message" class="text-yellow-400 mt-4 h-5 animate-pulse"></p>
                 </div>
 
-                <div id="vote-options" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" style="display: none;">
+                <div id="vote-options" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <!-- Player cards for voting will be injected here -->
                 </div>
             </div>
@@ -429,31 +429,39 @@
             }
         }
         
+        // REWRITTEN AND SIMPLIFIED FUNCTION
         function renderGameScreen(lobbyData) {
+            if (timerInterval) clearInterval(timerInterval);
+
             const categoryQuestions = questions[lobbyData.currentCategory] || [];
             const question = categoryQuestions[lobbyData.currentQuestionIndex] || "Frage wird geladen...";
             questionText.textContent = `...${question}`;
             
             const myVote = lobbyData.votes[currentUser.uid];
             
+            // --- CORE LOGIC REWRITE ---
             if (myVote) {
+                // You have voted: Show the waiting GIF
                 voteOptions.style.display = 'none';
                 waitingGifContainer.style.display = 'block';
                 voteMessage.textContent = "Warte auf die anderen Spieler...";
             } else {
-                voteOptions.style.display = 'grid';
+                // You have NOT voted: Show the player cards
                 waitingGifContainer.style.display = 'none';
-                voteOptions.innerHTML = lobbyData.players.map(p => `
-                    <div class="player-card" data-player-id="${p.id}">
-                        <span class="text-lg font-semibold">${p.name}</span>
-                    </div>`).join('');
+                voteOptions.style.display = 'grid';
                 
-                voteOptions.querySelectorAll('.player-card').forEach(card => {
-                    card.onclick = () => handleVote(card.dataset.playerId);
+                voteOptions.innerHTML = ''; // Clear previous cards
+                lobbyData.players.forEach(player => {
+                    const card = document.createElement('div');
+                    card.className = 'player-card';
+                    card.dataset.playerId = player.id;
+                    card.innerHTML = `<span class="text-lg font-semibold">${player.name}</span>`;
+                    card.onclick = () => handleVote(player.id);
+                    voteOptions.appendChild(card);
                 });
             }
             
-            if (timerInterval) clearInterval(timerInterval);
+            // --- TIMER LOGIC (UNCHANGED) ---
             let timeLeft = 20;
             timerText.textContent = timeLeft;
             timerProgressRing.style.strokeDashoffset = 0;
