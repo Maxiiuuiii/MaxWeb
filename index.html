@@ -134,15 +134,13 @@
                     <h2 id="question-text" class="text-3xl sm:text-4xl font-bold min-h-[100px]"></h2>
                 </div>
                 
-                <!-- Waiting GIF Container -->
-                <div id="waiting-gif-container" class="my-8" style="display: none;">
-                    <img src="hood-irony-ghetto-smosh.gif" alt="Warten auf andere Spieler..." class="mx-auto h-48 rounded-lg">
-                    <p id="vote-message" class="text-yellow-400 mt-4 h-5 animate-pulse"></p>
+                <div id="vote-container" class="my-8">
+                     <div id="vote-options" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Player cards for voting will be injected here -->
+                    </div>
+                    <p id="vote-message" class="text-yellow-400 mt-4 h-5 animate-pulse" style="display: none;"></p>
                 </div>
 
-                <div id="vote-options" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Player cards for voting will be injected here -->
-                </div>
             </div>
         </div>
 
@@ -233,7 +231,6 @@
         const scoreBoard = document.getElementById('score-board');
         const timerProgressRing = document.getElementById('timer-progress-ring');
         const timerText = document.getElementById('timer-text');
-        const waitingGifContainer = document.getElementById('waiting-gif-container');
         
         // --- INITIALIZATION ---
         function initialize() {
@@ -243,7 +240,6 @@
             
             onAuthStateChanged(auth, user => {
                 if (user) {
-                    console.log("Authenticated successfully with UID:", user.uid);
                     currentUser = user;
                 } else {
                     signInAnonymously(auth).catch(error => {
@@ -347,13 +343,11 @@
                     window.location.reload();
                     return;
                 }
-                console.log("Received lobby update:", doc.data());
                 updateUI(doc.data());
             });
         }
 
         async function handleStartGame() {
-            console.log("Start game button clicked by host.");
             const lobbyRef = doc(db, "lobbies", currentLobbyId);
             try {
                 await updateDoc(lobbyRef, { 
@@ -368,7 +362,6 @@
         }
         
         async function handleVote(votedForPlayerId) {
-            console.log(`Player ${currentUser.uid} voted for ${votedForPlayerId}`);
             const lobbyRef = doc(db, "lobbies", currentLobbyId);
             try {
                 await updateDoc(lobbyRef, { [`votes.${currentUser.uid}`]: votedForPlayerId });
@@ -398,10 +391,7 @@
 
         // --- UI UPDATES ---
         function updateUI(lobbyData) {
-            if (!currentUser) {
-                console.log("UI update skipped: currentUser is not ready.");
-                return;
-            }
+            if (!currentUser) return;
 
             playerCount.textContent = lobbyData.players.length;
             playerList.innerHTML = lobbyData.players.map(p => `
@@ -425,7 +415,6 @@
         }
         
         function renderGameScreen(lobbyData) {
-            console.log("Rendering game screen...");
             if (timerInterval) clearInterval(timerInterval);
 
             const categoryQuestions = questions[lobbyData.currentCategory] || [];
@@ -434,17 +423,16 @@
             
             const myVote = lobbyData.votes[currentUser.uid];
             
+            voteOptions.innerHTML = ''; // Always clear first
+            
             if (myVote) {
-                console.log("User has voted. Showing GIF.");
                 voteOptions.style.display = 'none';
-                waitingGifContainer.style.display = 'block';
+                voteMessage.style.display = 'block';
                 voteMessage.textContent = "Warte auf die anderen Spieler...";
             } else {
-                console.log("User has not voted. Showing player cards.");
-                waitingGifContainer.style.display = 'none';
+                voteMessage.style.display = 'none';
                 voteOptions.style.display = 'grid';
                 
-                voteOptions.innerHTML = ''; // Clear previous cards
                 if (lobbyData.players && lobbyData.players.length > 0) {
                     lobbyData.players.forEach(player => {
                         const card = document.createElement('div');
@@ -455,7 +443,6 @@
                         voteOptions.appendChild(card);
                     });
                 } else {
-                    // Failsafe in case player data is missing
                     voteOptions.innerHTML = `<p class="text-yellow-400 col-span-full">Warte auf Spielerdaten...</p>`;
                 }
             }
