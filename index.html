@@ -21,6 +21,8 @@
         }
         #timer-circle {
             transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.1s linear;
         }
         .pie-chart-container {
             width: 90%;
@@ -40,9 +42,10 @@
                  <input type="text" id="name-input" placeholder="Dein Name" class="w-full p-3 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                  <input type="text" id="lobby-code-input" placeholder="Lobby-Code (optional)" class="w-full p-3 border border-gray-300 rounded-lg text-center uppercase focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                  <div class="grid grid-cols-2 gap-3">
-                    <button id="create-lobby-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105">Lobby erstellen</button>
-                    <button id="join-lobby-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105">Lobby beitreten</button>
+                    <button id="create-lobby-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Lobby erstellen</button>
+                    <button id="join-lobby-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Lobby beitreten</button>
                  </div>
+                 <button id="test-game-button" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Testrunde starten</button>
             </div>
             <p id="error-message" class="text-red-500 text-sm mt-2"></p>
         </div>
@@ -78,22 +81,27 @@
         <div id="game-screen" class="screen flex-col items-center gap-4">
             <div class="relative w-24 h-24">
                 <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <circle class="text-gray-200" stroke-width="10" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" />
-                    <circle id="timer-circle" class="text-indigo-600" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
+                    <!-- Background circle -->
+                    <circle class="stroke-gray-200" stroke-width="10" fill="transparent" r="45" cx="50" cy="50" />
+                    <!-- Progress circle -->
+                    <circle id="timer-circle" class="stroke-indigo-600" stroke-width="10" stroke-linecap="round" fill="transparent" r="45" cx="50" cy="50"></circle>
                 </svg>
                 <span id="timer-text" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl font-bold">20</span>
             </div>
-            <h3 class="text-xl md:text-2xl font-semibold text-center mt-4" id="question-text"></h3>
+            <p id="question-counter" class="text-sm font-semibold text-gray-500"></p>
+            <h3 class="text-xl md:text-2xl font-semibold text-center mt-2" id="question-text"></h3>
             <div id="vote-options" class="w-full grid grid-cols-2 gap-3 mt-4">
                 <!-- Vote buttons will be injected here -->
             </div>
             <p id="vote-info" class="text-center text-gray-500 mt-2 hidden">Du hast bereits abgestimmt.</p>
+            <img id="waiting-gif" src="https://media.tenor.com/nZQlCgAcIXQAAAAi/hood-irony-ghetto-smosh.gif" alt="Warten..." class="hidden w-48 h-48 mx-auto mt-4 rounded-lg">
         </div>
 
         <!-- Screen 4: Results -->
         <div id="results-screen" class="screen flex-col items-center gap-4">
+            <p id="results-question-counter" class="text-sm font-semibold text-gray-500"></p>
             <h3 class="text-xl font-semibold text-center" id="results-question-text"></h3>
-            <p class="text-gray-600 text-center">Ergebnisse der Abstimmung:</p>
+            <p class="text-gray-600 text-center mt-2">Ergebnisse der Abstimmung:</p>
             <div class="pie-chart-container">
                 <canvas id="results-chart"></canvas>
             </div>
@@ -103,7 +111,6 @@
             </div>
              <p id="results-info-for-players" class="text-center text-gray-600 mt-4">Warte auf den Host für die nächste Runde...</p>
         </div>
-
     </div>
 
     <script type="module">
@@ -131,12 +138,11 @@
             ],
             'Party': [
                 "Wer würde eher auf den Tischen tanzen?", "Wer würde eher als erstes einschlafen?", "Wer würde eher den DJ bestechen, ein schlechtes Lied zu spielen?", "Wer würde eher mit einer Pflanze reden?", "Wer würde eher eine Polonaise starten?", "Wer würde eher alle Getränke mixen und probieren?", "Wer würde eher am nächsten Morgen nichts mehr wissen?", "Wer würde eher Karaoke singen, obwohl er es nicht kann?", "Wer würde eher versuchen, mit dem Barkeeper zu flirten?", "Wer würde eher die Snacks alleine aufessen?", "Wer würde eher einen peinlichen Tanzmove auspacken?", "Wer würde eher mit dem Gastgeber über Politik diskutieren?", "Wer würde eher die Musik übernehmen und alle nerven?", "Wer würde eher heimlich gehen, ohne sich zu verabschieden?", "Wer würde eher ein Trinkspiel vorschlagen?", "Wer würde eher am nächsten Tag beim Aufräumen helfen?", "Wer würde eher eine Wette verlieren und etwas Dummes tun müssen?", "Wer würde eher Fotos von schlafenden Leuten machen?", "Wer würde eher eine Rede halten, obwohl niemand zuhört?", "Wer würde eher versuchen, einen Zaubertrick vorzuführen und scheitern?"
-            ],
-            'Custom': []
+            ]
         };
 
         // --- APPLICATION STATE ---
-        let app, auth, db;
+        let app, auth, db, isFirebaseReady = false;
         let currentUser = null;
         let localPlayerName = '';
         let currentLobbyId = null;
@@ -150,15 +156,20 @@
         const lobbyCodeInput = document.getElementById('lobby-code-input');
         const createLobbyButton = document.getElementById('create-lobby-button');
         const joinLobbyButton = document.getElementById('join-lobby-button');
+        const testGameButton = document.getElementById('test-game-button');
+        const nameScreenButtons = [createLobbyButton, joinLobbyButton, testGameButton];
         const errorMessage = document.getElementById('error-message');
         const playerList = document.getElementById('player-list');
         const hostControls = document.getElementById('host-controls');
         const startGameButton = document.getElementById('start-game-button');
         const resetLobbyButton = document.getElementById('reset-lobby-button');
         const questionText = document.getElementById('question-text');
+        const questionCounter = document.getElementById('question-counter');
         const voteOptions = document.getElementById('vote-options');
         const voteInfo = document.getElementById('vote-info');
+        const waitingGif = document.getElementById('waiting-gif');
         const resultsQuestionText = document.getElementById('results-question-text');
+        const resultsQuestionCounter = document.getElementById('results-question-counter');
         const resultsChartCanvas = document.getElementById('results-chart');
         const resultsHostControls = document.getElementById('results-host-controls');
         const nextQuestionButton = document.getElementById('next-question-button');
@@ -204,23 +215,31 @@
         }
 
         async function initializeGame() {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
-            onAuthStateChanged(auth, user => {
-                currentUser = user;
-                if (!user) {
-                    signInAnonymously(auth).catch(error => {
-                        console.error("Anonymous sign-in failed:", error);
-                        errorMessage.textContent = "Verbindung zum Server fehlgeschlagen.";
-                    });
-                }
-            });
+                onAuthStateChanged(auth, user => {
+                    currentUser = user;
+                    if (user) {
+                        isFirebaseReady = true;
+                        nameScreenButtons.forEach(btn => btn.disabled = false);
+                    } else {
+                        signInAnonymously(auth).catch(error => {
+                            console.error("Anonymous sign-in failed:", error);
+                            errorMessage.textContent = "Verbindung zum Server fehlgeschlagen.";
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                errorMessage.textContent = "Verbindung zum Server konnte nicht hergestellt werden.";
+            }
         }
 
         createLobbyButton.addEventListener('click', async () => {
-            if (!validateInputs()) return;
+            if (!isFirebaseReady || !validateInputs()) return;
             
             const newLobbyId = generateLobbyCode();
             currentLobbyId = newLobbyId;
@@ -247,7 +266,7 @@
         });
 
         joinLobbyButton.addEventListener('click', async () => {
-            if (!validateInputs()) return;
+            if (!isFirebaseReady || !validateInputs()) return;
             const lobbyId = lobbyCodeInput.value.trim().toUpperCase();
             if (!lobbyId) {
                 errorMessage.textContent = "Bitte gib einen Lobby-Code ein.";
@@ -281,18 +300,56 @@
             }
         });
         
+        testGameButton.addEventListener('click', async () => {
+            if (!isFirebaseReady || !validateInputs()) return;
+
+            const newLobbyId = `TEST-${generateLobbyCode()}`;
+            currentLobbyId = newLobbyId;
+            const gameDocRef = doc(db, "lobbies", newLobbyId);
+
+            const testLobbyState = {
+                hostId: currentUser.uid,
+                status: 'lobby',
+                players: { [currentUser.uid]: { name: localPlayerName } },
+                currentCategory: 'Standard',
+                currentQuestionIndex: 0,
+                votes: {},
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await setDoc(gameDocRef, testLobbyState);
+                await updateDoc(gameDocRef, {
+                    status: 'playing',
+                    timerStartedAt: serverTimestamp()
+                });
+
+                if (gameUnsubscribe) gameUnsubscribe();
+                gameUnsubscribe = onSnapshot(gameDocRef, handleGameStateUpdate);
+
+                setTimeout(async () => {
+                    const freshDoc = await getDoc(gameDocRef);
+                    if (freshDoc.exists() && freshDoc.data().status === 'playing' && freshDoc.data().currentQuestionIndex === 0) {
+                         await updateDoc(gameDocRef, { status: 'results' });
+                    }
+                }, 20500);
+
+            } catch (error) {
+                console.error("Error starting test game:", error);
+                errorMessage.textContent = "Fehler beim Starten des Testspiels.";
+            }
+        });
+
         leaveLobbyButton.addEventListener('click', async () => {
-            if (!currentLobbyId || !currentUser) return;
+            if (!isFirebaseReady || !currentLobbyId) return;
             
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             
             try {
                 const gameDoc = await getDoc(gameDocRef);
                 if(gameDoc.exists() && gameDoc.data().hostId === currentUser.uid) {
-                    // If host leaves, dissolve the lobby for everyone
                     await dissolveLobby();
                 } else {
-                    // If a regular player leaves, just remove them
                     const playerPath = `players.${currentUser.uid}`;
                     await updateDoc(gameDocRef, { [playerPath]: deleteField() });
                     resetLocalState();
@@ -306,7 +363,6 @@
 
         function handleGameStateUpdate(docSnapshot) {
             if (!docSnapshot.exists()) {
-                // This will be triggered for all players when the host dissolves the lobby
                 alert("Die Lobby wurde vom Host aufgelöst.");
                 resetLocalState();
                 return;
@@ -318,8 +374,6 @@
             const isPlayerInGame = playerIds.includes(currentUser.uid);
 
             if (!isPlayerInGame && localPlayerName) {
-                // This handles the case where a player was removed (e.g., by host action in future)
-                // or if they left, but the listener fired again before unsubscribe.
                 resetLocalState();
                 alert("Du bist nicht mehr in der Lobby.");
                 return;
@@ -338,15 +392,28 @@
             } else if (gameState.status === 'playing') {
                 switchScreen('game');
                 const categoryQuestions = QUESTIONS[gameState.currentCategory] || [];
-                const question = categoryQuestions[gameState.currentQuestionIndex] || "Keine Frage mehr in dieser Kategorie.";
+                const totalQuestions = categoryQuestions.length;
+                const currentIndex = gameState.currentQuestionIndex;
+                const question = categoryQuestions[currentIndex] || "Keine Frage mehr in dieser Kategorie.";
+                
+                questionCounter.textContent = `Frage ${currentIndex + 1} / ${totalQuestions}`;
                 questionText.textContent = question;
                 renderVoteOptions(gameState.players, gameState.votes);
                 updateTimer(gameState.timerStartedAt);
+                
+                const hasVoted = gameState.votes && gameState.votes[currentUser.uid];
+                waitingGif.classList.toggle('hidden', !hasVoted);
+
             } else if (gameState.status === 'results') {
                 if (timerInterval) clearInterval(timerInterval);
                 switchScreen('results');
+                waitingGif.classList.add('hidden');
                 const categoryQuestions = QUESTIONS[gameState.currentCategory] || [];
-                const question = categoryQuestions[gameState.currentQuestionIndex] || "Letzte Frage wurde ausgewertet.";
+                const totalQuestions = categoryQuestions.length;
+                const currentIndex = gameState.currentQuestionIndex;
+                const question = categoryQuestions[currentIndex] || "Letzte Frage wurde ausgewertet.";
+
+                resultsQuestionCounter.textContent = `Frage ${currentIndex + 1} / ${totalQuestions}`;
                 resultsQuestionText.textContent = question;
                 renderResultsChart(gameState.players, gameState.votes);
                 resultsHostControls.classList.toggle('hidden', !isHost);
@@ -372,16 +439,29 @@
             const hasVoted = votes && votes[currentUser.uid];
             voteInfo.style.display = hasVoted ? 'block' : 'none';
 
-            for (const playerId in players) {
-                const button = document.createElement('button');
-                button.textContent = players[playerId].name;
-                button.dataset.voteFor = playerId;
-                button.disabled = hasVoted;
-                button.className = `p-3 rounded-lg font-semibold transition-transform transform ${
+            if (Object.keys(players).length === 1) {
+                 const playerId = Object.keys(players)[0];
+                 const button = document.createElement('button');
+                 button.textContent = players[playerId].name;
+                 button.dataset.voteFor = playerId;
+                 button.disabled = hasVoted;
+                 button.className = `p-3 rounded-lg font-semibold transition-transform transform col-span-2 ${
                     hasVoted ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:scale-105'
                 }`;
-                button.addEventListener('click', handleVote);
-                voteOptions.appendChild(button);
+                 button.addEventListener('click', handleVote);
+                 voteOptions.appendChild(button);
+            } else {
+                for (const playerId in players) {
+                    const button = document.createElement('button');
+                    button.textContent = players[playerId].name;
+                    button.dataset.voteFor = playerId;
+                    button.disabled = hasVoted;
+                    button.className = `p-3 rounded-lg font-semibold transition-transform transform ${
+                        hasVoted ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:scale-105'
+                    }`;
+                    button.addEventListener('click', handleVote);
+                    voteOptions.appendChild(button);
+                }
             }
         }
 
@@ -400,8 +480,8 @@
 
             if (currentChart) currentChart.destroy();
             
-            const textColor = '#1F2937'; // gray-800
-            const borderColor = '#ffffff'; // white
+            const textColor = '#1F2937';
+            const borderColor = '#ffffff';
 
             currentChart = new Chart(resultsChartCanvas, {
                 type: 'pie',
@@ -425,11 +505,19 @@
             });
         }
         
+        function setCircleProgress(percent) {
+            const radius = timerCircle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            timerCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            const offset = circumference - percent * circumference;
+            timerCircle.style.strokeDashoffset = offset;
+        }
+
         function updateTimer(timerStartedAt) {
             if (timerInterval) clearInterval(timerInterval);
             if (!timerStartedAt) {
                 timerText.textContent = '20';
-                setCircleProgress(1);
+                setCircleProgress(1); // Full circle
                 return;
             }
 
@@ -442,17 +530,15 @@
                 timerText.textContent = remainingSeconds;
                 const progress = Math.max(0, (totalDuration - elapsed) / totalDuration);
                 setCircleProgress(progress);
-                if (elapsed >= totalDuration) clearInterval(timerInterval);
+                if (elapsed >= totalDuration) {
+                    clearInterval(timerInterval);
+                    waitingGif.classList.add('hidden');
+                }
             }, 100);
         }
 
-        function setCircleProgress(progress) {
-            const radius = 45;
-            const circumference = 2 * Math.PI * radius;
-            timerCircle.style.strokeDashoffset = circumference - progress * circumference;
-        }
-
         async function handleVote(event) {
+            if (!isFirebaseReady) return;
             const votedForId = event.target.dataset.voteFor;
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             const votePath = `votes.${currentUser.uid}`;
@@ -460,9 +546,8 @@
         }
         
         async function dissolveLobby() {
-            if (!currentLobbyId) return;
+            if (!isFirebaseReady || !currentLobbyId) return;
             await deleteDoc(doc(db, "lobbies", currentLobbyId));
-            // The onSnapshot listener will handle the cleanup for all clients.
         }
         
         function resetLocalState() {
@@ -475,6 +560,7 @@
             nameInput.value = '';
             lobbyCodeInput.value = '';
             errorMessage.textContent = '';
+            waitingGif.classList.add('hidden');
             switchScreen('name');
         }
 
@@ -482,6 +568,7 @@
         resetLobbyButton.addEventListener('click', dissolveLobby);
 
         startGameButton.addEventListener('click', async () => {
+            if (!isFirebaseReady || !currentLobbyId) return;
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             const gameDoc = await getDoc(gameDocRef);
             const gameState = gameDoc.data();
@@ -507,13 +594,15 @@
             }, 20500);
         });
         
-        categorySelect.addEventListener('change', async () => {
-            const newCategory = categorySelect.value;
+        categorySelect.addEventListener('change', async (e) => {
+            if (!isFirebaseReady || !currentLobbyId) return;
+            const newCategory = e.target.value;
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             await updateDoc(gameDocRef, { currentCategory: newCategory });
         });
         
         nextQuestionButton.addEventListener('click', async () => {
+            if (!isFirebaseReady || !currentLobbyId) return;
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             const gameDoc = await getDoc(gameDocRef);
             const gameState = gameDoc.data();
@@ -541,6 +630,7 @@
         });
 
         endGameButton.addEventListener('click', async () => {
+            if (!isFirebaseReady || !currentLobbyId) return;
             const gameDocRef = doc(db, "lobbies", currentLobbyId);
             await updateDoc(gameDocRef, { status: 'game_over' });
         });
