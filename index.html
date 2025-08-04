@@ -171,21 +171,16 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // IMPORTANT: Replace with your own Firebase project configuration
+        // Using user-provided Firebase config
         const firebaseConfig = {
-          apiKey: "AIzaSyANV7_AKN8oZIpJ1JjIVuokO2Q6Gc-iN04",
-          authDomain: "wer-wuerde-eher-70d61.firebaseapp.com",
-          projectId: "wer-wuerde-eher-70d61",
-          storageBucket: "wer-wuerde-eher-70d61.firebasestorage.app",
-          messagingSenderId: "301727904397",
-          appId: "1:301727904397:web:eec5b088e46425946b68c4",
+            apiKey: "AIzaSyANV7_AKN8oZIpJ1JjIVuokO2Q6Gc-iN04",
+            authDomain: "wer-wuerde-eher-70d61.firebaseapp.com",
+            projectId: "wer-wuerde-eher-70d61",
+            storageBucket: "wer-wuerde-eher-70d61.appspot.com",
+            messagingSenderId: "301727904397",
+            appId: "1:301727904397:web:eec5b088e46425946b68c4"
         };
         
-        // Use placeholder config if the user hasn't replaced it
-        const finalFirebaseConfig = firebaseConfig.projectId === "YOUR_PROJECT_ID" 
-            ? JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}')
-            : firebaseConfig;
-
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -242,19 +237,13 @@
         
         // --- INITIALIZATION ---
         function initialize() {
-            if (Object.values(finalFirebaseConfig).some(v => v === "" || v.startsWith("YOUR_"))) {
-                showError("Firebase ist nicht konfiguriert. Bitte ersetze die Platzhalter in der Konfiguration.");
-                joinBtn.disabled = true;
-                joinBtn.classList.remove('btn-primary');
-                joinBtn.classList.add('btn-secondary');
-                return;
-            }
-            app = initializeApp(finalFirebaseConfig);
+            app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
             
             onAuthStateChanged(auth, user => {
                 if (user) {
+                    console.log("Authenticated successfully with UID:", user.uid);
                     currentUser = user;
                 } else {
                     signInAnonymously(auth).catch(error => {
@@ -358,11 +347,13 @@
                     window.location.reload();
                     return;
                 }
+                console.log("Received lobby update:", doc.data());
                 updateUI(doc.data());
             });
         }
 
         async function handleStartGame() {
+            console.log("Start game button clicked by host.");
             const lobbyRef = doc(db, "lobbies", currentLobbyId);
             try {
                 await updateDoc(lobbyRef, { 
@@ -377,6 +368,7 @@
         }
         
         async function handleVote(votedForPlayerId) {
+            console.log(`Player ${currentUser.uid} voted for ${votedForPlayerId}`);
             const lobbyRef = doc(db, "lobbies", currentLobbyId);
             try {
                 await updateDoc(lobbyRef, { [`votes.${currentUser.uid}`]: votedForPlayerId });
@@ -406,7 +398,10 @@
 
         // --- UI UPDATES ---
         function updateUI(lobbyData) {
-            if (!currentUser) return;
+            if (!currentUser) {
+                console.log("UI update skipped: currentUser is not ready.");
+                return;
+            }
 
             playerCount.textContent = lobbyData.players.length;
             playerList.innerHTML = lobbyData.players.map(p => `
@@ -429,8 +424,8 @@
             }
         }
         
-        // REWRITTEN AND SIMPLIFIED FUNCTION
         function renderGameScreen(lobbyData) {
+            console.log("Rendering game screen...");
             if (timerInterval) clearInterval(timerInterval);
 
             const categoryQuestions = questions[lobbyData.currentCategory] || [];
@@ -439,29 +434,32 @@
             
             const myVote = lobbyData.votes[currentUser.uid];
             
-            // --- CORE LOGIC REWRITE ---
             if (myVote) {
-                // You have voted: Show the waiting GIF
+                console.log("User has voted. Showing GIF.");
                 voteOptions.style.display = 'none';
                 waitingGifContainer.style.display = 'block';
                 voteMessage.textContent = "Warte auf die anderen Spieler...";
             } else {
-                // You have NOT voted: Show the player cards
+                console.log("User has not voted. Showing player cards.");
                 waitingGifContainer.style.display = 'none';
                 voteOptions.style.display = 'grid';
                 
                 voteOptions.innerHTML = ''; // Clear previous cards
-                lobbyData.players.forEach(player => {
-                    const card = document.createElement('div');
-                    card.className = 'player-card';
-                    card.dataset.playerId = player.id;
-                    card.innerHTML = `<span class="text-lg font-semibold">${player.name}</span>`;
-                    card.onclick = () => handleVote(player.id);
-                    voteOptions.appendChild(card);
-                });
+                if (lobbyData.players && lobbyData.players.length > 0) {
+                    lobbyData.players.forEach(player => {
+                        const card = document.createElement('div');
+                        card.className = 'player-card';
+                        card.dataset.playerId = player.id;
+                        card.innerHTML = `<span class="text-lg font-semibold">${player.name}</span>`;
+                        card.onclick = () => handleVote(player.id);
+                        voteOptions.appendChild(card);
+                    });
+                } else {
+                    // Failsafe in case player data is missing
+                    voteOptions.innerHTML = `<p class="text-yellow-400 col-span-full">Warte auf Spielerdaten...</p>`;
+                }
             }
             
-            // --- TIMER LOGIC (UNCHANGED) ---
             let timeLeft = 20;
             timerText.textContent = timeLeft;
             timerProgressRing.style.strokeDashoffset = 0;
@@ -491,7 +489,7 @@
                         if (sortedVotes.length > 0 && sortedVotes[0][1].count > 0) {
                             const winnerId = sortedVotes[0][0];
                             newPlayers = currentLobbyData.players.map(p => 
-                                currentLobbyData.votes[p.id] === winnerId ? { ...p, score: p.score + 10 } : p
+                                (currentLobbyData.votes[p.id] === winnerId) ? { ...p, score: p.score + 10 } : p
                             );
                         }
                         await updateDoc(lobbyRef, { gameState: "results", players: newPlayers });
