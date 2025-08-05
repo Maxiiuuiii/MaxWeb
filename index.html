@@ -115,17 +115,18 @@
             <div class="w-full flex flex-col gap-4">
                 <div class="flex items-center gap-2"> <!-- New flex container for name input and avatar button -->
                     <input type="text" id="name-input" placeholder="Dein Name" class="flex-grow p-3 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                    <button id="show-avatar-picker-button" class="p-2 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 transition-colors dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800 text-2xl">😊</button>
+                    <button id="show-avatar-picker-button" class="p-2 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 transition-colors dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800 flex items-center justify-center w-10 h-10 text-2xl">
+                        <!-- Content will be set by JS (emoji text) -->
+                    </button>
                 </div>
                 <input type="text" id="lobby-code-input" placeholder="Lobby-Code (optional)" class="w-full p-3 border border-gray-300 rounded-lg text-center uppercase focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
                 
                 <!-- Avatar Selection - initially hidden -->
                 <div id="avatar-picker-container" class="w-full flex flex-col gap-2 hidden"> <!-- New container for toggling -->
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dein Avatar:</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Wähle deinen Avatar:</label>
                     <div id="avatar-selection" class="grid grid-cols-6 gap-2 p-2 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700">
                         <!-- Emojis will be injected here by JS -->
                     </div>
-                    <p class="text-center text-sm text-gray-500 dark:text-gray-400">Aktueller Avatar: <span id="selected-avatar" class="text-2xl">👤</span></p>
                 </div>
                 <!-- End Avatar Selection -->
 
@@ -239,7 +240,7 @@
 
         const QUESTIONS = {
             'Standard': [
-                "Wer würde eher einen Bungeesprung machen?", "Wer würde eher im Lotto gewinnen und alles für Unsinn ausgeben?", "Wer würde eher eine Reality-TV-Show gewinnen?", "Wer würde eher 2 Wochen ohne Handy auskommen?", "Wer würde eher einen Fremden auf der Straße umarmen?", "Wer würde eher ein Buch schreiben?", "Wer würde eher auf einen Berg klettern?", "Wer würde eher eine Weltreise alleine machen?", "Wer würde eher ein Haustier aus einem Tierheim adoptieren?", "Wer würde eher den ganzen Tag im Bett verbringen?", "Wer würde eher einen Witz erzählen, über den niemand lacht?", "Wer würde eher ein komplettes Menü für alle kochen?", "Wer würde eher in einem Horrorfilm als erstes sterben?", "Wer würde eher eine neue Sprache in einem Monat lernen?", "Wer würde eher bei einer Talentshow mitmachen?", "Wer würde eher seinen Job kündigen, um Influencer zu werden?", "Wer würde eher barfuß durch die Stadt laufen?", "Wer würde eher ein Geheimnis für sich behalten?", "Wer würde eher einen Streit anfangen?", "Wer würde eher zu spät zu seiner eigenen Hochzeit kommen?"
+                "Wer würde eher einen Bungeesprung machen?", "Wer würde eher im Lotto gewinnen und alles für Unsinn ausgeben?", "Wer würde eher eine Reality-TV-Show gewinnen?", "Wer würde eher 2 Wochen ohne Handy auskommen?", "Wer würde eher einen Fremden auf der Straße umarmen?", "Wer würde eher ein Buch schreiben?", "Wer würde eher eher auf einen Berg klettern?", "Wer würde eher eine Weltreise alleine machen?", "Wer würde eher ein Haustier aus einem Tierheim adoptieren?", "Wer würde eher den ganzen Tag im Bett verbringen?", "Wer würde eher einen Witz erzählen, über den niemand lacht?", "Wer würde eher ein komplettes Menü für alle kochen?", "Wer würde eher in einem Horrorfilm als erstes sterben?", "Wer würde eher eine neue Sprache in einem Monat lernen?", "Wer würde eher bei einer Talentshow mitmachen?", "Wer würde eher seinen Job kündigen, um Influencer zu werden?", "Wer würde eher barfuß durch die Stadt laufen?", "Wer würde eher ein Geheimnis für sich behalten?", "Wer würde eher einen Streit anfangen?", "Wer würde eher zu spät zu seiner eigenen Hochzeit kommen?"
             ],
             'Peinlich': [
                 "Wer würde eher in der Öffentlichkeit stolpern und hinfallen?", "Wer würde eher den Namen seines Dates vergessen?", "Wer würde eher mit Toilettenpapier am Schuh herumlaufen?", "Wer würde eher in einer Bibliothek laut lachen?", "Wer würde eher die falsche Person küssen?", "Wer würde eher eine peinliche Nachricht an die falsche Person schicken?", "Wer würde eher beim Essen etwas auf sein weißes Hemd kleckern?", "Wer würde eher im Kino laut schnarchen?", "Wer würde eher gegen eine Glastür laufen?", "Wer würde eher versuchen, eine automatische Tür aufzuschieben?", "Wer würde eher seinen Hosenstall offen lassen?", "Wer würde eher in einem wichtigen Meeting einen Lachanfall bekommen?", "Wer würde eher auf einer Party der Letzte sein, der geht?", "Wer würde eher ein schreckliches Geschenk machen?", "Wer würde eher im Supermarkt etwas fallen lassen und so tun, als wäre nichts passiert?", "Wer würde eher laut im Auto singen und an der Ampel erwischt werden?", "Wer würde eher mit dem Lehrer mit Vornamen reden?", "Wer würde eher im Restaurant das Essen zurückgehen lassen?", "Wer würde eher über seine eigenen Füße fallen?", "Wer würde eher die Pointe eines Witzes verderben?"
@@ -253,7 +254,9 @@
         let app, auth, db, isFirebaseReady = false;
         let currentUser = null;
         let localPlayerName = '';
-        let localPlayerAvatar = '👤'; // Default avatar
+        // Default avatar is now a simple emoji
+        const DEFAULT_EMOJI_AVATAR = '👤';
+        let localPlayerAvatar = DEFAULT_EMOJI_AVATAR; 
         let currentLobbyId = null;
         let gameUnsubscribe = null;
         let currentChart = null;
@@ -307,7 +310,6 @@
         const showAvatarPickerButton = document.getElementById('show-avatar-picker-button'); // New button
         const avatarPickerContainer = document.getElementById('avatar-picker-container'); // Container to toggle visibility
         const avatarSelectionDiv = document.getElementById('avatar-selection');
-        const selectedAvatarDisplay = document.getElementById('selected-avatar');
         const EMOJIS = ['😀', '😎', '🥳', '🚀', '🌟', '👾', '🤖', '👻', '👽', '🐙', '🦖', '🦄', '🦊', '🐼', '🦁', '🦉', '🦋', '🌻', '🍕', '🎮', '⚽', '🎸', '🎨', '📚', '💻', '💡', '🏆', '🎉'];
 
 
@@ -515,7 +517,10 @@
             playerList.innerHTML = Object.entries(players).map(([id, p]) => 
                 `<div class="p-2 bg-white rounded shadow-sm flex justify-between items-center dark:bg-gray-800 dark:text-gray-100">
                     <span class="flex items-center gap-2">
-                        <span class="text-xl">${p.avatar || '👤'}</span> <!-- Display avatar -->
+                        <!-- Display avatar - check if it's an image URL or an emoji -->
+                        ${p.avatar && EMOJIS.includes(p.avatar) ? // Check if it's one of our emojis
+                            `<span class="text-xl">${p.avatar}</span>` : // If emoji, display as text
+                            `<img src="${p.avatar || DEFAULT_EMOJI_AVATAR}" alt="Avatar" class="w-6 h-6 object-contain">`} <!-- Otherwise, treat as URL (or default to fallback emoji if none) -->
                         <span>${p.name}</span>
                     </span>
                     ${id === hostId ? '<span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">HOST</span>' : ''}
@@ -730,12 +735,13 @@
             }
             
             localPlayerName = '';
-            localPlayerAvatar = '👤'; // Reset avatar to default
-            selectedAvatarDisplay.textContent = localPlayerAvatar; // Update display
+            localPlayerAvatar = DEFAULT_EMOJI_AVATAR; // Reset avatar to default emoji
+            updateAvatarButtonDisplay(); // Update button display with emoji
+
             // Remove selected-emoji class from all emojis
             avatarSelectionDiv.querySelectorAll('.selected-emoji').forEach(el => el.classList.remove('selected-emoji'));
-            // Add selected-emoji class to the default avatar
-            avatarSelectionDiv.querySelector(`span[data-emoji="${localPlayerAvatar}"]`)?.classList.add('selected-emoji'); // Use data-emoji for selection
+            // Add selected-emoji class to the default avatar emoji
+            avatarSelectionDiv.querySelector(`span[data-emoji="${localPlayerAvatar}"]`)?.classList.add('selected-emoji'); 
 
             currentLobbyId = null;
             nameInput.value = '';
@@ -803,6 +809,16 @@
         }
 
         /**
+         * Updates the display of the show-avatar-picker-button based on localPlayerAvatar.
+         * If localPlayerAvatar is the PNG URL, it sets an <img> tag. Otherwise, it sets textContent.
+         */
+        function updateAvatarButtonDisplay() {
+            // Now always display as emoji text
+            showAvatarPickerButton.innerHTML = localPlayerAvatar;
+            showAvatarPickerButton.classList.add('text-2xl');
+        }
+
+        /**
          * Populates the avatar selection grid and handles selection.
          */
         function populateAvatarSelection() {
@@ -813,6 +829,7 @@
                 span.dataset.emoji = emoji; // Store emoji in a data attribute
                 span.className = 'cursor-pointer text-2xl p-1 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors flex items-center justify-center';
                 
+                // Highlight the selected emoji
                 if (emoji === localPlayerAvatar) {
                     span.classList.add('selected-emoji');
                 }
@@ -825,12 +842,12 @@
                     }
 
                     localPlayerAvatar = emoji;
-                    selectedAvatarDisplay.textContent = emoji;
+                    updateAvatarButtonDisplay(); // Update the button display with selected emoji
                     span.classList.add('selected-emoji'); // Add highlight to newly selected
                 });
                 avatarSelectionDiv.appendChild(span);
             });
-            selectedAvatarDisplay.textContent = localPlayerAvatar; // Ensure initial display is correct
+            updateAvatarButtonDisplay(); // Initial call to set the button content
         }
 
 
@@ -1016,7 +1033,7 @@
                 if (freshDoc.exists() && freshDoc.data().status === 'playing' && freshDoc.data().currentQuestionIndex === 0 && freshDoc.data().hostId === currentUser.uid) {
                         await updateDoc(gameDocRef, { status: 'results' });
                 }
-            }, gameDuration + 500); // 500ms buffer
+            }, gameDuration + 500);
         });
             
         categorySelect.addEventListener('change', async (e) => {
@@ -1071,7 +1088,7 @@
                     if (freshDoc.exists() && freshDoc.data().status === 'playing' && freshDoc.data().currentQuestionIndex === nextIndex && freshDoc.data().hostId === currentUser.uid) {
                             await updateDoc(gameDocRef, { status: 'results' });
                     }
-                }, gameDuration + 500); // 500ms buffer
+                }, gameDuration + 500);
             }
         });
 
