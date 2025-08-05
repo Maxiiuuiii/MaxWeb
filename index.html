@@ -256,12 +256,13 @@
         let localPlayerName = '';
         // Default avatar is now a simple emoji
         const DEFAULT_EMOJI_AVATAR = '👤';
-        let localPlayerAvatar = DEFAULT_EMOJI_AVATAR; 
+        let localPlayerAvatar = null; // Set to null initially, means no avatar selected
         let currentLobbyId = null;
         let gameUnsubscribe = null;
         let currentChart = null;
         let timerInterval = null;
         const gameDuration = 20000; // 20 seconds in milliseconds
+        let hostTimerTimeout = null; // Global variable for the host's timer timeout
 
         // --- UI ELEMENTS ---
         const screens = { name: document.getElementById('name-screen'), lobby: document.getElementById('lobby-screen'), game: document.getElementById('game-screen'), results: document.getElementById('results-screen') };
@@ -310,7 +311,7 @@
         const showAvatarPickerButton = document.getElementById('show-avatar-picker-button'); // New button
         const avatarPickerContainer = document.getElementById('avatar-picker-container'); // Container to toggle visibility
         const avatarSelectionDiv = document.getElementById('avatar-selection');
-        const EMOJIS = ['😀', '😎', '🥳', '🚀', '🌟', '�', '🤖', '👻', '👽', '🐙', '🦖', '🦄', '🦊', '🐼', '🦁', '🦉', '🦋', '🌻', '🍕', '🎮', '⚽', '🎸', '🎨', '📚', '💻', '💡', '🏆', '🎉'];
+        const EMOJIS = ['😀', '😎', '🥳', '🚀', '🌟', '👾', '🤖', '👻', '👽', '🐙', '🦖', '🦄', '🦊', '🐼', '🦁', '🦉', '🦋', '🌻', '🍕', '🎮', '⚽', '🎸', '🎨', '📚', '💻', '💡', '🏆', '🎉'];
 
 
         // --- FUNCTIONS ---
@@ -468,7 +469,9 @@
                     renderVoteOptions(players, gameState.votes || {}); // Pass empty object if votes is null/undefined
                     updateTimer(gameState.timerStartedAt);
                     
-                    const hasVoted = gameState.votes && gameState.votes[currentUser.uid];
+                    const hasVoted = gameState.votes && Object.keys(gameState.votes).includes(currentUser.uid); // Check if current user has voted
+                    const allVoted = Object.keys(gameState.votes || {}).length === Object.keys(gameState.players || {}).length;
+
                     waitingGif.classList.toggle('hidden', !hasVoted);
 
                     // Update Double Vote Joker Button state
@@ -481,8 +484,29 @@
                         doubleVoteJokerButton.classList.add('hidden'); // Hide if player state not found
                     }
 
+                    // NEW: Host-side logic to speed up timer if all players have voted
+                    if (isHost && allVoted) {
+                        const timerStartedTime = gameState.timerStartedAt?.toDate().getTime();
+                        const currentTime = Date.now();
+                        // Only trigger if timer is still running (not yet transitioned by normal timeout)
+                        if (timerStartedTime && (currentTime - timerStartedTime) < gameDuration) {
+                            if (hostTimerTimeout) {
+                                clearTimeout(hostTimerTimeout);
+                                hostTimerTimeout = null; // Clear the reference
+                            }
+                            // Immediately transition to results
+                            updateDoc(doc(db, "lobbies", currentLobbyId), { status: 'results' });
+                        }
+                    }
+
+
                 } else if (gameState.status === 'results') {
                     if (timerInterval) clearInterval(timerInterval);
+                    // Clear host timer timeout if we transition to results
+                    if (hostTimerTimeout) {
+                        clearTimeout(hostTimerTimeout);
+                        hostTimerTimeout = null;
+                    }
                     switchScreen('results');
                     waitingGif.classList.add('hidden');
                     // Use currentQuestions if available (shuffled questions), otherwise fall back to QUESTIONS
@@ -504,6 +528,11 @@
                         alert("Das Spiel ist beendet!");
                         resetLocalState();
                     }
+                    // Clear host timer timeout if game is over
+                    if (hostTimerTimeout) {
+                        clearTimeout(hostTimerTimeout);
+                        hostTimerTimeout = null;
+                    }
                 }
             }
         }
@@ -516,15 +545,13 @@
         function renderPlayerList(players, hostId) {
             // Convert players object to an array and sort by name for consistent order
             const playerArray = Object.entries(players).map(([id, data]) => ({ id, ...data }));
-            playerArray.sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+            playerArray.sort((a, b) => a.name.localeCompare(b.name)); // Alphabetisch nach Namen sortieren
 
             playerList.innerHTML = playerArray.map(p => 
                 `<div class="p-2 bg-white rounded shadow-sm flex justify-between items-center dark:bg-gray-800 dark:text-gray-100">
                     <span class="flex items-center gap-2">
-                        <!-- Display avatar - check if it's an image URL or an emoji -->
-                        ${EMOJIS.includes(p.avatar) ? // Check if it's one of our emojis
-                            `<span class="text-xl">${p.avatar}</span>` : // If emoji, display as text
-                            `<img src="${p.avatar || DEFAULT_EMOJI_AVATAR}" alt="Avatar" class="w-6 h-6 object-contain">`} <!-- Otherwise, treat as URL (or default to fallback emoji if none) -->
+                        <!-- Display avatar - only display if p.avatar is not null/undefined -->
+                        ${p.avatar ? `<span class="text-xl">${p.avatar}</span>` : ''} 
                         <span>${p.name}</span>
                     </span>
                     ${p.id === hostId ? '<span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">HOST</span>' : ''}
@@ -539,7 +566,7 @@
          */
         function renderVoteOptions(players, votes) {
             voteOptions.innerHTML = '';
-            const hasVoted = votes && votes[currentUser.uid];
+            const hasVoted = votes && Object.keys(votes).includes(currentUser.uid); // Correctly check if current user has voted
             voteInfo.style.display = hasVoted ? 'block' : 'none';
 
             // Convert players object to an array and sort by name for consistent order
@@ -738,16 +765,20 @@
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
+            // Clear host timer timeout on reset
+            if (hostTimerTimeout) {
+                clearTimeout(hostTimerTimeout);
+                hostTimerTimeout = null;
+            }
             
             localPlayerName = '';
-            localPlayerAvatar = DEFAULT_EMOJI_AVATAR; // Reset avatar to default emoji
-            updateAvatarButtonDisplay(); // Update button display with emoji
+            localPlayerAvatar = null; // Reset avatar to null
+            updateAvatarButtonDisplay(); // Update button display (will show default emoji)
 
             // Remove selected-emoji class from all emojis
             avatarSelectionDiv.querySelectorAll('.selected-emoji').forEach(el => el.classList.remove('selected-emoji'));
-            // Add selected-emoji class to the default avatar emoji
-            avatarSelectionDiv.querySelector(`span[data-emoji="${localPlayerAvatar}"]`)?.classList.add('selected-emoji'); 
-
+            // No need to add selected-emoji to null, as it won't be in the picker
+            
             currentLobbyId = null;
             nameInput.value = '';
             lobbyCodeInput.value = '';
@@ -815,11 +846,9 @@
 
         /**
          * Updates the display of the show-avatar-picker-button based on localPlayerAvatar.
-         * If localPlayerAvatar is the PNG URL, it sets an <img> tag. Otherwise, it sets textContent.
          */
         function updateAvatarButtonDisplay() {
-            // Now always display as emoji text
-            showAvatarPickerButton.innerHTML = localPlayerAvatar;
+            showAvatarPickerButton.innerHTML = localPlayerAvatar || DEFAULT_EMOJI_AVATAR; // Show default emoji if localPlayerAvatar is null
             showAvatarPickerButton.classList.add('text-2xl');
         }
 
@@ -834,7 +863,7 @@
                 span.dataset.emoji = emoji; // Store emoji in a data attribute
                 span.className = 'cursor-pointer text-2xl p-1 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors flex items-center justify-center';
                 
-                // Highlight the selected emoji
+                // Highlight the selected emoji if it's not null
                 if (emoji === localPlayerAvatar) {
                     span.classList.add('selected-emoji');
                 }
@@ -883,7 +912,7 @@
                 players: { 
                     [currentUser.uid]: { 
                         name: localPlayerName,
-                        avatar: localPlayerAvatar, // Add avatar to player state
+                        avatar: localPlayerAvatar, // Pass null if no avatar chosen
                         jokerUsedThisGame: false, // Initialize joker status
                         jokerActiveForNextVote: false // Initialize joker status
                     } 
@@ -939,7 +968,7 @@
                 await updateDoc(gameDocRef, { 
                     [playerPath]: { 
                         name: localPlayerName,
-                        avatar: localPlayerAvatar, // Add avatar to player state
+                        avatar: localPlayerAvatar, // Pass null if no avatar chosen
                         jokerUsedThisGame: false,
                         jokerActiveForNextVote: false
                     } 
@@ -1031,12 +1060,14 @@
                 ...playersToUpdate // Apply joker resets
             });
             
-            // Auto-transition to results after gameDuration + small buffer
-            setTimeout(async () => {
+            // Clear any previous host timer timeout
+            if (hostTimerTimeout) clearTimeout(hostTimerTimeout);
+
+            // Set a new timeout for the game duration
+            hostTimerTimeout = setTimeout(async () => {
                 const freshDoc = await getDoc(gameDocRef);
-                // Only transition if still playing the same question and current user is host
                 if (freshDoc.exists() && freshDoc.data().status === 'playing' && freshDoc.data().currentQuestionIndex === 0 && freshDoc.data().hostId === currentUser.uid) {
-                        await updateDoc(gameDocRef, { status: 'results' });
+                    await updateDoc(gameDocRef, { status: 'results' });
                 }
             }, gameDuration + 500);
         });
@@ -1086,10 +1117,12 @@
                     ...playersToUpdate // Apply jokerActiveForNextVote reset
                 });
                 
-                // Auto-transition to results after gameDuration + small buffer
-                setTimeout(async () => {
+                // Clear any previous host timer timeout
+                if (hostTimerTimeout) clearTimeout(hostTimerTimeout);
+
+                // Set a new timeout for the game duration
+                hostTimerTimeout = setTimeout(async () => {
                     const freshDoc = await getDoc(gameDocRef);
-                    // Only transition if still playing the same question and current user is host
                     if (freshDoc.exists() && freshDoc.data().status === 'playing' && freshDoc.data().currentQuestionIndex === nextIndex && freshDoc.data().hostId === currentUser.uid) {
                             await updateDoc(gameDocRef, { status: 'results' });
                     }
