@@ -310,7 +310,7 @@
         const showAvatarPickerButton = document.getElementById('show-avatar-picker-button'); // New button
         const avatarPickerContainer = document.getElementById('avatar-picker-container'); // Container to toggle visibility
         const avatarSelectionDiv = document.getElementById('avatar-selection');
-        const EMOJIS = ['😀', '😎', '🥳', '🚀', '🌟', '👾', '🤖', '👻', '👽', '🐙', '🦖', '🦄', '🦊', '🐼', '🦁', '🦉', '🦋', '🌻', '🍕', '🎮', '⚽', '🎸', '🎨', '📚', '💻', '💡', '🏆', '🎉'];
+        const EMOJIS = ['😀', '😎', '🥳', '🚀', '🌟', '�', '🤖', '👻', '👽', '🐙', '🦖', '🦄', '🦊', '🐼', '🦁', '🦉', '🦋', '🌻', '🍕', '🎮', '⚽', '🎸', '🎨', '📚', '💻', '💡', '🏆', '🎉'];
 
 
         // --- FUNCTIONS ---
@@ -514,16 +514,20 @@
          * @param {string} hostId - The ID of the host player.
          */
         function renderPlayerList(players, hostId) {
-            playerList.innerHTML = Object.entries(players).map(([id, p]) => 
+            // Convert players object to an array and sort by name for consistent order
+            const playerArray = Object.entries(players).map(([id, data]) => ({ id, ...data }));
+            playerArray.sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+
+            playerList.innerHTML = playerArray.map(p => 
                 `<div class="p-2 bg-white rounded shadow-sm flex justify-between items-center dark:bg-gray-800 dark:text-gray-100">
                     <span class="flex items-center gap-2">
                         <!-- Display avatar - check if it's an image URL or an emoji -->
-                        ${p.avatar && EMOJIS.includes(p.avatar) ? // Check if it's one of our emojis
+                        ${EMOJIS.includes(p.avatar) ? // Check if it's one of our emojis
                             `<span class="text-xl">${p.avatar}</span>` : // If emoji, display as text
                             `<img src="${p.avatar || DEFAULT_EMOJI_AVATAR}" alt="Avatar" class="w-6 h-6 object-contain">`} <!-- Otherwise, treat as URL (or default to fallback emoji if none) -->
                         <span>${p.name}</span>
                     </span>
-                    ${id === hostId ? '<span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">HOST</span>' : ''}
+                    ${p.id === hostId ? '<span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">HOST</span>' : ''}
                 </div>`
             ).join('');
         }
@@ -538,16 +542,17 @@
             const hasVoted = votes && votes[currentUser.uid];
             voteInfo.style.display = hasVoted ? 'block' : 'none';
 
-            // Convert players object to an array for consistent iteration
-            const playerArray = Object.entries(players);
+            // Convert players object to an array and sort by name for consistent order
+            const playerArray = Object.entries(players).map(([id, data]) => ({ id, ...data }));
+            playerArray.sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
 
             // Dynamically adjust grid columns based on number of players
             voteOptions.className = `w-full grid gap-3 mt-4 ${playerArray.length <= 2 ? 'grid-cols-1' : 'grid-cols-2'}`;
 
-            playerArray.forEach(([playerId, playerData]) => {
+            playerArray.forEach(playerData => { // Iterate over the sorted array
                 const button = document.createElement('button');
                 button.textContent = playerData.name;
-                button.dataset.voteFor = playerId;
+                button.dataset.voteFor = playerData.id; // Use player ID for voting
                 button.disabled = hasVoted; // Disable if already voted
                 button.className = `p-3 rounded-lg font-semibold transition-transform transform ${
                     hasVoted ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400' : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:scale-105 dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800'
