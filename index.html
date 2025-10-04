@@ -1,198 +1,76 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Cloud - Datei-Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>🇺🇸 Obama Image Transformer 🦅</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="header-left">
-                    <h1 class="header-title">Private Cloud</h1>
-                    <p class="header-subtitle">Datei-Management System</p>
-                </div>
-                <div class="header-right">
-                    <div class="github-status">
-                        <div class="status-indicator"></div>
-                        <span>GitHub Repository verbunden</span>
+    <div class="container">
+        <header class="header">
+            <h1 class="header__title">
+                🇺🇸 Obama Image Transformer 🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅
+            </h1>
+            <div class="header__emojis">
+                🇺🇸🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅🇺🇸🦅
+            </div>
+        </header>
+
+        <main class="main">
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-zone" id="uploadZone">
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept="image/jpeg,image/png,image/jpg"
+                        class="upload-zone__input"
+                    />
+                    <div class="upload-zone__content">
+                        <div class="upload-zone__icon">📸</div>
+                        <h3>Bild hier ablegen oder klicken</h3>
+                        <p>JPG, PNG bis 10MB</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Data Warning Banner -->
-    <div class="warning-banner">
-        <div class="container">
-            <div class="warning-content">
-                <div class="warning-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m21,16-10,10-10,-10h20Z"/>
-                        <path d="m1,6 10,10 10,-10"/>
-                    </svg>
+                <div class="file-info hidden" id="fileInfo">
+                    <div class="file-info__details">
+                        <span class="file-info__name" id="fileName"></span>
+                        <span class="file-info__size" id="fileSize"></span>
+                    </div>
+                    <button class="btn btn--outline btn--sm" id="clearFile">Entfernen</button>
                 </div>
-                <div class="warning-text">
-                    <strong>Hinweis:</strong> Diese Demo-Version speichert Dateien nur temporär. Änderungen gehen beim Aktualisieren der Seite verloren.
+            </section>
+
+            <section class="preview-section hidden" id="previewSection">
+                <div class="image-preview">
+                    <div class="image-preview__container">
+                        <h4>Original</h4>
+                        <img id="originalImage" class="image-preview__img" alt="Original" />
+                    </div>
                 </div>
-                <button class="warning-close" id="closeWarning" aria-label="Warnung schließen">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
+
+                <button class="btn btn--primary btn--lg transform-btn" id="transformBtn">
+                    Bild in Obama verwandeln
                 </button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <main class="main">
-        <div class="container">
-            <!-- Upload Section -->
-            <section class="upload-section">
-                <div class="card">
-                    <div class="card__body">
-                        <div class="upload-area" id="uploadArea">
-                            <div class="upload-content">
-                                <div class="upload-icon">
-                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7,10 12,15 17,10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
-                                    </svg>
-                                </div>
-                                <h3>Dateien hier ablegen oder klicken zum Auswählen</h3>
-                                <p>Unterstützte Formate: PDF, JPG, PNG, XLSX, DOCX, TXT</p>
-                                <p>Maximale Dateigröße: 10 MB</p>
-                            </div>
-                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.xlsx,.docx,.txt">
-                        </div>
-                        <div class="upload-progress hidden" id="uploadProgress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressFill"></div>
-                            </div>
-                            <p class="progress-text" id="progressText">Hochladen... 0%</p>
-                        </div>
+                <div class="image-preview hidden" id="transformedContainer">
+                    <div class="image-preview__container">
+                        <h4>Obama Version</h4>
+                        <canvas id="transformedCanvas" class="image-preview__img"></canvas>
                     </div>
+                </div>
+
+                <div class="btn-group hidden" id="resultButtons">
+                    <button class="btn btn--secondary btn--lg" id="downloadBtn">Ergebnis herunterladen</button>
+                    <button class="btn btn--outline btn--lg" id="newImageBtn">Neues Bild</button>
+                </div>
+
+                <div class="progress-bar hidden" id="progressBar">
+                    <div class="progress-bar__inner" id="progressInner"></div>
                 </div>
             </section>
-
-            <!-- File Management Section -->
-            <section class="file-management-section">
-                <div class="card">
-                    <div class="card__header">
-                        <div class="section-header">
-                            <h2>Datei-Verwaltung</h2>
-                            <div class="file-stats">
-                                <div class="file-count" id="fileCount">0 Dateien</div>
-                                <div class="session-indicator" id="sessionIndicator">
-                                    <div class="session-dot"></div>
-                                    <span>Session aktiv</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="controls">
-                            <div class="search-box">
-                                <input type="text" id="searchInput" class="form-control" placeholder="Dateien suchen...">
-                            </div>
-                            <div class="sort-controls">
-                                <select id="sortSelect" class="form-control">
-                                    <option value="name">Sortieren nach: Name</option>
-                                    <option value="size">Sortieren nach: Größe</option>
-                                    <option value="date">Sortieren nach: Datum</option>
-                                    <option value="type">Sortieren nach: Typ</option>
-                                </select>
-                            </div>
-                            <div class="view-toggle">
-                                <button class="btn btn--sm view-btn active" id="gridView" data-view="grid">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="3" width="7" height="7"/>
-                                        <rect x="14" y="3" width="7" height="7"/>
-                                        <rect x="14" y="14" width="7" height="7"/>
-                                        <rect x="3" y="14" width="7" height="7"/>
-                                    </svg>
-                                    Raster
-                                </button>
-                                <button class="btn btn--sm view-btn" id="listView" data-view="list">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="8" y1="6" x2="21" y2="6"/>
-                                        <line x1="8" y1="12" x2="21" y2="12"/>
-                                        <line x1="8" y1="18" x2="21" y2="18"/>
-                                        <line x1="3" y1="6" x2="3.01" y2="6"/>
-                                        <line x1="3" y1="12" x2="3.01" y2="12"/>
-                                        <line x1="3" y1="18" x2="3.01" y2="18"/>
-                                    </svg>
-                                    Liste
-                                </button>
-                            </div>
-                            <div class="action-controls">
-                                <button class="btn btn--sm btn--outline" id="exportData" title="Daten exportieren">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7,10 12,15 17,10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
-                                    </svg>
-                                    Export
-                                </button>
-                                <button class="btn btn--sm btn--outline" id="resetData" title="Auf Beispieldaten zurücksetzen">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="23,4 23,10 17,10"/>
-                                        <path d="M20.49,15a9,9 0,1,1-2.12-9.36L23,10"/>
-                                    </svg>
-                                    Reset
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card__body">
-                        <div class="files-container" id="filesContainer">
-                            <div class="no-files" id="noFiles">
-                                <div class="no-files-icon">
-                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
-                                        <polyline points="13,2 13,9 20,9"/>
-                                    </svg>
-                                </div>
-                                <h3>Keine Dateien gefunden</h3>
-                                <p>Laden Sie Ihre ersten Dateien hoch, um zu beginnen.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal hidden" id="deleteModal">
-        <div class="modal-backdrop">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Datei löschen</h3>
-                </div>
-                <div class="modal-body">
-                    <p>Sind Sie sicher, dass Sie diese Datei löschen möchten?</p>
-                    <p class="file-name-to-delete" id="fileNameToDelete"></p>
-                    <div class="modal-warning">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="m21,16-10,10-10,-10h20Z"/>
-                            <path d="m1,6 10,10 10,-10"/>
-                        </svg>
-                        <span>Diese Aktion kann nicht rückgängig gemacht werden.</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn--secondary" id="cancelDelete">Abbrechen</button>
-                    <button class="btn btn--primary" id="confirmDelete">Löschen</button>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script src="app.js"></script>
