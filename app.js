@@ -51,13 +51,97 @@ const fileNameToDelete = document.getElementById('fileNameToDelete');
 const cancelDeleteBtn = document.getElementById('cancelDelete');
 const confirmDeleteBtn = document.getElementById('confirmDelete');
 const toastContainer = document.getElementById('toastContainer');
+const closeWarningBtn = document.getElementById('closeWarning');
+const exportDataBtn = document.getElementById('exportData');
+const resetDataBtn = document.getElementById('resetData');
+const warningBanner = document.querySelector('.warning-banner');
 
 let fileToDelete = null;
 
+// LocalStorage Functions
+function saveFilesToStorage() {
+    try {
+        const dataToSave = {
+            files: files,
+            fileIdCounter: fileIdCounter,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('privateCloudData', JSON.stringify(dataToSave));
+        console.log('Daten erfolgreich gespeichert');
+    } catch (error) {
+        console.error('Fehler beim Speichern:', error);
+        if (error.name === 'QuotaExceededError') {
+            showToast('Speicher voll. Bitte löschen Sie einige Dateien.', 'error');
+        } else {
+            showToast('Fehler beim Speichern der Daten', 'error');
+        }
+    }
+}
+
+function loadFilesFromStorage() {
+    try {
+        const savedData = localStorage.getItem('privateCloudData');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            return {
+                files: parsedData.files || [],
+                fileIdCounter: parsedData.fileIdCounter || 4,
+                timestamp: parsedData.timestamp
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Fehler beim Laden:', error);
+        showToast('Fehler beim Laden der gespeicherten Daten', 'error');
+        return null;
+    }
+}
+
+function clearStorage() {
+    try {
+        localStorage.removeItem('privateCloudData');
+        console.log('Speicher erfolgreich geleert');
+    } catch (error) {
+        console.error('Fehler beim Leeren des Speichers:', error);
+        showToast('Fehler beim Leeren des Speichers', 'error');
+    }
+}
+
+function isLocalStorageAvailable() {
+    try {
+        const test = 'localStorageTest';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-    // Load sample files
-    files = [...sampleFiles];
+    // Check localStorage availability and load data
+    if (isLocalStorageAvailable()) {
+        const savedData = loadFilesFromStorage();
+        if (savedData && savedData.files.length > 0) {
+            files = savedData.files;
+            fileIdCounter = savedData.fileIdCounter;
+            showToast('Gespeicherte Dateien erfolgreich geladen', 'success');
+            // Hide warning banner since data persists
+            if (warningBanner) {
+                warningBanner.classList.add('hidden');
+            }
+        } else {
+            // First time visitors get sample files
+            files = [...sampleFiles];
+            fileIdCounter = 4;
+            saveFilesToStorage();
+        }
+    } else {
+        // Fallback: use sample files if localStorage not available
+        files = [...sampleFiles];
+        showToast('LocalStorage nicht verfügbar. Änderungen gehen verloren.', 'warning');
+    }
     
     // Set up event listeners
     setupEventListeners();
@@ -86,6 +170,21 @@ function setupEventListeners() {
     gridViewBtn.addEventListener('click', () => setView('grid'));
     listViewBtn.addEventListener('click', () => setView('list'));
     
+    // Action controls
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', exportData);
+    }
+    if (resetDataBtn) {
+        resetDataBtn.addEventListener('click', resetToSampleData);
+    }
+    
+    // Warning banner close
+    if (closeWarningBtn) {
+        closeWarningBtn.addEventListener('click', () => {
+            warningBanner.classList.add('hidden');
+        });
+    }
+    
     // Modal events
     cancelDeleteBtn.addEventListener('click', closeDeleteModal);
     confirmDeleteBtn.addEventListener('click', handleDelete);
@@ -97,6 +196,129 @@ function setupEventListeners() {
     
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboard);
+}
+
+// Export Data Functionality
+function exportData() {
+    try {
+        const exportData = {
+            files: files.map(file => ({
+                id: file.id,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadDate: file.uploadDate,
+                extension: file.extension
+            })),
+            exportDate: new Date().toISOString(),
+            version: "1.0"
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `private-cloud-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showToast('Daten erfolgreich exportiert', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast('Fehler beim Exportieren der Daten', 'error');
+    }
+}
+
+// Reset to Sample Data
+function resetToSampleData() {
+    // Create custom confirmation modal instead of browser confirm
+    showCustomConfirm(
+        'Daten zurücksetzen',
+        'Möchten Sie wirklich alle aktuellen Dateien löschen und zu den Beispieldaten zurückkehren? Diese Aktion kann nicht rückgängig gemacht werden.',
+        () => {
+            // User confirmed
+            files = [...sampleFiles];
+            fileIdCounter = 4;
+            
+            if (isLocalStorageAvailable()) {
+                saveFilesToStorage();
+            }
+            
+            // Clear search to show all files
+            searchInput.value = '';
+            searchQuery = '';
+            
+            renderFiles();
+            updateFileCount();
+            showToast('Auf Beispieldaten zurückgesetzt', 'success');
+        }
+    );
+}
+
+// Custom Confirm Modal
+function showCustomConfirm(title, message, onConfirm) {
+    // Create modal elements
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-backdrop">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                </div>
+                <div class="modal-body">
+                    <p>${message}</p>
+                    <div class="modal-warning">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m21,16-10,10-10,-10h20Z"/>
+                            <path d="m1,6 10,10 10,-10"/>
+                        </svg>
+                        <span>Diese Aktion kann nicht rückgängig gemacht werden.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" id="customCancel">Abbrechen</button>
+                    <button class="btn btn--primary" id="customConfirm">Zurücksetzen</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    const cancelBtn = modal.querySelector('#customCancel');
+    const confirmBtn = modal.querySelector('#customConfirm');
+    
+    const closeModal = () => {
+        document.body.removeChild(modal);
+    };
+    
+    cancelBtn.addEventListener('click', closeModal);
+    confirmBtn.addEventListener('click', () => {
+        closeModal();
+        onConfirm();
+    });
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.classList.contains('modal-backdrop')) {
+            closeModal();
+        }
+    });
+    
+    // Close on ESC key
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
 }
 
 // Drag and Drop Handlers
@@ -193,6 +415,11 @@ function completeUpload(fileList) {
             };
             files.push(fileObj);
         });
+        
+        // Save to localStorage after upload
+        if (isLocalStorageAvailable()) {
+            saveFilesToStorage();
+        }
         
         // Reset upload UI
         uploadProgress.classList.add('hidden');
@@ -342,7 +569,7 @@ function createFileElement(file) {
                 <button class="action-btn delete" onclick="confirmDeleteFile(${file.id})" title="Löschen">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3,6 5,6 21,6"/>
-                        <path d="m19,6v14a2,2 0,0,1-2,2H7a2,2 0,0,1-2-2V6m3,0V4a2,2 0,0,1,2,2h4a2,2 0,0,1,2,2v2"/>
+                        <path d="m19,6v14a2,2 0,0,1-2,2H7a2,2 0,0,1-2-2V6m3,0V4a2,2 0,0,1,2-2h4a2,2 0,0,1,2,2v2"/>
                     </svg>
                     Löschen
                 </button>
@@ -454,6 +681,11 @@ function handleDelete() {
     
     files = files.filter(f => f.id !== fileToDelete.id);
     
+    // Save to localStorage after deletion
+    if (isLocalStorageAvailable()) {
+        saveFilesToStorage();
+    }
+    
     showToast(`Datei "${fileToDelete.name}" erfolgreich gelöscht`, 'success');
     
     renderFiles();
@@ -466,15 +698,29 @@ function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
-    const icon = type === 'success' ? 
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="20,6 9,17 4,12"/>
-         </svg>` :
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-         </svg>`;
+    let icon;
+    switch (type) {
+        case 'success':
+            icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"/>
+                     </svg>`;
+            break;
+        case 'error':
+            icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                     </svg>`;
+            break;
+        case 'warning':
+            icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m21,16-10,10-10,-10h20Z"/>
+                        <path d="m1,6 10,10 10,-10"/>
+                     </svg>`;
+            break;
+        default:
+            icon = '';
+    }
     
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
