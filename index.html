@@ -25,6 +25,29 @@
         </div>
     </header>
 
+    <!-- Data Warning Banner -->
+    <div class="warning-banner">
+        <div class="container">
+            <div class="warning-content">
+                <div class="warning-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m21,16-10,10-10,-10h20Z"/>
+                        <path d="m1,6 10,10 10,-10"/>
+                    </svg>
+                </div>
+                <div class="warning-text">
+                    <strong>Hinweis:</strong> Diese Demo-Version speichert Dateien nur temporär. Änderungen gehen beim Aktualisieren der Seite verloren.
+                </div>
+                <button class="warning-close" id="closeWarning" aria-label="Warnung schließen">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="main">
         <div class="container">
@@ -63,7 +86,13 @@
                     <div class="card__header">
                         <div class="section-header">
                             <h2>Datei-Verwaltung</h2>
-                            <div class="file-count" id="fileCount">0 Dateien</div>
+                            <div class="file-stats">
+                                <div class="file-count" id="fileCount">0 Dateien</div>
+                                <div class="session-indicator" id="sessionIndicator">
+                                    <div class="session-dot"></div>
+                                    <span>Session aktiv</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="controls">
                             <div class="search-box">
@@ -97,6 +126,23 @@
                                         <line x1="3" y1="18" x2="3.01" y2="18"/>
                                     </svg>
                                     Liste
+                                </button>
+                            </div>
+                            <div class="action-controls">
+                                <button class="btn btn--sm btn--outline" id="exportData" title="Daten exportieren">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Export
+                                </button>
+                                <button class="btn btn--sm btn--outline" id="resetData" title="Auf Beispieldaten zurücksetzen">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23,4 23,10 17,10"/>
+                                        <path d="M20.49,15a9,9 0,1,1-2.12-9.36L23,10"/>
+                                    </svg>
+                                    Reset
                                 </button>
                             </div>
                         </div>
@@ -133,6 +179,13 @@
                 <div class="modal-body">
                     <p>Sind Sie sicher, dass Sie diese Datei löschen möchten?</p>
                     <p class="file-name-to-delete" id="fileNameToDelete"></p>
+                    <div class="modal-warning">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m21,16-10,10-10,-10h20Z"/>
+                            <path d="m1,6 10,10 10,-10"/>
+                        </svg>
+                        <span>Diese Aktion kann nicht rückgängig gemacht werden.</span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn--secondary" id="cancelDelete">Abbrechen</button>
