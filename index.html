@@ -1,71 +1,147 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meine Testseite</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #74ebd5, #ACB6E5);
-      color: #333;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    header {
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 1em 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      margin: 0;
-    }
-
-    main {
-      padding: 2em;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    footer {
-      margin-top: 3em;
-      font-size: 14px;
-      color: #444;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Cloud - Datei-Management System</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>👋 Willkommen auf meiner Testseite!</h1>
-  </header>
-  <main>
-    <p>Dies ist eine einfache HTML-Testseite. Du kannst sie lokal auf deinem PC öffnen oder mit einem Webserver hosten.</p>
-    <button onclick="zeigeNachricht()">Klick mich!</button>
-  </main>
-  <footer>
-    <p>© 2025 – Erstellt mit ❤️ von [Dein Name]</p>
-  </footer>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">Private Cloud</h1>
+                    <p class="header-subtitle">Datei-Management System</p>
+                </div>
+                <div class="header-right">
+                    <div class="github-status">
+                        <div class="status-indicator"></div>
+                        <span>GitHub Repository verbunden</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <script>
-    function zeigeNachricht() {
-      alert("Hallo! Dein HTML-Test funktioniert 🎉");
-    }
-  </script>
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="card">
+                    <div class="card__body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <div class="upload-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </div>
+                                <h3>Dateien hier ablegen oder klicken zum Auswählen</h3>
+                                <p>Unterstützte Formate: PDF, JPG, PNG, XLSX, DOCX, TXT</p>
+                                <p>Maximale Dateigröße: 10 MB</p>
+                            </div>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.xlsx,.docx,.txt">
+                        </div>
+                        <div class="upload-progress hidden" id="uploadProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">Hochladen... 0%</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Management Section -->
+            <section class="file-management-section">
+                <div class="card">
+                    <div class="card__header">
+                        <div class="section-header">
+                            <h2>Datei-Verwaltung</h2>
+                            <div class="file-count" id="fileCount">0 Dateien</div>
+                        </div>
+                        <div class="controls">
+                            <div class="search-box">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Dateien suchen...">
+                            </div>
+                            <div class="sort-controls">
+                                <select id="sortSelect" class="form-control">
+                                    <option value="name">Sortieren nach: Name</option>
+                                    <option value="size">Sortieren nach: Größe</option>
+                                    <option value="date">Sortieren nach: Datum</option>
+                                    <option value="type">Sortieren nach: Typ</option>
+                                </select>
+                            </div>
+                            <div class="view-toggle">
+                                <button class="btn btn--sm view-btn active" id="gridView" data-view="grid">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"/>
+                                        <rect x="14" y="3" width="7" height="7"/>
+                                        <rect x="14" y="14" width="7" height="7"/>
+                                        <rect x="3" y="14" width="7" height="7"/>
+                                    </svg>
+                                    Raster
+                                </button>
+                                <button class="btn btn--sm view-btn" id="listView" data-view="list">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="8" y1="6" x2="21" y2="6"/>
+                                        <line x1="8" y1="12" x2="21" y2="12"/>
+                                        <line x1="8" y1="18" x2="21" y2="18"/>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                    </svg>
+                                    Liste
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div class="files-container" id="filesContainer">
+                            <div class="no-files" id="noFiles">
+                                <div class="no-files-icon">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                                        <polyline points="13,2 13,9 20,9"/>
+                                    </svg>
+                                </div>
+                                <h3>Keine Dateien gefunden</h3>
+                                <p>Laden Sie Ihre ersten Dateien hoch, um zu beginnen.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal hidden" id="deleteModal">
+        <div class="modal-backdrop">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Datei löschen</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Sind Sie sicher, dass Sie diese Datei löschen möchten?</p>
+                    <p class="file-name-to-delete" id="fileNameToDelete"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" id="cancelDelete">Abbrechen</button>
+                    <button class="btn btn--primary" id="confirmDelete">Löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
