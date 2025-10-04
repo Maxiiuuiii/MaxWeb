@@ -15,31 +15,37 @@ body {
     color: var(--color-black);
     position: relative;
     overflow-x: hidden;
+    background: url('58174daa-0001-0004-0000-000001279488_w520_r1_fpx53.08_fpy50.98.jpg') center center / cover no-repeat fixed;
 }
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 0;
-    opacity: 0.14;
-    pointer-events: none;
-    user-select: none;
-    background: url('58174daa-0001-0004-0000-000001279488_w520_r1_fpx53.08_fpy50.98.jpg') center center / cover no-repeat;
-}
+
 .container, .main, header, .upload-section, .preview-section {
     position: relative;
     z-index: 1;
 }
 
-/* Header */
+/* Adler-Dekoration */
+.adler-deco {
+    text-align: center;
+    font-size: 2.3rem;
+    margin: 1rem 0 1.5rem 0;
+    user-select: none;
+    line-height: 2.5rem;
+    letter-spacing: 0.11em;
+    filter: drop-shadow(0 1px 6px white);
+}
+
 .header {
     text-align: center;
     margin-bottom: 2rem;
     user-select: none;
+    background: rgba(255,255,255,0.68);
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(59,130,246,.06);
+    padding-bottom: 0.7rem;
 }
 
 .header__title {
-    font-size: 2.8rem;
+    font-size: 2.7rem;
     color: var(--color-blue);
     font-weight: 700;
     margin: 0;
@@ -169,6 +175,7 @@ body::before {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgb(59 130 246 / 0.3);
     user-select: none;
+    background: rgba(255,255,255,0.42);
 }
 
 /* Ladebalken */
@@ -188,7 +195,7 @@ body::before {
     transition: width 0.25s ease;
 }
 
-/* Gruppierte Buttons */
+/* Button-Gruppe */
 .btn-group {
     display: flex;
     gap: 1rem;
@@ -198,12 +205,3 @@ body::before {
 
 /* Responsive */
 @media (max-width: 600px) {
-    .header__title {
-        font-size: 2rem;
-    }
-
-    .btn--lg {
-        font-size: 1rem;
-        padding: 0.7rem 1.5rem;
-    }
-}
