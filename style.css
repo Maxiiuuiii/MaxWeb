@@ -1,6 +1,6 @@
 :root {
-    --color-blue: #3b82f6; /* kräftiges blau */
-    --color-gold: #fbbf24; /* goldgelb */
+    --color-blue: #3b82f6;
+    --color-gold: #fbbf24;
     --color-white: #ffffff;
     --color-gray-light: #f3f4f6;
     --color-gray-dark: #374151;
@@ -8,7 +8,6 @@
     --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Body und Hintergrund */
 body {
     margin: 0;
     font-family: var(--font-family);
@@ -17,30 +16,17 @@ body {
     position: relative;
     overflow-x: hidden;
 }
-
-/* Hintergrund-Emoji-Pattern */
 body::before {
-    content: '🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 🇺🇸🦅 ';
-    white-space: pre-wrap;
-    opacity: 0.08;
-    font-size: 8vw;
+    content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    top: 0; left: 0; width: 100vw; height: 100vh;
     z-index: 0;
+    opacity: 0.14;
     pointer-events: none;
     user-select: none;
-    line-height: 12vw;
-    text-align: center;
+    background: url('58174daa-0001-0004-0000-000001279488_w520_r1_fpx53.08_fpy50.98.jpg') center center / cover no-repeat;
 }
-
-/* Container und Layout */
-.container {
-    max-width: 960px;
-    margin: 1rem auto 2rem;
-    padding: 1rem 2rem;
+.container, .main, header, .upload-section, .preview-section {
     position: relative;
     z-index: 1;
 }
@@ -58,12 +44,6 @@ body::before {
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.05em;
-}
-
-.header__emojis {
-    font-size: 2.2rem;
-    margin-top: 0.3rem;
-    user-select: none;
 }
 
 /* Upload Bereich */
@@ -220,10 +200,6 @@ body::before {
 @media (max-width: 600px) {
     .header__title {
         font-size: 2rem;
-    }
-
-    .header__emojis {
-        font-size: 1.5rem;
     }
 
     .btn--lg {
