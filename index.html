@@ -6,10 +6,7 @@
   <meta name="description" content="Live-Stream: VfB Stuttgart vs. 1. FC Heidenheim 1846" />
   <title>VfB Stuttgart vs. 1. FC Heidenheim 1846 - Live Stream</title>
   <style>
-    /* Einfache Reset-Regeln */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
@@ -32,22 +29,18 @@
       font-size: 1.5rem;
       color: #48a9e6;
     }
-
     .status {
       margin-top: 0.25rem;
       font-size: 0.875rem;
       color: #56d364;
       font-weight: 600;
     }
-
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 0.5rem;
     }
-
-    /* Tabs */
     .stream-tabs {
       display: flex;
       justify-content: center;
@@ -74,8 +67,6 @@
       color: #fff;
       cursor: default;
     }
-
-    /* Video area */
     .streams-wrapper {
       flex: 1;
       position: relative;
@@ -92,12 +83,14 @@
       position: relative;
       width: 100%;
       height: 100%;
+      min-height: 65vh;
     }
     iframe {
       width: 100%;
       height: 100%;
       border: none;
       background-color: black;
+      display: block;
     }
   </style>
 </head>
@@ -127,7 +120,6 @@
             scrolling="no"
             allowfullscreen="yes"
             allow="encrypted-media; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-presentation"
             loading="lazy"
           ></iframe>
         </div>
@@ -143,21 +135,14 @@
             scrolling="no"
             allowfullscreen="yes"
             allow="encrypted-media; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-presentation"
             loading="lazy"
           ></iframe>
         </div>
       </section>
     </div>
   </main>
-
   <script>
-    // Blockiere Popups und neue Fenster
-    window.open = function () {
-      console.log("Popup- oder neues Fenster-Öffnen wurde blockiert.");
-      return null;
-    };
-
+    // Tabs-Logik
     const tabs = document.querySelectorAll(".stream-tab");
     const streams = document.querySelectorAll(".stream-content");
 
@@ -213,6 +198,7 @@
         }
       });
     });
+    // window.open hier zu sperren hilft nur für eigene Skripte, im iframe greift das leider nicht!
   </script>
 </body>
 </html>
