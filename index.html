@@ -1,204 +1,296 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Live-Stream: VfB Stuttgart vs. 1. FC Heidenheim 1846" />
-  <title>VfB Stuttgart vs. 1. FC Heidenheim 1846 - Live Stream</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background-color: #1a1a1a;
-      color: #eee;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      padding: 1rem;
-      background-color: #111;
-      text-align: center;
-      border-bottom: 1px solid #333;
-    }
-    header h1 {
-      margin: 0;
-      font-weight: 600;
-      font-size: 1.5rem;
-      color: #48a9e6;
-    }
-    .status {
-      margin-top: 0.25rem;
-      font-size: 0.875rem;
-      color: #56d364;
-      font-weight: 600;
-    }
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 0.5rem;
-    }
-    .stream-tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 0.5rem;
-    }
-    .stream-tab {
-      background: #222;
-      border: none;
-      color: #ccc;
-      font-size: 1rem;
-      padding: 0.5rem 1.25rem;
-      cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
-      border-radius: 4px 4px 0 0;
-      margin: 0 0.25rem;
-      user-select: none;
-    }
-    .stream-tab:hover {
-      background-color: #333;
-      color: #48a9e6;
-    }
-    .stream-tab.active {
-      background-color: #48a9e6;
-      color: #fff;
-      cursor: default;
-    }
-    .streams-wrapper {
-      flex: 1;
-      position: relative;
-    }
-    .stream-content {
-      display: none;
-      height: 100%;
-    }
-    .stream-content.active {
-      display: block;
-      height: 100%;
-    }
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      min-height: 65vh;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background-color: black;
-      display: block;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strichmännchen Kampf Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>VfB Stuttgart vs. 1. FC Heidenheim 1846</h1>
-    <div class="status">Live</div>
-  </header>
-  <main>
-    <div class="stream-tabs" role="tablist" aria-label="Stream Auswahl">
-      <button class="stream-tab active" data-stream="stream1" role="tab" aria-selected="true" tabindex="0">
-        Stream 1
-      </button>
-      <button class="stream-tab" data-stream="stream2" role="tab" aria-selected="false" tabindex="-1">
-        Stream 2
-      </button>
-    </div>
-    <div class="streams-wrapper">
-      <!-- Stream 1 -->
-      <section id="stream1" class="stream-content active" role="tabpanel" tabindex="0">
-        <div class="video-wrapper">
-          <iframe
-            title="Stuttgart vs FC Heidenheim Player Stream 1"
-            marginheight="0"
-            marginwidth="0"
-            src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2"
-            scrolling="no"
-            allowfullscreen="yes"
-            allow="encrypted-media; picture-in-picture"
-            loading="lazy"
-          ></iframe>
+    <div class="game-container">
+        <!-- Hauptmenü -->
+        <div id="main-menu" class="screen active">
+            <div class="logo">
+                <h1>STRICHMÄNNCHEN</h1>
+                <h2>KAMPF ARENA</h2>
+            </div>
+            <div class="menu-buttons">
+                <button class="btn btn--primary btn--lg" id="start-game">LOKALES SPIEL STARTEN</button>
+                <button class="btn btn--secondary btn--lg" id="settings-btn">EINSTELLUNGEN</button>
+                <button class="btn btn--outline btn--lg" id="help-btn">HILFE</button>
+            </div>
+            <div class="game-stats">
+                <p>Gespiele Runden: <span id="total-games">0</span></p>
+                <p>Spieler 1 Siege: <span id="p1-wins">0</span></p>
+                <p>Spieler 2 Siege: <span id="p2-wins">0</span></p>
+            </div>
         </div>
-      </section>
-      <!-- Stream 2 -->
-      <section id="stream2" class="stream-content" role="tabpanel" tabindex="0" aria-hidden="true">
-        <div class="video-wrapper">
-          <iframe
-            title="Stuttgart vs FC Heidenheim Player Stream 2"
-            marginheight="0"
-            marginwidth="0"
-            src="https://embedsports.top/embed/echo/vfb-stuttgart-vs-1-fc-heidenheim-football-1388360/2"
-            scrolling="no"
-            allowfullscreen="yes"
-            allow="encrypted-media; picture-in-picture"
-            loading="lazy"
-          ></iframe>
+
+        <!-- Waffen zeichnen -->
+        <div id="weapon-design" class="screen">
+            <div class="design-header">
+                <h2 id="current-player-title">Spieler 1 - Zeichne deine Waffe!</h2>
+                <div class="timer-container">
+                    <div class="timer-circle">
+                        <span id="timer">30</span>
+                    </div>
+                </div>
+            </div>
+            <div class="drawing-area">
+                <canvas id="drawing-canvas" width="400" height="300"></canvas>
+                <div class="drawing-controls">
+                    <button class="btn btn--secondary" id="clear-canvas">Löschen</button>
+                    <button class="btn btn--primary" id="finish-drawing">Fertig</button>
+                </div>
+            </div>
+            <div class="drawing-instructions">
+                <p>Zeichne deine Waffe! Sie kann alles sein: Schwert, Axt, Gewehr, Bogen...</p>
+                <p>Die KI wird sie analysieren und ihre Stärke bestimmen.</p>
+            </div>
         </div>
-      </section>
+
+        <!-- KI Analyse -->
+        <div id="ai-analysis" class="screen">
+            <div class="analysis-container">
+                <h2>KI-Waffen-Analyse</h2>
+                <div class="weapon-results">
+                    <div class="weapon-result" id="player1-weapon">
+                        <h3>Spieler 1</h3>
+                        <canvas class="weapon-preview" width="200" height="150"></canvas>
+                        <div class="weapon-stats">
+                            <div class="stat">
+                                <span class="stat-label">Typ:</span>
+                                <span class="stat-value" id="p1-weapon-type">Schwert</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Schaden:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p1-damage-bar"></div>
+                                    <span class="stat-value" id="p1-damage-value">60</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Geschwindigkeit:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p1-speed-bar"></div>
+                                    <span class="stat-value" id="p1-speed-value">70</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Reichweite:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p1-range-bar"></div>
+                                    <span class="stat-value" id="p1-range-value">40</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weapon-result" id="player2-weapon">
+                        <h3>Spieler 2</h3>
+                        <canvas class="weapon-preview" width="200" height="150"></canvas>
+                        <div class="weapon-stats">
+                            <div class="stat">
+                                <span class="stat-label">Typ:</span>
+                                <span class="stat-value" id="p2-weapon-type">Axt</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Schaden:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p2-damage-bar"></div>
+                                    <span class="stat-value" id="p2-damage-value">80</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Geschwindigkeit:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p2-speed-bar"></div>
+                                    <span class="stat-value" id="p2-speed-value">40</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Reichweite:</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" id="p2-range-bar"></div>
+                                    <span class="stat-value" id="p2-range-value">35</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn--primary btn--lg" id="continue-to-arena">Zur Arena!</button>
+            </div>
+        </div>
+
+        <!-- Arena Auswahl -->
+        <div id="arena-selection" class="screen">
+            <h2>Wähle deine Arena</h2>
+            <div class="arena-grid">
+                <div class="arena-card" data-arena="0">
+                    <h3>Klassische Arena</h3>
+                    <div class="arena-preview">
+                        <div class="platforms">3 Plattformen</div>
+                        <div class="hazards">Keine Gefahren</div>
+                    </div>
+                </div>
+                <div class="arena-card" data-arena="1">
+                    <h3>Gefährlicher Turm</h3>
+                    <div class="arena-preview">
+                        <div class="platforms">5 Plattformen</div>
+                        <div class="hazards">2 Fallen</div>
+                    </div>
+                </div>
+                <div class="arena-card" data-arena="2">
+                    <h3>Schwebende Inseln</h3>
+                    <div class="arena-preview">
+                        <div class="platforms">7 Plattformen</div>
+                        <div class="hazards">1 Falle</div>
+                    </div>
+                </div>
+                <div class="arena-card" data-arena="3">
+                    <h3>Lava-Grube</h3>
+                    <div class="arena-preview">
+                        <div class="platforms">4 Plattformen</div>
+                        <div class="hazards">3 Lava-Gruben</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kampf -->
+        <div id="battle" class="screen">
+            <div class="battle-ui">
+                <div class="player-hud" id="player1-hud">
+                    <h3>Spieler 1</h3>
+                    <div class="health-bar">
+                        <div class="health-fill" id="p1-health"></div>
+                    </div>
+                    <div class="stamina-bar">
+                        <div class="stamina-fill" id="p1-stamina"></div>
+                    </div>
+                </div>
+                <div class="battle-timer">
+                    <span id="battle-time">120</span>
+                </div>
+                <div class="player-hud" id="player2-hud">
+                    <h3>Spieler 2</h3>
+                    <div class="health-bar">
+                        <div class="health-fill" id="p2-health"></div>
+                    </div>
+                    <div class="stamina-bar">
+                        <div class="stamina-fill" id="p2-stamina"></div>
+                    </div>
+                </div>
+            </div>
+            <canvas id="game-canvas" width="1200" height="600"></canvas>
+            <div class="controls-hint">
+                <div class="controls-player">
+                    <h4>Spieler 1</h4>
+                    <p>WASD = Bewegen | Leertaste = Springen | F = Angriff</p>
+                </div>
+                <div class="controls-player">
+                    <h4>Spieler 2</h4>
+                    <p>Pfeiltasten = Bewegen | Enter = Springen | Shift = Angriff</p>
+                </div>
+            </div>
+            <button class="btn btn--secondary" id="pause-game">Pause</button>
+        </div>
+
+        <!-- Ergebnis -->
+        <div id="game-result" class="screen">
+            <div class="result-container">
+                <h1 id="winner-text">Spieler 1 Gewinnt!</h1>
+                <div class="victory-animation">🏆</div>
+                <div class="match-stats">
+                    <h3>Kampf-Statistiken</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Kampfdauer:</span>
+                            <span class="stat-value" id="fight-duration">0:45</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Treffer Spieler 1:</span>
+                            <span class="stat-value" id="p1-hits">8</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Treffer Spieler 2:</span>
+                            <span class="stat-value" id="p2-hits">5</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-buttons">
+                    <button class="btn btn--primary btn--lg" id="rematch-btn">Revanche</button>
+                    <button class="btn btn--secondary btn--lg" id="main-menu-btn">Hauptmenü</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Einstellungen Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Einstellungen</h2>
+                <div class="form-group">
+                    <label class="form-label">Zeichenzeit (Sekunden):</label>
+                    <input type="range" id="drawing-time" min="15" max="60" value="30" class="form-control">
+                    <span id="drawing-time-value">30s</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rundenzeit (Sekunden):</label>
+                    <input type="range" id="round-time" min="60" max="300" value="120" class="form-control">
+                    <span id="round-time-value">120s</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Spieler Gesundheit:</label>
+                    <input type="range" id="player-health" min="50" max="200" value="100" class="form-control">
+                    <span id="player-health-value">100</span>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn--primary" id="save-settings">Speichern</button>
+                    <button class="btn btn--secondary" id="close-settings">Abbrechen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hilfe Modal -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Spielanleitung</h2>
+                <div class="help-content">
+                    <h3>Wie zu spielen:</h3>
+                    <ol>
+                        <li><strong>Waffe zeichnen:</strong> Beide Spieler zeichnen nacheinander ihre Waffen</li>
+                        <li><strong>KI-Analyse:</strong> Das System analysiert die Zeichnungen und bestimmt Waffentyp und Stärke</li>
+                        <li><strong>Arena wählen:</strong> Wählt eine Kampfumgebung</li>
+                        <li><strong>Kämpfen:</strong> Verwendet eure Waffen im 2D-Kampf</li>
+                    </ol>
+                    
+                    <h3>Steuerung:</h3>
+                    <div class="controls-help">
+                        <div>
+                            <h4>Spieler 1:</h4>
+                            <p>W/A/S/D = Bewegen</p>
+                            <p>Leertaste = Springen</p>
+                            <p>F = Angriff</p>
+                        </div>
+                        <div>
+                            <h4>Spieler 2:</h4>
+                            <p>Pfeiltasten = Bewegen</p>
+                            <p>Enter = Springen</p>
+                            <p>Shift = Angriff</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Waffentypen:</h3>
+                    <p>Die KI erkennt verschiedene Waffentypen wie Schwerter, Äxte, Speere, Gewehre, Bögen und mehr. Jeder Typ hat unterschiedliche Stärken!</p>
+                </div>
+                <button class="btn btn--primary" id="close-help">Verstanden</button>
+            </div>
+        </div>
+
+        <!-- Particle System -->
+        <div id="particles"></div>
     </div>
-  </main>
-  <script>
-    // Tabs-Logik
-    const tabs = document.querySelectorAll(".stream-tab");
-    const streams = document.querySelectorAll(".stream-content");
 
-    function activateStream(streamId) {
-      streams.forEach((stream) => {
-        if (stream.id === streamId) {
-          stream.classList.add("active");
-          stream.setAttribute("aria-hidden", "false");
-          stream.tabIndex = 0;
-        } else {
-          stream.classList.remove("active");
-          stream.setAttribute("aria-hidden", "true");
-          stream.tabIndex = -1;
-        }
-      });
-
-      tabs.forEach((tab) => {
-        if (tab.getAttribute("data-stream") === streamId) {
-          tab.classList.add("active");
-          tab.setAttribute("aria-selected", "true");
-          tab.tabIndex = 0;
-          tab.focus();
-        } else {
-          tab.classList.remove("active");
-          tab.setAttribute("aria-selected", "false");
-          tab.tabIndex = -1;
-        }
-      });
-    }
-
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const streamId = tab.getAttribute("data-stream");
-        activateStream(streamId);
-      });
-
-      tab.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-          e.preventDefault();
-          const currentIndex = Array.from(tabs).indexOf(e.target);
-          let newIndex;
-          if (e.key === "ArrowRight") {
-            newIndex = (currentIndex + 1) % tabs.length;
-          } else {
-            newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-          }
-          tabs[newIndex].focus();
-        }
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          const streamId = e.target.getAttribute("data-stream");
-          activateStream(streamId);
-        }
-      });
-    });
-    // window.open hier zu sperren hilft nur für eigene Skripte, im iframe greift das leider nicht!
-  </script>
+    <script src="app.js"></script>
 </body>
 </html>
