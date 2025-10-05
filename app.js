@@ -1,9 +1,9 @@
-// Online Multiplayer Strichmännchen Kampf Arena
-class OnlineMultiplayerGame {
+// Online Multiplayer Strichmännchen Kampf Arena - Text-Based Weapon System
+class TextBasedMultiplayerGame {
     constructor() {
         // Game State
         this.currentScreen = 'main-menu';
-        this.gameMode = 'menu'; // menu, lobby, drawing, battle
+        this.gameMode = 'menu'; // menu, lobby, description, battle
         this.isHost = false;
         this.playerId = this.generatePlayerId();
         this.playerName = 'Spieler ' + Math.floor(Math.random() * 9999);
@@ -21,10 +21,82 @@ class OnlineMultiplayerGame {
         // Game Data
         this.weapons = { player1: null, player2: null };
         this.gameSettings = {
-            drawingTime: 30,
+            descriptionTime: 30,
             battleTime: 120,
             healthPerPlayer: 100,
             gravity: 0.8
+        };
+        
+        // Weapon Generation Data
+        this.weaponData = {
+            weaponTypes: {
+                sword: {name: "Schwert", baseSpeed: 70, baseDamage: 60, baseRange: 40, icon: "⚔️"},
+                axe: {name: "Streitaxt", baseSpeed: 40, baseDamage: 80, baseRange: 35, icon: "🪓"},
+                spear: {name: "Speer", baseSpeed: 60, baseDamage: 50, baseRange: 70, icon: "🗡️"},
+                pistol: {name: "Pistole", baseSpeed: 90, baseDamage: 70, baseRange: 85, icon: "🔫"},
+                rifle: {name: "Gewehr", baseSpeed: 50, baseDamage: 90, baseRange: 95, icon: "🏹"},
+                bow: {name: "Bogen", baseSpeed: 50, baseDamage: 55, baseRange: 90, icon: "🏹"},
+                hammer: {name: "Kriegshammer", baseSpeed: 30, baseDamage: 95, baseRange: 30, icon: "🔨"},
+                dagger: {name: "Dolch", baseSpeed: 95, baseDamage: 35, baseRange: 25, icon: "🗡️"},
+                laser: {name: "Laserkanone", baseSpeed: 95, baseDamage: 80, baseRange: 90, icon: "⚡"},
+                wand: {name: "Zauberstab", baseSpeed: 60, baseDamage: 75, baseRange: 80, icon: "🪄"}
+            },
+            materials: {
+                steel: {name: "Stahl", multiplier: 1.1, color: "#C0C0C0"},
+                gold: {name: "Gold", multiplier: 1.2, color: "#FFD700"},
+                diamond: {name: "Diamant", multiplier: 1.4, color: "#B9F2FF"},
+                wood: {name: "Holz", multiplier: 0.9, color: "#8B4513"},
+                magic: {name: "Magie", multiplier: 1.3, color: "#9932CC"},
+                plasma: {name: "Plasma", multiplier: 1.5, color: "#00FFFF"},
+                crystal: {name: "Kristall", multiplier: 1.2, color: "#FF69B4"}
+            },
+            effects: {
+                fire: {name: "Feuer", damageBuff: 15, color: "#FF4500", icon: "🔥"},
+                ice: {name: "Eis", speedBuff: 10, color: "#87CEEB", icon: "❄️"},
+                lightning: {name: "Blitz", speedBuff: 20, color: "#FFFF00", icon: "⚡"},
+                poison: {name: "Gift", damageBuff: 10, color: "#9ACD32", icon: "☠️"},
+                heal: {name: "Heilung", special: "heal", color: "#32CD32", icon: "💚"},
+                explosive: {name: "Explosiv", damageBuff: 25, color: "#FF6347", icon: "💥"}
+            },
+            keywordPatterns: {
+                weaponTypes: {
+                    "schwert|sword|blade|klinge": "sword",
+                    "axt|axe|beil": "axe",
+                    "speer|lance|pike|lanze": "spear", 
+                    "pistol|pistole|gun|schuss": "pistol",
+                    "gewehr|rifle|sniper": "rifle",
+                    "bogen|bow|pfeil": "bow",
+                    "hammer|mace|keule": "hammer",
+                    "dolch|dagger|messer": "dagger",
+                    "laser|beam|strahl": "laser",
+                    "stab|wand|zauberstab": "wand"
+                },
+                materials: {
+                    "stahl|steel|eisen": "steel",
+                    "gold|golden": "gold",
+                    "diamant|diamond": "diamond",
+                    "holz|wood": "wood",
+                    "magie|magic|magisch": "magic",
+                    "laser|plasma": "plasma",
+                    "kristall|crystal": "crystal"
+                },
+                effects: {
+                    "feuer|fire|flamm": "fire",
+                    "eis|ice|frost": "ice", 
+                    "blitz|lightning|elektro": "lightning",
+                    "gift|poison|toxic": "poison",
+                    "heil|heal|leben": "heal",
+                    "explosiv|bomb|boom": "explosive"
+                }
+            },
+            inspirationExamples: [
+                "Explosive Plasmaaxt mit Blitzeffekt",
+                "Magischer Diamantbogen der Heilung",
+                "Giftiger Stahldolch mit Eisschaden",
+                "Flammendes Kristallschwert",
+                "Goldener Zauberstab des Feuers",
+                "Eisiger Kriegshammer aus Diamant"
+            ]
         };
         
         // Physics Engine
@@ -34,15 +106,11 @@ class OnlineMultiplayerGame {
         this.platforms = [];
         this.gameRunning = false;
 
-        // Drawing
-        this.drawingCtx = null;
+        // Game Context
         this.gameCtx = null;
-        this.isDrawing = false;
-        this.lastX = 0;
-        this.lastY = 0;
 
         // Timers
-        this.drawingTimer = null;
+        this.descriptionTimer = null;
         this.battleTimer = null;
         this.heartbeatInterval = null;
 
@@ -55,25 +123,6 @@ class OnlineMultiplayerGame {
             myHits: 0,
             opponentHits: 0,
             startTime: null
-        };
-
-        // WebRTC Config
-        this.stunServers = [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun.services.mozilla.com' }
-        ];
-
-        // Weapon Types
-        this.weaponTypes = {
-            sword: { name: 'Schwert', baseSpeed: 70, baseDamage: 60, baseRange: 40 },
-            axe: { name: 'Streitaxt', baseSpeed: 40, baseDamage: 80, baseRange: 35 },
-            spear: { name: 'Speer', baseSpeed: 60, baseDamage: 50, baseRange: 70 },
-            gun: { name: 'Pistole', baseSpeed: 90, baseDamage: 70, baseRange: 85 },
-            rifle: { name: 'Gewehr', baseSpeed: 50, baseDamage: 90, baseRange: 95 },
-            bow: { name: 'Bogen', baseSpeed: 50, baseDamage: 55, baseRange: 90 },
-            hammer: { name: 'Kriegshammer', baseSpeed: 30, baseDamage: 95, baseRange: 30 },
-            dagger: { name: 'Dolch', baseSpeed: 95, baseDamage: 35, baseRange: 25 }
         };
 
         this.init();
@@ -93,8 +142,7 @@ class OnlineMultiplayerGame {
     }
 
     init() {
-        console.log('Initializing game...');
-        // Ensure we start fresh
+        console.log('Initializing text-based weapon game...');
         this.resetGameState();
         this.setupEventListeners();
         this.createParticleSystem();
@@ -118,51 +166,23 @@ class OnlineMultiplayerGame {
     setupEventListeners() {
         console.log('Setting up event listeners...');
         
-        // Main Menu - ensure buttons exist and are clickable
-        this.bindButton('create-lobby-btn', () => {
-            console.log('Create lobby clicked');
-            this.createLobby();
-        });
-
-        this.bindButton('join-lobby-btn', () => {
-            console.log('Join lobby clicked');
-            this.showJoinLobby();
-        });
-
-        this.bindButton('local-game-btn', () => {
-            console.log('Local game clicked');
-            this.startLocalGame();
-        });
-
-        this.bindButton('help-btn', () => {
-            console.log('Help clicked');
-            this.showHelp();
-        });
+        // Main Menu
+        this.bindButton('create-lobby-btn', () => this.createLobby());
+        this.bindButton('join-lobby-btn', () => this.showJoinLobby());
+        this.bindButton('local-game-btn', () => this.startLocalGame());
+        this.bindButton('help-btn', () => this.showHelp());
 
         // Lobby Creation
         this.bindButton('copy-code', () => this.copyLobbyCode());
-        
-        this.bindButton('cancel-lobby', () => {
-            console.log('Cancel lobby clicked');
-            this.cancelLobby();
-        });
+        this.bindButton('cancel-lobby', () => this.cancelLobby());
 
         // Lobby Joining
         this.bindButton('connect-lobby', () => this.connectToLobby());
-        
-        this.bindButton('back-to-menu', () => {
-            console.log('Back to menu clicked');
-            this.backToMainMenu();
-        });
+        this.bindButton('back-to-menu', () => this.backToMainMenu());
 
         // Lobby Room
         this.bindButton('start-game', () => this.startOnlineGame());
-        
-        this.bindButton('leave-lobby', () => {
-            console.log('Leave lobby clicked');
-            this.leaveLobby();
-        });
-        
+        this.bindButton('leave-lobby', () => this.leaveLobby());
         this.bindButton('send-chat', () => this.sendChatMessage());
         
         const chatMessageInput = document.getElementById('chat-message');
@@ -172,42 +192,25 @@ class OnlineMultiplayerGame {
             });
         }
 
-        // Weapon Design
-        this.bindButton('clear-canvas', () => {
-            console.log('Clear canvas clicked');
-            this.clearCanvas();
-        });
-        
-        this.bindButton('finish-drawing', () => {
-            console.log('Finish drawing clicked');
-            this.finishDrawing();
-        });
+        // Weapon Description
+        this.bindButton('generate-weapon', () => this.generateWeapon());
+        this.bindButton('back-from-description', () => this.handleBackFromDescription());
+        this.bindButton('random-weapon', () => this.generateRandomWeaponDescription());
 
-        this.bindButton('back-from-drawing', () => {
-            console.log('Back from drawing clicked');
-            this.handleBackFromDrawing();
-        });
+        // Setup text input
+        this.setupTextInput();
+
+        // Setup example tags
+        this.setupExampleTags();
 
         // AI Analysis
-        this.bindButton('continue-to-battle', () => {
-            console.log('Continue to battle clicked');
-            this.startBattle();
-        });
-
-        this.bindButton('back-from-analysis', () => {
-            console.log('Back from analysis clicked');
-            this.handleBackFromAnalysis();
-        });
+        this.bindButton('continue-to-battle', () => this.startBattle());
+        this.bindButton('back-from-analysis', () => this.handleBackFromAnalysis());
 
         // Battle Results
         this.bindButton('rematch-btn', () => this.requestRematch());
-        
         this.bindButton('new-game-btn', () => this.backToLobby());
-        
-        this.bindButton('main-menu-btn', () => {
-            console.log('Main menu clicked');
-            this.backToMainMenu();
-        });
+        this.bindButton('main-menu-btn', () => this.backToMainMenu());
 
         // Modals
         this.bindButton('close-help', () => this.closeHelp());
@@ -219,7 +222,6 @@ class OnlineMultiplayerGame {
             this.keys[e.key.toLowerCase()] = true;
             if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
             
-            // ESC key to go back
             if (e.key === 'Escape') {
                 this.handleEscapeKey();
             }
@@ -229,10 +231,6 @@ class OnlineMultiplayerGame {
             this.keys[e.key.toLowerCase()] = false;
         });
 
-        // Drawing Canvas
-        this.setupDrawingCanvas();
-
-        // Window Events
         window.addEventListener('beforeunload', () => this.cleanup());
         
         console.log('Event listeners setup complete');
@@ -241,7 +239,6 @@ class OnlineMultiplayerGame {
     bindButton(id, handler) {
         const button = document.getElementById(id);
         if (button) {
-            // Remove existing listeners to prevent duplicates
             button.removeEventListener('click', handler);
             button.addEventListener('click', handler);
             console.log(`Bound handler for button: ${id}`);
@@ -250,10 +247,44 @@ class OnlineMultiplayerGame {
         }
     }
 
+    setupTextInput() {
+        const textInput = document.getElementById('weapon-text');
+        const charCount = document.getElementById('char-count');
+        
+        if (textInput && charCount) {
+            textInput.addEventListener('input', (e) => {
+                const length = e.target.value.length;
+                charCount.textContent = length;
+                
+                if (length > 200) {
+                    charCount.classList.add('over-limit');
+                } else {
+                    charCount.classList.remove('over-limit');
+                }
+            });
+        }
+    }
+
+    setupExampleTags() {
+        const exampleTags = document.getElementById('example-tags');
+        if (exampleTags) {
+            exampleTags.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag')) {
+                    const text = e.target.getAttribute('data-text');
+                    const textInput = document.getElementById('weapon-text');
+                    if (textInput && text) {
+                        textInput.value = text;
+                        textInput.dispatchEvent(new Event('input'));
+                        textInput.focus();
+                    }
+                }
+            });
+        }
+    }
+
     handleEscapeKey() {
         console.log('Escape key pressed, current screen:', this.currentScreen);
         
-        // Close modals first
         const helpModal = document.getElementById('help-modal');
         const errorModal = document.getElementById('error-modal');
         
@@ -267,7 +298,6 @@ class OnlineMultiplayerGame {
             return;
         }
         
-        // Navigate back based on current screen
         switch (this.currentScreen) {
             case 'create-lobby':
             case 'join-lobby':
@@ -276,14 +306,13 @@ class OnlineMultiplayerGame {
             case 'lobby-room':
                 this.leaveLobby();
                 break;
-            case 'weapon-design':
-                this.handleBackFromDrawing();
+            case 'weapon-description':
+                this.handleBackFromDescription();
                 break;
             case 'ai-analysis':
                 this.handleBackFromAnalysis();
                 break;
             case 'battle':
-                // Don't allow escape during battle
                 break;
             case 'game-result':
                 this.backToMainMenu();
@@ -291,10 +320,10 @@ class OnlineMultiplayerGame {
         }
     }
 
-    handleBackFromDrawing() {
-        if (this.drawingTimer) {
-            clearInterval(this.drawingTimer);
-            this.drawingTimer = null;
+    handleBackFromDescription() {
+        if (this.descriptionTimer) {
+            clearInterval(this.descriptionTimer);
+            this.descriptionTimer = null;
         }
 
         if (this.isConnected) {
@@ -317,87 +346,6 @@ class OnlineMultiplayerGame {
         this.resetGameState();
         this.showScreen('main-menu');
         this.updateConnectionStatus('offline');
-    }
-
-    setupDrawingCanvas() {
-        const canvas = document.getElementById('drawing-canvas');
-        if (!canvas) {
-            console.error('Drawing canvas not found');
-            return;
-        }
-        
-        this.drawingCtx = canvas.getContext('2d');
-
-        // Mouse Events
-        canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-        canvas.addEventListener('mousemove', (e) => this.draw(e));
-        canvas.addEventListener('mouseup', () => this.stopDrawing());
-        canvas.addEventListener('mouseout', () => this.stopDrawing());
-
-        // Touch Events
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            this.startDrawing({
-                offsetX: touch.clientX - rect.left,
-                offsetY: touch.clientY - rect.top
-            });
-        });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            this.draw({
-                offsetX: touch.clientX - rect.left,
-                offsetY: touch.clientY - rect.top
-            });
-        });
-
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            this.stopDrawing();
-        });
-        
-        console.log('Drawing canvas setup complete');
-    }
-
-    startDrawing(e) {
-        this.isDrawing = true;
-        this.lastX = e.offsetX;
-        this.lastY = e.offsetY;
-    }
-
-    draw(e) {
-        if (!this.isDrawing) return;
-        
-        this.drawingCtx.beginPath();
-        this.drawingCtx.moveTo(this.lastX, this.lastY);
-        this.drawingCtx.lineTo(e.offsetX, e.offsetY);
-        this.drawingCtx.strokeStyle = '#32a087';
-        this.drawingCtx.lineWidth = 3;
-        this.drawingCtx.lineCap = 'round';
-        this.drawingCtx.stroke();
-        
-        this.lastX = e.offsetX;
-        this.lastY = e.offsetY;
-
-        // Send drawing data to peer (throttled)
-        if (this.isConnected && Math.random() < 0.3) {
-            this.sendMessage({
-                type: 'drawing_stroke',
-                fromX: this.lastX,
-                fromY: this.lastY,
-                toX: e.offsetX,
-                toY: e.offsetY,
-                timestamp: Date.now()
-            });
-        }
-    }
-
-    stopDrawing() {
-        this.isDrawing = false;
     }
 
     // Screen Management
@@ -431,7 +379,6 @@ class OnlineMultiplayerGame {
         this.showScreen('create-lobby');
         this.updateConnectionStatus('waiting');
         
-        // Simulate connection after 3 seconds for demo
         setTimeout(() => {
             if (this.currentScreen === 'create-lobby') {
                 console.log('Simulating player join...');
@@ -472,7 +419,6 @@ class OnlineMultiplayerGame {
         this.lobbyCode = code;
         this.showJoinStatus('Verbinde...', 'connecting');
 
-        // Simulate connection after 2 seconds
         setTimeout(() => {
             console.log('Simulating successful connection');
             this.isConnected = true;
@@ -491,7 +437,6 @@ class OnlineMultiplayerGame {
         
         this.showScreen('lobby-room');
         
-        // Update player cards
         this.updatePlayerCard(1, this.playerName, true);
         
         if (!this.isHost) {
@@ -504,7 +449,7 @@ class OnlineMultiplayerGame {
             this.updatePlayerCard(2, 'Mitspieler', true);
         }
         
-        this.addChatMessage('system', 'Verbunden! Das Spiel kann beginnen.');
+        this.addChatMessage('system', 'Verbunden! Beschreibt eure Waffen mit Text!');
     }
 
     updatePlayerCard(playerNum, name, connected) {
@@ -542,20 +487,12 @@ class OnlineMultiplayerGame {
         
         if (navigator.clipboard) {
             navigator.clipboard.writeText(code).then(() => {
-                const btn = document.getElementById('copy-code');
-                if (btn) {
-                    const originalText = btn.textContent;
-                    btn.textContent = 'Kopiert!';
-                    setTimeout(() => {
-                        btn.textContent = originalText;
-                    }, 2000);
-                }
+                this.showCopiedFeedback();
             }).catch(err => {
                 console.error('Failed to copy: ', err);
                 this.showCopiedFeedback();
             });
         } else {
-            // Fallback for older browsers
             this.showCopiedFeedback();
         }
     }
@@ -620,7 +557,6 @@ class OnlineMultiplayerGame {
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         
-        // Limit chat messages to prevent memory issues
         while (messagesContainer.children.length > 50) {
             messagesContainer.removeChild(messagesContainer.firstChild);
         }
@@ -666,13 +602,11 @@ class OnlineMultiplayerGame {
     // Network Communication
     sendMessage(message) {
         console.log('Sending message:', message.type);
-        // In a real implementation, this would send via WebRTC
         return true;
     }
 
     startHeartbeat() {
         console.log('Starting heartbeat...');
-        // Simplified heartbeat for demo
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
         }
@@ -691,35 +625,34 @@ class OnlineMultiplayerGame {
         }
         
         this.sendMessage({ type: 'game_start' });
-        this.startWeaponDesign();
+        this.startWeaponDescription();
     }
 
     startLocalGame() {
         console.log('Starting local game...');
         this.gameMode = 'local';
-        this.isConnected = false; // Ensure we're in local mode
-        this.startWeaponDesign();
+        this.isConnected = false;
+        this.startWeaponDescription();
     }
 
-    startWeaponDesign() {
-        console.log('Starting weapon design phase...');
-        this.gameMode = 'drawing';
+    startWeaponDescription() {
+        console.log('Starting weapon description phase...');
+        this.gameMode = 'description';
         this.currentPlayer = 1;
-        this.showScreen('weapon-design');
+        this.showScreen('weapon-description');
         
         const titleElement = document.getElementById('current-player-title');
         if (titleElement) {
             if (this.gameMode === 'local') {
-                titleElement.textContent = 'Spieler 1 - Zeichne deine Waffe!';
+                titleElement.textContent = 'Spieler 1 - Beschreibe deine Waffe!';
             } else {
-                titleElement.textContent = 'Du - Zeichne deine Waffe!';
+                titleElement.textContent = 'Du - Beschreibe deine Waffe!';
             }
         }
         
-        this.clearCanvas();
-        this.startDrawingTimer();
+        this.clearTextInput();
+        this.startDescriptionTimer();
         
-        // Update sync status
         const syncText = document.getElementById('sync-text');
         const opponentProgress = document.getElementById('opponent-progress');
         
@@ -732,93 +665,102 @@ class OnlineMultiplayerGame {
         }
     }
 
-    startDrawingTimer() {
-        console.log('Starting drawing timer...');
-        let timeLeft = this.gameSettings.drawingTime;
+    clearTextInput() {
+        const textInput = document.getElementById('weapon-text');
+        const charCount = document.getElementById('char-count');
+        
+        if (textInput) {
+            textInput.value = '';
+            textInput.focus();
+        }
+        
+        if (charCount) {
+            charCount.textContent = '0';
+            charCount.classList.remove('over-limit');
+        }
+    }
+
+    startDescriptionTimer() {
+        console.log('Starting description timer...');
+        let timeLeft = this.gameSettings.descriptionTime;
         const timerElement = document.getElementById('timer');
         
         if (timerElement) {
             timerElement.textContent = timeLeft;
         }
         
-        if (this.drawingTimer) {
-            clearInterval(this.drawingTimer);
+        if (this.descriptionTimer) {
+            clearInterval(this.descriptionTimer);
         }
         
-        this.drawingTimer = setInterval(() => {
+        this.descriptionTimer = setInterval(() => {
             timeLeft--;
             if (timerElement) {
                 timerElement.textContent = timeLeft;
             }
             
-            // Update timer circle visual
             const timerCircle = document.querySelector('.timer-circle');
             if (timerCircle) {
-                const progress = ((this.gameSettings.drawingTime - timeLeft) / this.gameSettings.drawingTime) * 360;
+                const progress = ((this.gameSettings.descriptionTime - timeLeft) / this.gameSettings.descriptionTime) * 360;
                 timerCircle.style.background = `conic-gradient(var(--color-primary) ${progress}deg, transparent ${progress}deg)`;
             }
             
             if (timeLeft <= 0) {
-                console.log('Drawing timer expired, finishing drawing automatically');
-                this.finishDrawing();
+                console.log('Description timer expired, generating weapon automatically');
+                this.generateWeapon();
             }
         }, 1000);
     }
 
-    clearCanvas() {
-        console.log('Clearing canvas...');
-        const canvas = document.getElementById('drawing-canvas');
-        if (!canvas || !this.drawingCtx) {
-            console.error('Canvas or context not available');
-            return;
-        }
+    generateRandomWeaponDescription() {
+        const examples = this.weaponData.inspirationExamples;
+        const randomExample = examples[Math.floor(Math.random() * examples.length)];
         
-        this.drawingCtx.clearRect(0, 0, canvas.width, canvas.height);
-        this.drawingCtx.fillStyle = '#f8f8f8';
-        this.drawingCtx.fillRect(0, 0, canvas.width, canvas.height);
-        console.log('Canvas cleared');
+        const textInput = document.getElementById('weapon-text');
+        if (textInput) {
+            textInput.value = randomExample;
+            textInput.dispatchEvent(new Event('input'));
+        }
     }
 
-    finishDrawing() {
-        console.log('Finishing drawing for player', this.currentPlayer);
+    generateWeapon() {
+        console.log('Generating weapon for player', this.currentPlayer);
         
-        if (this.drawingTimer) {
-            clearInterval(this.drawingTimer);
-            this.drawingTimer = null;
+        if (this.descriptionTimer) {
+            clearInterval(this.descriptionTimer);
+            this.descriptionTimer = null;
         }
 
-        const canvas = document.getElementById('drawing-canvas');
-        if (!canvas) {
-            console.error('Canvas not found');
+        const textInput = document.getElementById('weapon-text');
+        const description = textInput ? textInput.value.trim() : '';
+        
+        if (description.length < 3) {
+            this.showError('Beschreibung zu kurz! Mindestens 3 Zeichen erforderlich.');
             return;
         }
 
-        const weaponData = this.analyzeDrawing(canvas);
+        const weaponData = this.analyzeWeaponText(description);
         this.weapons[`player${this.currentPlayer}`] = weaponData;
         
         console.log(`Weapon data for player ${this.currentPlayer}:`, weaponData);
         
         if (this.gameMode === 'local') {
-            // In local mode, handle both players
             if (this.currentPlayer === 1) {
                 this.currentPlayer = 2;
                 
-                // Update UI for player 2
                 const titleElement = document.getElementById('current-player-title');
                 if (titleElement) {
-                    titleElement.textContent = 'Spieler 2 - Zeichne deine Waffe!';
+                    titleElement.textContent = 'Spieler 2 - Beschreibe deine Waffe!';
                 }
                 
-                this.clearCanvas();
-                this.startDrawingTimer();
+                this.clearTextInput();
+                this.startDescriptionTimer();
                 console.log('Switched to player 2 in local mode');
             } else {
-                // Both players done in local mode
-                console.log('Both players finished drawing in local mode');
+                console.log('Both players finished describing in local mode');
                 this.showAIAnalysis();
             }
         } else {
-            // Online mode - in demo, just create a dummy weapon for other player
             if (!this.weapons.player2) {
                 this.weapons.player2 = this.createDummyWeaponData();
             }
@@ -829,114 +771,129 @@ class OnlineMultiplayerGame {
 
     createDummyWeaponData() {
         console.log('Creating dummy weapon data');
-        // Create a simple dummy weapon image for demo
-        const canvas = document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 300;
-        const ctx = canvas.getContext('2d');
-        
-        ctx.fillStyle = '#f8f8f8';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.strokeStyle = '#32a087';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(150, 150);
-        ctx.lineTo(250, 100);
-        ctx.lineTo(270, 80);
-        ctx.lineTo(270, 120);
-        ctx.lineTo(250, 100);
-        ctx.lineTo(250, 140);
-        ctx.lineTo(150, 180);
-        ctx.stroke();
-        
-        return {
-            type: 'axe',
-            damage: 85,
-            speed: 45,
-            range: 40,
-            imageData: ctx.getImageData(0, 0, canvas.width, canvas.height)
-        };
+        return this.analyzeWeaponText("Explosive Plasmaaxt mit Blitzeffekt");
     }
 
-    // AI Weapon Analysis
-    analyzeDrawing(canvas) {
-        console.log('Analyzing drawing...');
+    // AI Weapon Text Analysis
+    analyzeWeaponText(description) {
+        console.log('Analyzing weapon text:', description);
         
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = imageData.data;
-
-        let drawnPixels = [];
-        for (let i = 0; i < pixels.length; i += 4) {
-            if (pixels[i + 3] > 0 && !(pixels[i] === 248 && pixels[i+1] === 248 && pixels[i+2] === 248)) {
-                const x = (i / 4) % canvas.width;
-                const y = Math.floor((i / 4) / canvas.width);
-                drawnPixels.push({ x, y });
+        const lowerDescription = description.toLowerCase();
+        
+        // Detect weapon type
+        let detectedType = 'sword'; // default
+        for (const [pattern, type] of Object.entries(this.weaponData.keywordPatterns.weaponTypes)) {
+            const regex = new RegExp(pattern, 'i');
+            if (regex.test(description)) {
+                detectedType = type;
+                break;
             }
         }
-
-        if (drawnPixels.length === 0) {
-            console.log('No drawing detected, using default weapon');
-            return {
-                type: 'sword',
-                damage: 50,
-                speed: 70,
-                range: 45,
-                imageData: imageData
-            };
+        
+        // Detect material
+        let detectedMaterial = null;
+        for (const [pattern, material] of Object.entries(this.weaponData.keywordPatterns.materials)) {
+            const regex = new RegExp(pattern, 'i');
+            if (regex.test(description)) {
+                detectedMaterial = material;
+                break;
+            }
         }
-
-        const minX = Math.min(...drawnPixels.map(p => p.x));
-        const maxX = Math.max(...drawnPixels.map(p => p.x));
-        const minY = Math.min(...drawnPixels.map(p => p.y));
-        const maxY = Math.max(...drawnPixels.map(p => p.y));
-
-        const width = maxX - minX;
-        const height = maxY - minY;
-        const aspectRatio = width / height;
-        const complexity = drawnPixels.length;
-        const area = width * height;
-
-        console.log('Drawing analysis:', { width, height, aspectRatio, complexity, area });
-
-        let weaponType = this.determineWeaponType(aspectRatio, complexity, area);
-        let baseStats = this.weaponTypes[weaponType];
-
-        const sizeModifier = Math.min(2, Math.max(0.5, area / 10000));
-        const complexityModifier = Math.min(1.5, Math.max(0.7, complexity / 1000));
-
-        const damage = Math.round(baseStats.baseDamage * sizeModifier * complexityModifier);
-        const speed = Math.round(baseStats.baseSpeed * (2 - sizeModifier) * complexityModifier);
-        const range = Math.round(baseStats.baseRange * (aspectRatio > 2 ? 1.3 : 1));
-
+        
+        // Detect effects
+        let detectedEffects = [];
+        for (const [pattern, effect] of Object.entries(this.weaponData.keywordPatterns.effects)) {
+            const regex = new RegExp(pattern, 'i');
+            if (regex.test(description)) {
+                detectedEffects.push(effect);
+            }
+        }
+        
+        // Calculate stats
+        const baseWeapon = this.weaponData.weaponTypes[detectedType];
+        let finalDamage = baseWeapon.baseDamage;
+        let finalSpeed = baseWeapon.baseSpeed;
+        let finalRange = baseWeapon.baseRange;
+        
+        // Apply material bonus
+        if (detectedMaterial) {
+            const material = this.weaponData.materials[detectedMaterial];
+            finalDamage = Math.round(finalDamage * material.multiplier);
+            finalSpeed = Math.round(finalSpeed * material.multiplier);
+            finalRange = Math.round(finalRange * material.multiplier);
+        }
+        
+        // Apply effect bonuses
+        for (const effectKey of detectedEffects) {
+            const effect = this.weaponData.effects[effectKey];
+            if (effect.damageBuff) {
+                finalDamage += effect.damageBuff;
+            }
+            if (effect.speedBuff) {
+                finalSpeed += effect.speedBuff;
+            }
+        }
+        
+        // Length bonus (creativity bonus)
+        const lengthBonus = Math.min(1.2, 1 + (description.length / 500));
+        finalDamage = Math.round(finalDamage * lengthBonus);
+        
+        // Creativity bonus for rare combinations
+        if (detectedMaterial && detectedEffects.length > 0) {
+            finalDamage += 5;
+            finalSpeed += 5;
+        }
+        
+        // Cap values
+        finalDamage = Math.min(100, Math.max(10, finalDamage));
+        finalSpeed = Math.min(100, Math.max(10, finalSpeed));
+        finalRange = Math.min(100, Math.max(10, finalRange));
+        
+        // Generate insights
+        const insights = [];
+        insights.push(`✓ Waffentyp: ${baseWeapon.name} erkannt`);
+        
+        if (detectedMaterial) {
+            const materialData = this.weaponData.materials[detectedMaterial];
+            const bonus = Math.round((materialData.multiplier - 1) * 100);
+            insights.push(`✓ Material: ${materialData.name} (+${bonus}% Bonus)`);
+        }
+        
+        if (detectedEffects.length > 0) {
+            const effectNames = detectedEffects.map(e => this.weaponData.effects[e].name);
+            insights.push(`✓ Effekte: ${effectNames.join(', ')} entdeckt`);
+        }
+        
+        if (description.length > 50) {
+            insights.push(`✓ Längen-Bonus: +${Math.round((lengthBonus - 1) * 100)}%`);
+        }
+        
+        if (detectedMaterial && detectedEffects.length > 0) {
+            insights.push(`✓ Kreativitäts-Bonus: +10%`);
+        }
+        
         const result = {
-            type: weaponType,
-            damage: Math.min(100, Math.max(10, damage)),
-            speed: Math.min(100, Math.max(10, speed)),
-            range: Math.min(100, Math.max(10, range)),
-            imageData: imageData
+            description: description,
+            type: detectedType,
+            typeName: baseWeapon.name,
+            material: detectedMaterial,
+            materialName: detectedMaterial ? this.weaponData.materials[detectedMaterial].name : 'Standard',
+            effects: detectedEffects,
+            damage: finalDamage,
+            speed: finalSpeed,
+            range: finalRange,
+            icon: baseWeapon.icon,
+            insights: insights
         };
 
         console.log('Weapon analysis result:', result);
         return result;
     }
 
-    determineWeaponType(aspectRatio, complexity, area) {
-        if (aspectRatio > 4) return 'spear';
-        if (aspectRatio > 2.5 && complexity < 500) return 'sword';
-        if (aspectRatio < 0.8 && area > 8000) return 'hammer';
-        if (aspectRatio > 2 && complexity > 800) return 'gun';
-        if (aspectRatio < 1.2 && area > 5000) return 'axe';
-        if (area < 3000) return 'dagger';
-        return 'sword';
-    }
-
     showAIAnalysis() {
         console.log('Showing AI analysis...');
         this.showScreen('ai-analysis');
         
-        // Small delay to let screen transition complete
         setTimeout(() => {
             this.displayWeaponAnalysis();
         }, 100);
@@ -945,7 +902,6 @@ class OnlineMultiplayerGame {
     displayWeaponAnalysis() {
         console.log('Displaying weapon analysis...');
         
-        // Update player names
         const p1Name = document.getElementById('p1-player-name');
         const p2Name = document.getElementById('p2-player-name');
         
@@ -978,39 +934,80 @@ class OnlineMultiplayerGame {
         
         const prefix = `p${playerNum}`;
         
+        // Update weapon name
+        const weaponNameElement = document.getElementById(`${prefix}-weapon-name`);
+        if (weaponNameElement) {
+            weaponNameElement.textContent = this.generateWeaponName(weapon);
+        }
+        
+        // Update description
+        const descriptionElement = document.getElementById(`${prefix}-weapon-description`);
+        if (descriptionElement) {
+            descriptionElement.textContent = `"${weapon.description}"`;
+        }
+        
+        // Update weapon icon
+        const weaponIconElement = document.getElementById(`${prefix}-weapon-icon`);
+        if (weaponIconElement) {
+            weaponIconElement.textContent = weapon.icon;
+        }
+        
+        // Update weapon effects
+        const weaponEffectsElement = document.getElementById(`${prefix}-weapon-effects`);
+        if (weaponEffectsElement) {
+            weaponEffectsElement.innerHTML = '';
+            weapon.effects.forEach(effectKey => {
+                const effect = this.weaponData.effects[effectKey];
+                const effectSpan = document.createElement('span');
+                effectSpan.className = 'weapon-effect';
+                effectSpan.textContent = effect.icon;
+                effectSpan.style.color = effect.color;
+                weaponEffectsElement.appendChild(effectSpan);
+            });
+        }
+        
+        // Update stats
         const weaponTypeElement = document.getElementById(`${prefix}-weapon-type`);
         if (weaponTypeElement) {
-            weaponTypeElement.textContent = this.weaponTypes[weapon.type].name;
+            weaponTypeElement.textContent = weapon.typeName;
+        }
+        
+        const weaponMaterialElement = document.getElementById(`${prefix}-weapon-material`);
+        if (weaponMaterialElement) {
+            weaponMaterialElement.textContent = weapon.materialName;
         }
         
         this.animateStatBar(`${prefix}-damage-bar`, `${prefix}-damage-value`, weapon.damage);
         this.animateStatBar(`${prefix}-speed-bar`, `${prefix}-speed-value`, weapon.speed);
         this.animateStatBar(`${prefix}-range-bar`, `${prefix}-range-value`, weapon.range);
         
-        const preview = document.querySelector(`#player${playerNum}-weapon .weapon-preview`);
-        if (preview && weapon.imageData) {
-            const ctx = preview.getContext('2d');
-            
-            ctx.fillStyle = '#f8f8f8';
-            ctx.fillRect(0, 0, preview.width, preview.height);
-            
-            try {
-                const scale = Math.min(preview.width / 400, preview.height / 300);
-                ctx.save();
-                ctx.scale(scale, scale);
-                ctx.putImageData(weapon.imageData, 0, 0);
-                ctx.restore();
-            } catch (error) {
-                console.error('Error displaying weapon preview:', error);
-                // Draw a fallback weapon
-                ctx.strokeStyle = '#32a087';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(50, 75);
-                ctx.lineTo(150, 50);
-                ctx.stroke();
-            }
+        // Update AI insights
+        const insightsElement = document.getElementById(`${prefix}-ai-insights`);
+        if (insightsElement) {
+            insightsElement.innerHTML = '';
+            weapon.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                insightsElement.appendChild(li);
+            });
         }
+    }
+
+    generateWeaponName(weapon) {
+        let name = '';
+        
+        if (weapon.effects.length > 0) {
+            const effectNames = weapon.effects.map(e => this.weaponData.effects[e].name);
+            name += effectNames[0] + 'es ';
+        }
+        
+        if (weapon.material) {
+            name += this.weaponData.materials[weapon.material].name + '-';
+        }
+        
+        name += weapon.typeName;
+        
+        return name;
     }
 
     animateStatBar(barId, valueId, value) {
@@ -1034,7 +1031,6 @@ class OnlineMultiplayerGame {
         this.gameMode = 'battle';
         this.showScreen('battle');
         
-        // Initialize battle UI
         const p1Name = document.getElementById('battle-p1-name');
         const p2Name = document.getElementById('battle-p2-name');
         
@@ -1048,7 +1044,6 @@ class OnlineMultiplayerGame {
             }
         }
         
-        // Initialize health and stamina bars
         const p1Health = document.getElementById('p1-health');
         const p2Health = document.getElementById('p2-health');
         const p1Stamina = document.getElementById('p1-stamina');
@@ -1059,7 +1054,6 @@ class OnlineMultiplayerGame {
         if (p1Stamina) p1Stamina.style.width = '100%';
         if (p2Stamina) p2Stamina.style.width = '100%';
         
-        // Start battle timer
         let timeLeft = this.gameSettings.battleTime;
         const timerElement = document.getElementById('battle-time');
         
@@ -1082,7 +1076,6 @@ class OnlineMultiplayerGame {
             }
         }, 1000);
         
-        // Simulate battle result after 5 seconds
         setTimeout(() => {
             const results = ['win', 'lose', 'draw'];
             const result = results[Math.floor(Math.random() * results.length)];
@@ -1111,8 +1104,17 @@ class OnlineMultiplayerGame {
             }
         }
         
-        // Update stats with random but reasonable values
-        const duration = Math.floor(Math.random() * 90 + 30); // 30-120 seconds
+        // Show best weapon
+        const bestWeaponElement = document.getElementById('best-weapon');
+        if (bestWeaponElement && this.weapons.player1) {
+            const weaponEmoji = bestWeaponElement.querySelector('.weapon-emoji');
+            const weaponTitle = bestWeaponElement.querySelector('.weapon-title');
+            
+            if (weaponEmoji) weaponEmoji.textContent = this.weapons.player1.icon;
+            if (weaponTitle) weaponTitle.textContent = this.generateWeaponName(this.weapons.player1);
+        }
+        
+        const duration = Math.floor(Math.random() * 90 + 30);
         const myHits = Math.floor(Math.random() * 15 + 5);
         const opponentHits = Math.floor(Math.random() * 15 + 5);
         const avgPing = this.isConnected ? Math.floor(Math.random() * 80 + 20) : 0;
@@ -1138,7 +1140,6 @@ class OnlineMultiplayerGame {
             avgPingElement.textContent = this.isConnected ? `${avgPing}ms` : 'Lokal';
         }
         
-        // Save stats
         this.saveStats(result);
     }
 
@@ -1150,7 +1151,7 @@ class OnlineMultiplayerGame {
         
         if (this.isConnected) {
             this.sendMessage({ type: 'rematch_request' });
-            this.startWeaponDesign();
+            this.startWeaponDescription();
         } else {
             this.startLocalGame();
         }
@@ -1235,7 +1236,6 @@ class OnlineMultiplayerGame {
 
     // Stats Management
     loadStats() {
-        // Load stats from localStorage if available
         try {
             const savedStats = localStorage.getItem('gameStats');
             if (savedStats) {
@@ -1267,7 +1267,7 @@ class OnlineMultiplayerGame {
             }
             
             localStorage.setItem('gameStats', JSON.stringify(stats));
-            this.loadStats(); // Update display
+            this.loadStats();
         } catch (error) {
             console.error('Error saving stats:', error);
         }
@@ -1292,9 +1292,9 @@ class OnlineMultiplayerGame {
             this.heartbeatInterval = null;
         }
         
-        if (this.drawingTimer) {
-            clearInterval(this.drawingTimer);
-            this.drawingTimer = null;
+        if (this.descriptionTimer) {
+            clearInterval(this.descriptionTimer);
+            this.descriptionTimer = null;
         }
         
         if (this.battleTimer) {
@@ -1309,9 +1309,9 @@ class OnlineMultiplayerGame {
 
 // Start the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing game...');
+    console.log('DOM loaded, initializing text-based weapon game...');
     try {
-        window.game = new OnlineMultiplayerGame();
+        window.game = new TextBasedMultiplayerGame();
         console.log('Game initialized successfully');
     } catch (error) {
         console.error('Error initializing game:', error);
