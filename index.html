@@ -25,20 +25,53 @@
         <main class="main-content">
             <div class="container">
                 <div class="video-container">
-                    <div class="video-wrapper">
-                        <iframe 
-                            title="Stuttgart vs FC Heidenheim Player" 
-                            marginheight="0" 
-                            marginwidth="0" 
-                            src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2" 
-                            scrolling="no" 
-                            allowfullscreen="yes" 
-                            allow="encrypted-media; picture-in-picture;" 
-                            width="100%" 
-                            height="100%" 
-                            frameborder="0"
-                            loading="lazy">
-                        </iframe>
+                    <!-- Stream Tabs -->
+                    <div class="stream-tabs">
+                        <button class="stream-tab active" data-stream="stream1">
+                            <span class="tab-label">Stream 1</span>
+                            <span class="tab-subtitle">Alpha Stream</span>
+                        </button>
+                        <button class="stream-tab" data-stream="stream2">
+                            <span class="tab-label">Stream 2</span>
+                            <span class="tab-subtitle">Echo Stream</span>
+                        </button>
+                    </div>
+
+                    <!-- Stream Content -->
+                    <div class="streams-wrapper">
+                        <!-- Stream 1 -->
+                        <div class="stream-content active" id="stream1">
+                            <div class="video-wrapper">
+                                <iframe 
+                                    title="Stuttgart vs FC Heidenheim Player (Alpha Stream)" 
+                                    marginheight="0" 
+                                    marginwidth="0" 
+                                    src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2" 
+                                    scrolling="no" 
+                                    allowfullscreen="yes" 
+                                    allow="encrypted-media; picture-in-picture;" 
+                                    width="100%" 
+                                    height="100%" 
+                                    frameborder="0"
+                                    loading="lazy">
+                                </iframe>
+                            </div>
+                        </div>
+
+                        <!-- Stream 2 -->
+                        <div class="stream-content" id="stream2">
+                            <div class="video-wrapper">
+                                <!-- iframe will be loaded when tab is activated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stream Status -->
+                    <div class="stream-status">
+                        <div class="current-stream-info">
+                            <span class="stream-indicator">Aktiver Stream:</span>
+                            <span class="stream-name" id="current-stream-name">Stream 1 - Alpha Stream</span>
+                        </div>
                     </div>
                 </div>
 
@@ -62,7 +95,7 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
-                <p>Live-Übertragung des Spiels</p>
+                <p>Live-Übertragung des Spiels - Wählen Sie zwischen verschiedenen Streams</p>
             </div>
         </footer>
     </div>
