@@ -1,4 +1,24 @@
-// JavaScript for the football match streaming website
+// JavaScript for the football match streaming website with dual streams
+
+// Stream configuration
+const streamConfig = {
+    stream1: {
+        id: 'stream1',
+        name: 'Stream 1',
+        title: 'Alpha Stream',
+        url: 'https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2'
+    },
+    stream2: {
+        id: 'stream2',
+        name: 'Stream 2', 
+        title: 'Echo Stream',
+        url: 'https://embedsports.top/embed/echo/vfb-stuttgart-vs-1-fc-heidenheim-football-1388360/2'
+    }
+};
+
+// Application state
+let currentStream = 'stream1';
+let loadedStreams = new Set(['stream1']); // Stream 1 is loaded by default
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the application
@@ -6,7 +26,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Set up iframe loading handler
+    // Set up stream tabs
+    setupStreamTabs();
+    
+    // Set up iframe loading handlers
     setupIframeLoading();
     
     // Set up responsive handler
@@ -17,46 +40,148 @@ function initializeApp() {
     
     // Update match status
     updateMatchStatus();
+    
+    // Initialize current stream display
+    updateStreamStatus();
+    
+    console.log('Football streaming app initialized with dual streams');
+}
+
+function setupStreamTabs() {
+    const tabs = document.querySelectorAll('.stream-tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const streamId = this.getAttribute('data-stream');
+            switchToStream(streamId);
+        });
+        
+        // Add keyboard support
+        tab.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                const streamId = this.getAttribute('data-stream');
+                switchToStream(streamId);
+            }
+        });
+    });
+}
+
+function switchToStream(streamId) {
+    if (streamId === currentStream) return; // Already on this stream
+    
+    // Update current stream
+    currentStream = streamId;
+    
+    // Update tab appearance
+    updateActiveTab(streamId);
+    
+    // Show/hide stream content
+    updateStreamContent(streamId);
+    
+    // Load stream if not already loaded
+    if (!loadedStreams.has(streamId)) {
+        loadStream(streamId);
+        loadedStreams.add(streamId);
+    }
+    
+    // Update stream status display
+    updateStreamStatus();
+    
+    console.log(`Switched to ${streamId}`);
+}
+
+function updateActiveTab(activeStreamId) {
+    const tabs = document.querySelectorAll('.stream-tab');
+    
+    tabs.forEach(tab => {
+        const streamId = tab.getAttribute('data-stream');
+        if (streamId === activeStreamId) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
+function updateStreamContent(activeStreamId) {
+    const streamContents = document.querySelectorAll('.stream-content');
+    
+    streamContents.forEach(content => {
+        if (content.id === activeStreamId) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+}
+
+function loadStream(streamId) {
+    const streamContent = document.getElementById(streamId);
+    const videoWrapper = streamContent.querySelector('.video-wrapper');
+    const config = streamConfig[streamId];
+    
+    if (!config || !videoWrapper) return;
+    
+    // Create iframe element
+    const iframe = document.createElement('iframe');
+    iframe.title = `Stuttgart vs FC Heidenheim Player (${config.title})`;
+    iframe.marginHeight = '0';
+    iframe.marginWidth = '0';
+    iframe.src = config.url;
+    iframe.scrolling = 'no';
+    iframe.allowFullscreen = true;
+    iframe.allow = 'encrypted-media; picture-in-picture;';
+    iframe.width = '100%';
+    iframe.height = '100%';
+    iframe.frameBorder = '0';
+    iframe.loading = 'lazy';
+    
+    // Add loading handler
+    iframe.addEventListener('load', function() {
+        videoWrapper.classList.add('loaded');
+        console.log(`${streamId} loaded successfully`);
+    });
+    
+    iframe.addEventListener('error', function() {
+        showStreamError(streamId);
+        console.error(`Error loading ${streamId}`);
+    });
+    
+    // Clear existing content and add iframe
+    videoWrapper.innerHTML = '';
+    videoWrapper.appendChild(iframe);
+    
+    console.log(`Loading ${streamId}: ${config.url}`);
+}
+
+function updateStreamStatus() {
+    const streamNameElement = document.getElementById('current-stream-name');
+    const config = streamConfig[currentStream];
+    
+    if (streamNameElement && config) {
+        streamNameElement.textContent = `${config.name} - ${config.title}`;
+    }
 }
 
 function setupIframeLoading() {
-    const iframe = document.querySelector('iframe');
-    const videoWrapper = document.querySelector('.video-wrapper');
+    // Handle the default loaded stream (stream1)
+    const defaultIframe = document.querySelector('#stream1 iframe');
+    const defaultWrapper = document.querySelector('#stream1 .video-wrapper');
     
-    if (!iframe || !videoWrapper) return;
-    
-    // Add loading class initially
-    videoWrapper.classList.add('loading');
-    
-    // Handle iframe load event
-    iframe.addEventListener('load', function() {
-        videoWrapper.classList.remove('loading');
-        videoWrapper.classList.add('loaded');
+    if (defaultIframe && defaultWrapper) {
+        defaultIframe.addEventListener('load', function() {
+            defaultWrapper.classList.add('loaded');
+            console.log('Default stream loaded successfully');
+        });
         
-        // Log successful load
-        console.log('Video stream loaded successfully');
-    });
-    
-    // Handle iframe error
-    iframe.addEventListener('error', function() {
-        videoWrapper.classList.remove('loading');
-        videoWrapper.classList.add('error');
-        
-        // Show error message
-        showErrorMessage();
-    });
-    
-    // Set a timeout for loading
-    setTimeout(function() {
-        if (videoWrapper.classList.contains('loading')) {
-            videoWrapper.classList.remove('loading');
-            console.log('Stream loading timeout reached');
-        }
-    }, 10000); // 10 second timeout
+        defaultIframe.addEventListener('error', function() {
+            showStreamError('stream1');
+        });
+    }
 }
 
 function setupResponsiveHandling() {
-    // Handle window resize
     let resizeTimeout;
     
     window.addEventListener('resize', function() {
@@ -88,18 +213,19 @@ function adjustVideoLayout() {
 }
 
 function setupKeyboardNavigation() {
-    // Allow keyboard navigation to iframe
-    const iframe = document.querySelector('iframe');
-    
-    if (!iframe) return;
-    
-    // Make iframe focusable
-    iframe.setAttribute('tabindex', '0');
-    
-    // Handle escape key for potential fullscreen exit
+    // Handle tab navigation between streams
     document.addEventListener('keydown', function(event) {
+        // Switch streams with number keys
+        if (event.key === '1') {
+            event.preventDefault();
+            switchToStream('stream1');
+        } else if (event.key === '2') {
+            event.preventDefault();
+            switchToStream('stream2');
+        }
+        
+        // Handle escape key for potential fullscreen exit
         if (event.key === 'Escape') {
-            // If document is in fullscreen, exit
             if (document.fullscreenElement) {
                 document.exitFullscreen().catch(err => {
                     console.log('Error exiting fullscreen:', err);
@@ -107,10 +233,13 @@ function setupKeyboardNavigation() {
             }
         }
         
-        // Handle F key for fullscreen (when iframe is focused)
-        if (event.key === 'f' && event.target === iframe) {
-            event.preventDefault();
-            requestFullscreen();
+        // Handle F key for fullscreen
+        if (event.key === 'f' || event.key === 'F') {
+            const activeIframe = document.querySelector('.stream-content.active iframe');
+            if (activeIframe && document.activeElement === activeIframe) {
+                event.preventDefault();
+                requestFullscreen();
+            }
         }
     });
 }
@@ -141,8 +270,9 @@ function requestFullscreen() {
     }
 }
 
-function showErrorMessage() {
-    const videoWrapper = document.querySelector('.video-wrapper');
+function showStreamError(streamId) {
+    const streamContent = document.getElementById(streamId);
+    const videoWrapper = streamContent.querySelector('.video-wrapper');
     
     if (!videoWrapper) return;
     
@@ -152,60 +282,49 @@ function showErrorMessage() {
     errorMessage.innerHTML = `
         <div class="error-content">
             <h3>Stream nicht verfügbar</h3>
-            <p>Der Live-Stream konnte nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
-            <button class="btn btn--primary" onclick="reloadStream()">Erneut versuchen</button>
+            <p>Der Live-Stream konnte nicht geladen werden. Bitte versuchen Sie es später erneut oder wechseln Sie zu einem anderen Stream.</p>
+            <button class="btn btn--primary" onclick="reloadStream('${streamId}')">Erneut versuchen</button>
+            ${streamId === 'stream1' ? 
+                '<button class="btn btn--secondary" onclick="switchToStream(\'stream2\')">Zu Stream 2 wechseln</button>' :
+                '<button class="btn btn--secondary" onclick="switchToStream(\'stream1\')">Zu Stream 1 wechseln</button>'
+            }
         </div>
-    `;
-    
-    // Style the error message
-    errorMessage.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--color-charcoal-800);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        border-radius: var(--radius-lg);
-    `;
-    
-    const errorContent = errorMessage.querySelector('.error-content');
-    errorContent.style.cssText = `
-        text-align: center;
-        padding: var(--space-24);
-        color: var(--color-text);
     `;
     
     videoWrapper.appendChild(errorMessage);
 }
 
-function reloadStream() {
-    const iframe = document.querySelector('iframe');
-    const errorMessage = document.querySelector('.error-message');
-    
-    if (iframe) {
-        // Reload the iframe
-        const src = iframe.src;
-        iframe.src = '';
-        setTimeout(() => {
-            iframe.src = src;
-        }, 100);
-    }
+function reloadStream(streamId) {
+    const streamContent = document.getElementById(streamId);
+    const videoWrapper = streamContent.querySelector('.video-wrapper');
+    const errorMessage = videoWrapper.querySelector('.error-message');
     
     if (errorMessage) {
         errorMessage.remove();
     }
     
-    // Re-initialize loading state
-    const videoWrapper = document.querySelector('.video-wrapper');
-    if (videoWrapper) {
-        videoWrapper.classList.remove('error', 'loaded');
-        videoWrapper.classList.add('loading');
-    }
+    // Remove from loaded streams set to force reload
+    loadedStreams.delete(streamId);
+    
+    // Clear wrapper
+    videoWrapper.innerHTML = '';
+    videoWrapper.classList.remove('loaded');
+    
+    // Reload the stream
+    loadStream(streamId);
+    loadedStreams.add(streamId);
+    
+    console.log(`Reloading ${streamId}`);
 }
+
+// Handle visibility change (pause/play when tab becomes inactive/active)
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('Tab hidden - streams may pause');
+    } else {
+        console.log('Tab visible - streams should resume');
+    }
+});
 
 // Utility functions
 function getViewportSize() {
@@ -219,25 +338,22 @@ function isMobile() {
     return window.innerWidth < 768;
 }
 
-// Handle visibility change (pause/play when tab becomes inactive/active)
-document.addEventListener('visibilitychange', function() {
-    const iframe = document.querySelector('iframe');
-    
-    if (!iframe) return;
-    
-    if (document.hidden) {
-        // Tab is now hidden
-        console.log('Tab hidden - stream may pause');
-    } else {
-        // Tab is now visible
-        console.log('Tab visible - stream should resume');
-    }
-});
+function getCurrentStream() {
+    return currentStream;
+}
 
-// Expose some functions globally for debugging
+function getLoadedStreams() {
+    return Array.from(loadedStreams);
+}
+
+// Expose functions globally for debugging and external access
 window.footballStream = {
+    switchToStream,
     reloadStream,
     requestFullscreen,
     getViewportSize,
-    isMobile
+    isMobile,
+    getCurrentStream,
+    getLoadedStreams,
+    streamConfig
 };
