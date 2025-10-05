@@ -1,77 +1,72 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Obama Image Transformer</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Live-Stream: VfB Stuttgart vs. 1. FC Heidenheim 1846">
+    <title>VfB Stuttgart vs. 1. FC Heidenheim 1846 - Live Stream</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container">
+<body data-color-scheme="dark">
+    <div class="app-container">
+        <!-- Header -->
         <header class="header">
-            <h1 class="header__title">Obama Image Transformer</h1>
-            <div class="adler-deco">
-                🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅 <br>
-                🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅🦅<br>
-                🦅🦅🦅🦅🦅🦅🦅🦅🦅
+            <div class="container">
+                <div class="header-content">
+                    <h1 class="match-title">VfB Stuttgart vs. 1. FC Heidenheim 1846</h1>
+                    <div class="match-info">
+                        <span class="status status--info">Live</span>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <main class="main">
-            <section class="upload-section" id="uploadSection">
-                <div class="upload-zone" id="uploadZone">
-                    <input
-                        type="file"
-                        id="fileInput"
-                        accept="image/jpeg,image/png,image/jpg"
-                        class="upload-zone__input"
-                    />
-                    <div class="upload-zone__content">
-                        <div class="upload-zone__icon">📸</div>
-                        <h3>Bild hier ablegen oder klicken</h3>
-                        <p>JPG, PNG bis 10MB</p>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="video-container">
+                    <div class="video-wrapper">
+                        <iframe 
+                            title="Stuttgart vs FC Heidenheim Player" 
+                            marginheight="0" 
+                            marginwidth="0" 
+                            src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2" 
+                            scrolling="no" 
+                            allowfullscreen="yes" 
+                            allow="encrypted-media; picture-in-picture;" 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0"
+                            loading="lazy">
+                        </iframe>
                     </div>
                 </div>
 
-                <div class="file-info hidden" id="fileInfo">
-                    <div class="file-info__details">
-                        <span class="file-info__name" id="fileName"></span>
-                        <span class="file-info__size" id="fileSize"></span>
-                    </div>
-                    <button class="btn btn--outline btn--sm" id="clearFile">Entfernen</button>
-                </div>
-            </section>
-
-            <section class="preview-section hidden" id="previewSection">
-                <div class="image-preview">
-                    <div class="image-preview__container">
-                        <h4>Original</h4>
-                        <img id="originalImage" class="image-preview__img" alt="Original" />
+                <!-- Match Details -->
+                <div class="match-details">
+                    <div class="teams-container">
+                        <div class="team">
+                            <h3>VfB Stuttgart</h3>
+                        </div>
+                        <div class="vs-separator">
+                            <span>vs.</span>
+                        </div>
+                        <div class="team">
+                            <h3>1. FC Heidenheim 1846</h3>
+                        </div>
                     </div>
                 </div>
-
-                <button class="btn btn--primary btn--lg transform-btn" id="transformBtn">
-                    Bild in Obama verwandeln
-                </button>
-
-                <div class="image-preview hidden" id="transformedContainer">
-                    <div class="image-preview__container">
-                        <h4>Obama Version</h4>
-                        <canvas id="transformedCanvas" class="image-preview__img"></canvas>
-                    </div>
-                </div>
-
-                <div class="btn-group hidden" id="resultButtons">
-                    <button class="btn btn--secondary btn--lg" id="downloadBtn">Ergebnis herunterladen</button>
-                    <button class="btn btn--outline btn--lg" id="newImageBtn">Neues Bild</button>
-                </div>
-
-                <div class="progress-bar hidden" id="progressBar">
-                    <div class="progress-bar__inner" id="progressInner"></div>
-                </div>
-            </section>
+            </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>Live-Übertragung des Spiels</p>
+            </div>
+        </footer>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
