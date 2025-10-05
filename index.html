@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strichmännchen Kampf Arena - Online Multiplayer</title>
+    <title>Strichmännchen Kampf Arena - Text-Waffen-System</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
@@ -14,6 +14,7 @@
             <div class="logo">
                 <h1>STRICHMÄNNCHEN</h1>
                 <h2>KAMPF ARENA</h2>
+                <div class="subtitle">🤖 Mit KI-Waffen-Generierung</div>
                 <div class="online-indicator">
                     <span class="status-dot" id="connection-status"></span>
                     <span id="connection-text">Offline</span>
@@ -129,10 +130,10 @@
             </div>
         </div>
 
-        <!-- Waffen zeichnen -->
-        <div id="weapon-design" class="screen">
-            <div class="design-header">
-                <h2 id="current-player-title">Spieler 1 - Zeichne deine Waffe!</h2>
+        <!-- Waffen-Beschreibung -->
+        <div id="weapon-description" class="screen">
+            <div class="description-header">
+                <h2 id="current-player-title">Spieler 1 - Beschreibe deine Waffe!</h2>
                 <div class="timer-container">
                     <div class="timer-circle">
                         <span id="timer">30</span>
@@ -143,47 +144,71 @@
                     <span id="sync-text">Synchronisiert</span>
                 </div>
             </div>
-            <div class="drawing-area">
-                <canvas id="drawing-canvas" width="400" height="300"></canvas>
-                <div class="drawing-controls">
-                    <button class="btn btn--secondary" id="clear-canvas">
-                        <span>🗑️</span> Löschen
-                    </button>
-                    <button class="btn btn--primary" id="finish-drawing">
-                        <span>✅</span> Fertig
-                    </button>
-                    <button class="btn btn--outline" id="back-from-drawing">
-                        <span>⬅️</span> Zurück
-                    </button>
+            
+            <div class="description-area">
+                <div class="text-input-container">
+                    <textarea id="weapon-text" class="weapon-description-input" placeholder="Beschreibe deine ultimative Waffe...&#10;&#10;Beispiel: 'Ein flammendes Diamantschwert mit Blitzmagie'"></textarea>
+                    <div class="character-count">
+                        <span id="char-count">0</span>/200 Zeichen
+                    </div>
+                </div>
+                
+                <div class="inspiration-section">
+                    <h4>💡 Inspiration & Beispiele:</h4>
+                    <div class="example-tags" id="example-tags">
+                        <span class="tag" data-text="Explosive Plasmaaxt mit Blitzeffekt">⚡ Explosive Plasmaaxt</span>
+                        <span class="tag" data-text="Magischer Diamantbogen der Heilung">💎 Diamantbogen</span>
+                        <span class="tag" data-text="Giftiger Stahldolch mit Eisschaden">☠️ Giftiger Dolch</span>
+                        <span class="tag" data-text="Flammendes Kristallschwert">🔥 Flammenschwert</span>
+                        <span class="tag" data-text="Goldener Zauberstab des Feuers">🪄 Feuerstab</span>
+                        <span class="tag" data-text="Eisiger Kriegshammer aus Diamant">❄️ Eishammer</span>
+                    </div>
+                    <button class="btn btn--outline btn--sm" id="random-weapon">🎲 Zufällige Idee</button>
                 </div>
             </div>
-            <div class="drawing-instructions">
-                <p>Zeichne deine Waffe! Sie kann alles sein: Schwert, Axt, Gewehr, Bogen...</p>
-                <p>Die KI wird sie analysieren und ihre Stärke bestimmen.</p>
-                <div id="opponent-status" class="opponent-drawing-status">
-                    <span>Gegner: </span><span id="opponent-progress">Zeichnet...</span>
-                </div>
+            
+            <div class="description-controls">
+                <button class="btn btn--primary btn--lg" id="generate-weapon">
+                    <span>🤖</span> WAFFE GENERIEREN
+                </button>
+                <button class="btn btn--outline" id="back-from-description">
+                    <span>⬅️</span> Zurück
+                </button>
+            </div>
+            
+            <div class="opponent-status" id="opponent-status">
+                <span>Gegner: </span><span id="opponent-progress">Beschreibt...</span>
             </div>
         </div>
 
         <!-- KI Analyse -->
         <div id="ai-analysis" class="screen">
             <div class="analysis-container">
-                <h2>KI-Waffen-Analyse</h2>
+                <h2>🤖 KI-Waffen-Analyse</h2>
                 <div class="weapon-results">
                     <div class="weapon-result" id="player1-weapon">
                         <h3 id="p1-player-name">Spieler 1</h3>
-                        <canvas class="weapon-preview" width="200" height="150"></canvas>
+                        <div class="weapon-visual">
+                            <div class="weapon-icon" id="p1-weapon-icon">⚔️</div>
+                            <div class="weapon-effects" id="p1-weapon-effects"></div>
+                        </div>
+                        <h4 class="weapon-name" id="p1-weapon-name">Flammendes Diamantschwert</h4>
+                        <div class="weapon-description" id="p1-weapon-description">"Ein flammendes Diamantschwert mit Blitzmagie"</div>
+                        
                         <div class="weapon-stats">
                             <div class="stat">
                                 <span class="stat-label">Typ:</span>
                                 <span class="stat-value" id="p1-weapon-type">Schwert</span>
                             </div>
                             <div class="stat">
+                                <span class="stat-label">Material:</span>
+                                <span class="stat-value" id="p1-weapon-material">Diamant</span>
+                            </div>
+                            <div class="stat">
                                 <span class="stat-label">Schaden:</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" id="p1-damage-bar"></div>
-                                    <span class="stat-value" id="p1-damage-value">60</span>
+                                    <span class="stat-value" id="p1-damage-value">85</span>
                                 </div>
                             </div>
                             <div class="stat">
@@ -197,43 +222,75 @@
                                 <span class="stat-label">Reichweite:</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" id="p1-range-bar"></div>
-                                    <span class="stat-value" id="p1-range-value">40</span>
+                                    <span class="stat-value" id="p1-range-value">45</span>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="ai-insights">
+                            <h5>🤖 KI-Erkenntnisse:</h5>
+                            <ul id="p1-ai-insights">
+                                <li>✓ Waffentyp: Schwert erkannt</li>
+                                <li>✓ Material: Diamant (+40% Bonus)</li>
+                                <li>✓ Effekt: Feuer (+15 Schaden)</li>
+                                <li>✓ Kreativitäts-Bonus: +10%</li>
+                            </ul>
+                        </div>
                     </div>
+                    
                     <div class="weapon-result" id="player2-weapon">
                         <h3 id="p2-player-name">Spieler 2</h3>
-                        <canvas class="weapon-preview" width="200" height="150"></canvas>
+                        <div class="weapon-visual">
+                            <div class="weapon-icon" id="p2-weapon-icon">🪓</div>
+                            <div class="weapon-effects" id="p2-weapon-effects"></div>
+                        </div>
+                        <h4 class="weapon-name" id="p2-weapon-name">Explosive Plasmaaxt</h4>
+                        <div class="weapon-description" id="p2-weapon-description">"Eine explosive Plasmaaxt"</div>
+                        
                         <div class="weapon-stats">
                             <div class="stat">
                                 <span class="stat-label">Typ:</span>
                                 <span class="stat-value" id="p2-weapon-type">Axt</span>
                             </div>
                             <div class="stat">
+                                <span class="stat-label">Material:</span>
+                                <span class="stat-value" id="p2-weapon-material">Plasma</span>
+                            </div>
+                            <div class="stat">
                                 <span class="stat-label">Schaden:</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" id="p2-damage-bar"></div>
-                                    <span class="stat-value" id="p2-damage-value">80</span>
+                                    <span class="stat-value" id="p2-damage-value">95</span>
                                 </div>
                             </div>
                             <div class="stat">
                                 <span class="stat-label">Geschwindigkeit:</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" id="p2-speed-bar"></div>
-                                    <span class="stat-value" id="p2-speed-value">40</span>
+                                    <span class="stat-value" id="p2-speed-value">60</span>
                                 </div>
                             </div>
                             <div class="stat">
                                 <span class="stat-label">Reichweite:</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" id="p2-range-bar"></div>
-                                    <span class="stat-value" id="p2-range-value">35</span>
+                                    <span class="stat-value" id="p2-range-value">52</span>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="ai-insights">
+                            <h5>🤖 KI-Erkenntnisse:</h5>
+                            <ul id="p2-ai-insights">
+                                <li>✓ Waffentyp: Axt erkannt</li>
+                                <li>✓ Material: Plasma (+50% Bonus)</li>
+                                <li>✓ Effekt: Explosiv (+25 Schaden)</li>
+                                <li>✓ Längen-Bonus: +5%</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+                
                 <div class="analysis-actions">
                     <button class="btn btn--primary btn--lg" id="continue-to-battle">
                         <span>⚔️</span> ZUM KAMPF!
@@ -310,6 +367,13 @@
                             <span class="stat-value" id="avg-ping">45ms</span>
                         </div>
                     </div>
+                    <div class="weapon-showcase">
+                        <h4>🏆 Beste Waffe:</h4>
+                        <div class="best-weapon" id="best-weapon">
+                            <span class="weapon-emoji">⚔️</span>
+                            <span class="weapon-title">Flammendes Diamantschwert</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="result-buttons">
                     <button class="btn btn--primary btn--lg" id="rematch-btn">
@@ -328,34 +392,43 @@
         <!-- Hilfe Modal -->
         <div id="help-modal" class="modal hidden">
             <div class="modal-content">
-                <h2>Online Multiplayer Anleitung</h2>
+                <h2>KI-Waffen-System Anleitung</h2>
                 <div class="help-content">
-                    <h3>Online spielen:</h3>
+                    <h3>🤖 Wie funktioniert das KI-System?</h3>
                     <ol>
-                        <li><strong>Lobby erstellen:</strong> Klicke auf "Lobby Erstellen" und teile den Code mit einem Freund</li>
-                        <li><strong>Lobby beitreten:</strong> Gib den erhaltenen Code ein und verbinde dich</li>
-                        <li><strong>Waffe zeichnen:</strong> Both Spieler zeichnen nacheinander ihre Waffen</li>
-                        <li><strong>Kämpfen:</strong> Echtzeit-Online-Kampf mit synchronisierter Physik</li>
+                        <li><strong>Beschreibe deine Waffe:</strong> Schreibe eine kreative Beschreibung (50-200 Zeichen)</li>
+                        <li><strong>KI-Analyse:</strong> Das System erkennt automatisch Waffentyp, Material und Effekte</li>
+                        <li><strong>Stat-Generierung:</strong> Basierend auf deiner Beschreibung werden Schaden, Geschwindigkeit und Reichweite berechnet</li>
+                        <li><strong>Kampf:</strong> Nutze deine generierte Waffe im Online-PvP</li>
                     </ol>
                     
-                    <h3>Steuerung:</h3>
-                    <div class="controls-help">
-                        <div>
-                            <p>W/A/S/D = Bewegen</p>
-                            <p>Leertaste = Springen</p>
-                            <p>F = Angriff</p>
-                            <p>ESC = Zurück/Abbrechen</p>
+                    <h3>💡 Tipps für bessere Waffen:</h3>
+                    <div class="tips-grid">
+                        <div class="tip">
+                            <strong>Waffentypen:</strong><br>
+                            Schwert, Axt, Speer, Pistole, Gewehr, Bogen, Hammer, Dolch, Laser, Zauberstab
+                        </div>
+                        <div class="tip">
+                            <strong>Materialien:</strong><br>
+                            Stahl (+10%), Gold (+20%), Diamant (+40%), Magie (+30%), Plasma (+50%)
+                        </div>
+                        <div class="tip">
+                            <strong>Effekte:</strong><br>
+                            Feuer, Eis, Blitz, Gift, Heilung, Explosiv
                         </div>
                     </div>
                     
-                    <h3>Technische Hinweise:</h3>
-                    <p>• Das Spiel verwendet WebRTC für direkte Peer-to-Peer Verbindungen</p>
-                    <p>• Keine Server erforderlich - funktioniert komplett dezentral</p>
-                    <p>• Bei Verbindungsproblemen automatisches Wiederverbinden</p>
-                    <p>• Optimiert für niedrige Latenz und flüssiges Gameplay</p>
+                    <h3>Steuerung:</h3>
+                    <div class="controls-help">
+                        <p>W/A/S/D = Bewegen | Leertaste = Springen | F = Angriff | ESC = Zurück</p>
+                    </div>
                     
-                    <h3>Waffentypen:</h3>
-                    <p>Die KI erkennt verschiedene Waffentypen wie Schwerter, Äxte, Speere, Gewehre, Bögen und mehr. Jeder Typ hat unterschiedliche Stärken!</p>
+                    <h3>🎯 Beispiele für starke Waffen:</h3>
+                    <ul>
+                        <li>"Diamant-Laserkanone mit Blitzeffekt"</li>
+                        <li>"Magische Plasmaaxt der Explosion"</li>
+                        <li>"Giftiger Kristallspeer mit Eisschaden"</li>
+                    </ul>
                 </div>
                 <button class="btn btn--primary" id="close-help">
                     <span>✅</span> Verstanden
