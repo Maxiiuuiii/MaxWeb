@@ -1,105 +1,218 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Live-Stream: VfB Stuttgart vs. 1. FC Heidenheim 1846">
-    <title>VfB Stuttgart vs. 1. FC Heidenheim 1846 - Live Stream</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live-Stream: VfB Stuttgart vs. 1. FC Heidenheim 1846" />
+  <title>VfB Stuttgart vs. 1. FC Heidenheim 1846 - Live Stream</title>
+  <style>
+    /* Einfache Reset-Regeln */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #1a1a1a;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 1rem;
+      background-color: #111;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+    header h1 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: #48a9e6;
+    }
+
+    .status {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: #56d364;
+      font-weight: 600;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem;
+    }
+
+    /* Tabs */
+    .stream-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+    .stream-tab {
+      background: #222;
+      border: none;
+      color: #ccc;
+      font-size: 1rem;
+      padding: 0.5rem 1.25rem;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      border-radius: 4px 4px 0 0;
+      margin: 0 0.25rem;
+      user-select: none;
+    }
+    .stream-tab:hover {
+      background-color: #333;
+      color: #48a9e6;
+    }
+    .stream-tab.active {
+      background-color: #48a9e6;
+      color: #fff;
+      cursor: default;
+    }
+
+    /* Video area */
+    .streams-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    .stream-content {
+      display: none;
+      height: 100%;
+    }
+    .stream-content.active {
+      display: block;
+      height: 100%;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background-color: black;
+    }
+  </style>
 </head>
-<body data-color-scheme="dark">
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="container">
-                <div class="header-content">
-                    <h1 class="match-title">VfB Stuttgart vs. 1. FC Heidenheim 1846</h1>
-                    <div class="match-info">
-                        <span class="status status--info">Live</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <div class="video-container">
-                    <!-- Stream Tabs -->
-                    <div class="stream-tabs">
-                        <button class="stream-tab active" data-stream="stream1">
-                            <span class="tab-label">Stream 1</span>
-                            <span class="tab-subtitle">Alpha Stream</span>
-                        </button>
-                        <button class="stream-tab" data-stream="stream2">
-                            <span class="tab-label">Stream 2</span>
-                            <span class="tab-subtitle">Echo Stream</span>
-                        </button>
-                    </div>
-
-                    <!-- Stream Content -->
-                    <div class="streams-wrapper">
-                        <!-- Stream 1 -->
-                        <div class="stream-content active" id="stream1">
-                            <div class="video-wrapper">
-                                <iframe 
-                                    title="Stuttgart vs FC Heidenheim Player (Alpha Stream)" 
-                                    marginheight="0" 
-                                    marginwidth="0" 
-                                    src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2" 
-                                    scrolling="no" 
-                                    allowfullscreen="yes" 
-                                    allow="encrypted-media; picture-in-picture;" 
-                                    width="100%" 
-                                    height="100%" 
-                                    frameborder="0"
-                                    loading="lazy">
-                                </iframe>
-                            </div>
-                        </div>
-
-                        <!-- Stream 2 -->
-                        <div class="stream-content" id="stream2">
-                            <div class="video-wrapper">
-                                <!-- iframe will be loaded when tab is activated -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stream Status -->
-                    <div class="stream-status">
-                        <div class="current-stream-info">
-                            <span class="stream-indicator">Aktiver Stream:</span>
-                            <span class="stream-name" id="current-stream-name">Stream 1 - Alpha Stream</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Match Details -->
-                <div class="match-details">
-                    <div class="teams-container">
-                        <div class="team">
-                            <h3>VfB Stuttgart</h3>
-                        </div>
-                        <div class="vs-separator">
-                            <span>vs.</span>
-                        </div>
-                        <div class="team">
-                            <h3>1. FC Heidenheim 1846</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <p>Live-Übertragung des Spiels - Wählen Sie zwischen verschiedenen Streams</p>
-            </div>
-        </footer>
+<body>
+  <header>
+    <h1>VfB Stuttgart vs. 1. FC Heidenheim 1846</h1>
+    <div class="status">Live</div>
+  </header>
+  <main>
+    <div class="stream-tabs" role="tablist" aria-label="Stream Auswahl">
+      <button class="stream-tab active" data-stream="stream1" role="tab" aria-selected="true" tabindex="0">
+        Stream 1
+      </button>
+      <button class="stream-tab" data-stream="stream2" role="tab" aria-selected="false" tabindex="-1">
+        Stream 2
+      </button>
     </div>
+    <div class="streams-wrapper">
+      <!-- Stream 1 -->
+      <section id="stream1" class="stream-content active" role="tabpanel" tabindex="0">
+        <div class="video-wrapper">
+          <iframe
+            title="Stuttgart vs FC Heidenheim Player Stream 1"
+            marginheight="0"
+            marginwidth="0"
+            src="https://embedsports.top/embed/alpha/vfb-stuttgart-vs-1-fc-heidenheim-1846/2"
+            scrolling="no"
+            allowfullscreen="yes"
+            allow="encrypted-media; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+      <!-- Stream 2 -->
+      <section id="stream2" class="stream-content" role="tabpanel" tabindex="0" aria-hidden="true">
+        <div class="video-wrapper">
+          <iframe
+            title="Stuttgart vs FC Heidenheim Player Stream 2"
+            marginheight="0"
+            marginwidth="0"
+            src="https://embedsports.top/embed/echo/vfb-stuttgart-vs-1-fc-heidenheim-football-1388360/2"
+            scrolling="no"
+            allowfullscreen="yes"
+            allow="encrypted-media; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+    </div>
+  </main>
 
-    <script src="app.js"></script>
+  <script>
+    // Blockiere Popups und neue Fenster
+    window.open = function () {
+      console.log("Popup- oder neues Fenster-Öffnen wurde blockiert.");
+      return null;
+    };
+
+    const tabs = document.querySelectorAll(".stream-tab");
+    const streams = document.querySelectorAll(".stream-content");
+
+    function activateStream(streamId) {
+      streams.forEach((stream) => {
+        if (stream.id === streamId) {
+          stream.classList.add("active");
+          stream.setAttribute("aria-hidden", "false");
+          stream.tabIndex = 0;
+        } else {
+          stream.classList.remove("active");
+          stream.setAttribute("aria-hidden", "true");
+          stream.tabIndex = -1;
+        }
+      });
+
+      tabs.forEach((tab) => {
+        if (tab.getAttribute("data-stream") === streamId) {
+          tab.classList.add("active");
+          tab.setAttribute("aria-selected", "true");
+          tab.tabIndex = 0;
+          tab.focus();
+        } else {
+          tab.classList.remove("active");
+          tab.setAttribute("aria-selected", "false");
+          tab.tabIndex = -1;
+        }
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const streamId = tab.getAttribute("data-stream");
+        activateStream(streamId);
+      });
+
+      tab.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          const currentIndex = Array.from(tabs).indexOf(e.target);
+          let newIndex;
+          if (e.key === "ArrowRight") {
+            newIndex = (currentIndex + 1) % tabs.length;
+          } else {
+            newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+          }
+          tabs[newIndex].focus();
+        }
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const streamId = e.target.getAttribute("data-stream");
+          activateStream(streamId);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
