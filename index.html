@@ -3,460 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strichmännchen Kampf Arena - Text-Waffen-System</title>
+    <title>StreamFlix - Moderne Streaming Plattform</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="game-container">
-        <!-- Hauptmenü -->
-        <div id="main-menu" class="screen active">
-            <div class="logo">
-                <h1>STRICHMÄNNCHEN</h1>
-                <h2>KAMPF ARENA</h2>
-                <div class="subtitle">🤖 Mit KI-Waffen-Generierung</div>
-                <div class="online-indicator">
-                    <span class="status-dot" id="connection-status"></span>
-                    <span id="connection-text">Offline</span>
-                </div>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <div class="nav__brand">
+                <h2>StreamFlix</h2>
             </div>
-            <div class="menu-buttons">
-                <button class="btn btn--primary btn--lg" id="create-lobby-btn">
-                    <span>🌐</span> LOBBY ERSTELLEN
-                </button>
-                <button class="btn btn--secondary btn--lg" id="join-lobby-btn">
-                    <span>🔗</span> LOBBY BEITRETEN
-                </button>
-                <button class="btn btn--outline btn--lg" id="local-game-btn">
-                    <span>🎮</span> LOKALES SPIEL
-                </button>
-                <button class="btn btn--outline btn--lg" id="help-btn">
-                    <span>❓</span> HILFE
-                </button>
+            <ul class="nav__menu">
+                <li><a href="#" class="nav__link active" data-filter="all">Startseite</a></li>
+                <li><a href="#" class="nav__link" data-filter="movie">Filme</a></li>
+                <li><a href="#" class="nav__link" data-filter="tv">Serien</a></li>
+                <li><a href="#" class="nav__link" data-filter="popular">Beliebt</a></li>
+            </ul>
+            <div class="nav__search">
+                <input type="text" class="search-input" placeholder="Suchen..." id="searchInput">
             </div>
-            <div class="game-stats">
-                <p>Online Siege: <span id="online-wins">0</span></p>
-                <p>Lokale Spiele: <span id="total-games">0</span></p>
-            </div>
-        </div>
+        </nav>
+    </header>
 
-        <!-- Lobby Erstellen -->
-        <div id="create-lobby" class="screen">
-            <div class="lobby-container">
-                <h2>Lobby Erstellen</h2>
-                <div class="lobby-code-display">
-                    <h3>Dein Lobby-Code:</h3>
-                    <div class="code-container">
-                        <span id="lobby-code">ABC123</span>
-                        <button class="btn btn--outline btn--sm" id="copy-code">Kopieren</button>
-                    </div>
-                    <p>Teile diesen Code mit deinem Freund!</p>
+    <!-- Hero Section with Featured Player -->
+    <section class="hero">
+        <div class="hero__content">
+            <div class="hero__info">
+                <h1 class="hero__title" id="heroTitle">Wicked</h1>
+                <p class="hero__description" id="heroDescription">
+                    Ein magisches Musical-Abenteuer über die unerzählte Geschichte der Hexen von Oz
+                </p>
+                <div class="hero__meta">
+                    <span class="hero__year" id="heroYear">2024</span>
+                    <span class="hero__genre" id="heroGenre">Musical, Fantasy</span>
                 </div>
-                <div class="waiting-status">
-                    <div class="loading-spinner"></div>
-                    <p id="waiting-text">Warte auf Mitspieler...</p>
-                </div>
-                <div class="lobby-actions">
-                    <button class="btn btn--secondary" id="cancel-lobby">
-                        <span>❌</span> Abbrechen
+                <div class="hero__actions">
+                    <button class="btn btn--primary btn--large" onclick="playFeatured()">
+                        ▶ Abspielen
+                    </button>
+                    <button class="btn btn--secondary btn--large" onclick="toggleSettings()">
+                        ⚙ Einstellungen
                     </button>
                 </div>
             </div>
         </div>
-
-        <!-- Lobby Beitreten -->
-        <div id="join-lobby" class="screen">
-            <div class="lobby-container">
-                <h2>Lobby Beitreten</h2>
-                <div class="join-form">
-                    <div class="form-group">
-                        <label class="form-label">Lobby-Code eingeben:</label>
-                        <input type="text" id="lobby-code-input" class="form-control" placeholder="ABC123" maxlength="6">
-                    </div>
-                    <div class="connection-status" id="join-status">
-                        <span id="join-status-text">Bereit zum Verbinden</span>
-                    </div>
-                </div>
-                <div class="lobby-actions">
-                    <button class="btn btn--primary" id="connect-lobby">
-                        <span>🔗</span> VERBINDEN
-                    </button>
-                    <button class="btn btn--secondary" id="back-to-menu">
-                        <span>⬅️</span> Zurück
-                    </button>
-                </div>
+        <div class="hero__player">
+            <div class="player-container" id="playerContainer">
+                <iframe 
+                    id="videoPlayer"
+                    src="https://www.vidking.net/embed/movie/1078605?color=e50914&autoPlay=false"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
             </div>
         </div>
+    </section>
 
-        <!-- Lobby Warteraum -->
-        <div id="lobby-room" class="screen">
-            <div class="room-container">
-                <h2>Lobby: <span id="room-code">ABC123</span></h2>
-                <div class="players-grid">
-                    <div class="player-card" id="player1-card">
-                        <div class="player-avatar">👤</div>
-                        <h3 id="player1-name">Du</h3>
-                        <div class="ready-status" id="player1-ready">
-                            <span class="status-dot ready"></span>
-                            <span>Bereit</span>
-                        </div>
-                    </div>
-                    <div class="player-card" id="player2-card">
-                        <div class="player-avatar">🤖</div>
-                        <h3 id="player2-name">Warte auf Spieler...</h3>
-                        <div class="ready-status" id="player2-ready">
-                            <span class="status-dot waiting"></span>
-                            <span>Nicht bereit</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="system-message">Willkommen in der Lobby!</div>
-                    </div>
-                    <div class="chat-input">
-                        <input type="text" id="chat-message" class="form-control" placeholder="Nachricht schreiben..." maxlength="100">
-                        <button class="btn btn--primary btn--sm" id="send-chat">Senden</button>
-                    </div>
-                </div>
-                <div class="room-actions">
-                    <button class="btn btn--primary btn--lg" id="start-game" disabled>
-                        <span>🚀</span> SPIEL STARTEN
-                    </button>
-                    <button class="btn btn--secondary" id="leave-lobby">
-                        <span>🚪</span> Lobby Verlassen
-                    </button>
-                </div>
+    <!-- Settings Panel -->
+    <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-panel__overlay" onclick="toggleSettings()"></div>
+        <div class="settings-panel__content">
+            <h3>Player Einstellungen</h3>
+            <div class="settings-group">
+                <label for="colorPicker" class="form-label">Player Farbe:</label>
+                <input type="color" id="colorPicker" class="color-picker" value="#e50914">
+                <span id="colorDisplay">#e50914</span>
             </div>
+            <div class="settings-group">
+                <label class="form-label">
+                    <input type="checkbox" id="autoPlayToggle" checked>
+                    Auto-Play aktivieren
+                </label>
+            </div>
+            <div class="settings-group" id="tvSettings" style="display: none;">
+                <label class="form-label">
+                    <input type="checkbox" id="nextEpisodeToggle" checked>
+                    Nächste Episode anzeigen
+                </label>
+            </div>
+            <div class="settings-group" id="tvEpisodeSelector" style="display: none;">
+                <label for="episodeSelect" class="form-label">Episode auswählen:</label>
+                <select id="episodeSelect" class="form-control">
+                    <option value="1">Episode 1</option>
+                    <option value="2">Episode 2</option>
+                    <option value="3">Episode 3</option>
+                    <option value="4">Episode 4</option>
+                    <option value="5">Episode 5</option>
+                    <option value="6">Episode 6</option>
+                    <option value="7">Episode 7</option>
+                    <option value="8" selected>Episode 8</option>
+                </select>
+            </div>
+            <button class="btn btn--primary" onclick="applySettings()">Anwenden</button>
         </div>
-
-        <!-- Waffen-Beschreibung -->
-        <div id="weapon-description" class="screen">
-            <div class="description-header">
-                <h2 id="current-player-title">Spieler 1 - Beschreibe deine Waffe!</h2>
-                <div class="timer-container">
-                    <div class="timer-circle">
-                        <span id="timer">30</span>
-                    </div>
-                </div>
-                <div class="sync-status">
-                    <span id="sync-indicator">🔄</span>
-                    <span id="sync-text">Synchronisiert</span>
-                </div>
-            </div>
-            
-            <div class="description-area">
-                <div class="text-input-container">
-                    <textarea id="weapon-text" class="weapon-description-input" placeholder="Beschreibe deine ultimative Waffe...&#10;&#10;Beispiel: 'Ein flammendes Diamantschwert mit Blitzmagie'"></textarea>
-                    <div class="character-count">
-                        <span id="char-count">0</span>/200 Zeichen
-                    </div>
-                </div>
-                
-                <div class="inspiration-section">
-                    <h4>💡 Inspiration & Beispiele:</h4>
-                    <div class="example-tags" id="example-tags">
-                        <span class="tag" data-text="Explosive Plasmaaxt mit Blitzeffekt">⚡ Explosive Plasmaaxt</span>
-                        <span class="tag" data-text="Magischer Diamantbogen der Heilung">💎 Diamantbogen</span>
-                        <span class="tag" data-text="Giftiger Stahldolch mit Eisschaden">☠️ Giftiger Dolch</span>
-                        <span class="tag" data-text="Flammendes Kristallschwert">🔥 Flammenschwert</span>
-                        <span class="tag" data-text="Goldener Zauberstab des Feuers">🪄 Feuerstab</span>
-                        <span class="tag" data-text="Eisiger Kriegshammer aus Diamant">❄️ Eishammer</span>
-                    </div>
-                    <button class="btn btn--outline btn--sm" id="random-weapon">🎲 Zufällige Idee</button>
-                </div>
-            </div>
-            
-            <div class="description-controls">
-                <button class="btn btn--primary btn--lg" id="generate-weapon">
-                    <span>🤖</span> WAFFE GENERIEREN
-                </button>
-                <button class="btn btn--outline" id="back-from-description">
-                    <span>⬅️</span> Zurück
-                </button>
-            </div>
-            
-            <div class="opponent-status" id="opponent-status">
-                <span>Gegner: </span><span id="opponent-progress">Beschreibt...</span>
-            </div>
-        </div>
-
-        <!-- KI Analyse -->
-        <div id="ai-analysis" class="screen">
-            <div class="analysis-container">
-                <h2>🤖 KI-Waffen-Analyse</h2>
-                <div class="weapon-results">
-                    <div class="weapon-result" id="player1-weapon">
-                        <h3 id="p1-player-name">Spieler 1</h3>
-                        <div class="weapon-visual">
-                            <div class="weapon-icon" id="p1-weapon-icon">⚔️</div>
-                            <div class="weapon-effects" id="p1-weapon-effects"></div>
-                        </div>
-                        <h4 class="weapon-name" id="p1-weapon-name">Flammendes Diamantschwert</h4>
-                        <div class="weapon-description" id="p1-weapon-description">"Ein flammendes Diamantschwert mit Blitzmagie"</div>
-                        
-                        <div class="weapon-stats">
-                            <div class="stat">
-                                <span class="stat-label">Typ:</span>
-                                <span class="stat-value" id="p1-weapon-type">Schwert</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Material:</span>
-                                <span class="stat-value" id="p1-weapon-material">Diamant</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Schaden:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p1-damage-bar"></div>
-                                    <span class="stat-value" id="p1-damage-value">85</span>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Geschwindigkeit:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p1-speed-bar"></div>
-                                    <span class="stat-value" id="p1-speed-value">70</span>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Reichweite:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p1-range-bar"></div>
-                                    <span class="stat-value" id="p1-range-value">45</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="ai-insights">
-                            <h5>🤖 KI-Erkenntnisse:</h5>
-                            <ul id="p1-ai-insights">
-                                <li>✓ Waffentyp: Schwert erkannt</li>
-                                <li>✓ Material: Diamant (+40% Bonus)</li>
-                                <li>✓ Effekt: Feuer (+15 Schaden)</li>
-                                <li>✓ Kreativitäts-Bonus: +10%</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="weapon-result" id="player2-weapon">
-                        <h3 id="p2-player-name">Spieler 2</h3>
-                        <div class="weapon-visual">
-                            <div class="weapon-icon" id="p2-weapon-icon">🪓</div>
-                            <div class="weapon-effects" id="p2-weapon-effects"></div>
-                        </div>
-                        <h4 class="weapon-name" id="p2-weapon-name">Explosive Plasmaaxt</h4>
-                        <div class="weapon-description" id="p2-weapon-description">"Eine explosive Plasmaaxt"</div>
-                        
-                        <div class="weapon-stats">
-                            <div class="stat">
-                                <span class="stat-label">Typ:</span>
-                                <span class="stat-value" id="p2-weapon-type">Axt</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Material:</span>
-                                <span class="stat-value" id="p2-weapon-material">Plasma</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Schaden:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p2-damage-bar"></div>
-                                    <span class="stat-value" id="p2-damage-value">95</span>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Geschwindigkeit:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p2-speed-bar"></div>
-                                    <span class="stat-value" id="p2-speed-value">60</span>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Reichweite:</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" id="p2-range-bar"></div>
-                                    <span class="stat-value" id="p2-range-value">52</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="ai-insights">
-                            <h5>🤖 KI-Erkenntnisse:</h5>
-                            <ul id="p2-ai-insights">
-                                <li>✓ Waffentyp: Axt erkannt</li>
-                                <li>✓ Material: Plasma (+50% Bonus)</li>
-                                <li>✓ Effekt: Explosiv (+25 Schaden)</li>
-                                <li>✓ Längen-Bonus: +5%</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analysis-actions">
-                    <button class="btn btn--primary btn--lg" id="continue-to-battle">
-                        <span>⚔️</span> ZUM KAMPF!
-                    </button>
-                    <button class="btn btn--outline" id="back-from-analysis">
-                        <span>⬅️</span> Zurück
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kampf -->
-        <div id="battle" class="screen">
-            <div class="battle-ui">
-                <div class="player-hud" id="player1-hud">
-                    <h3 id="battle-p1-name">Spieler 1</h3>
-                    <div class="health-bar">
-                        <div class="health-fill" id="p1-health"></div>
-                    </div>
-                    <div class="stamina-bar">
-                        <div class="stamina-fill" id="p1-stamina"></div>
-                    </div>
-                    <div class="ping-indicator" id="p1-ping">Ping: 0ms</div>
-                </div>
-                <div class="battle-timer">
-                    <span id="battle-time">120</span>
-                </div>
-                <div class="player-hud" id="player2-hud">
-                    <h3 id="battle-p2-name">Spieler 2</h3>
-                    <div class="health-bar">
-                        <div class="health-fill" id="p2-health"></div>
-                    </div>
-                    <div class="stamina-bar">
-                        <div class="stamina-fill" id="p2-stamina"></div>
-                    </div>
-                    <div class="ping-indicator" id="p2-ping">Ping: 0ms</div>
-                </div>
-            </div>
-            <canvas id="game-canvas" width="1200" height="600"></canvas>
-            <div class="controls-hint">
-                <div class="controls-player">
-                    <h4>Steuerung</h4>
-                    <p>WASD = Bewegen | Leertaste = Springen | F = Angriff</p>
-                </div>
-                <div class="sync-status-battle">
-                    <span id="battle-sync-indicator">🔄</span>
-                    <span id="battle-sync-text">Synchronisiert</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ergebnis -->
-        <div id="game-result" class="screen">
-            <div class="result-container">
-                <h1 id="winner-text">Spieler 1 Gewinnt!</h1>
-                <div class="victory-animation">🏆</div>
-                <div class="match-stats">
-                    <h3>Kampf-Statistiken</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-label">Kampfdauer:</span>
-                            <span class="stat-value" id="fight-duration">0:45</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Deine Treffer:</span>
-                            <span class="stat-value" id="my-hits">8</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Gegner Treffer:</span>
-                            <span class="stat-value" id="opponent-hits">5</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Durchschnittlicher Ping:</span>
-                            <span class="stat-value" id="avg-ping">45ms</span>
-                        </div>
-                    </div>
-                    <div class="weapon-showcase">
-                        <h4>🏆 Beste Waffe:</h4>
-                        <div class="best-weapon" id="best-weapon">
-                            <span class="weapon-emoji">⚔️</span>
-                            <span class="weapon-title">Flammendes Diamantschwert</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="result-buttons">
-                    <button class="btn btn--primary btn--lg" id="rematch-btn">
-                        <span>🔄</span> Revanche
-                    </button>
-                    <button class="btn btn--secondary btn--lg" id="new-game-btn">
-                        <span>🎮</span> Neues Spiel
-                    </button>
-                    <button class="btn btn--outline btn--lg" id="main-menu-btn">
-                        <span>🏠</span> Hauptmenü
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hilfe Modal -->
-        <div id="help-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>KI-Waffen-System Anleitung</h2>
-                <div class="help-content">
-                    <h3>🤖 Wie funktioniert das KI-System?</h3>
-                    <ol>
-                        <li><strong>Beschreibe deine Waffe:</strong> Schreibe eine kreative Beschreibung (50-200 Zeichen)</li>
-                        <li><strong>KI-Analyse:</strong> Das System erkennt automatisch Waffentyp, Material und Effekte</li>
-                        <li><strong>Stat-Generierung:</strong> Basierend auf deiner Beschreibung werden Schaden, Geschwindigkeit und Reichweite berechnet</li>
-                        <li><strong>Kampf:</strong> Nutze deine generierte Waffe im Online-PvP</li>
-                    </ol>
-                    
-                    <h3>💡 Tipps für bessere Waffen:</h3>
-                    <div class="tips-grid">
-                        <div class="tip">
-                            <strong>Waffentypen:</strong><br>
-                            Schwert, Axt, Speer, Pistole, Gewehr, Bogen, Hammer, Dolch, Laser, Zauberstab
-                        </div>
-                        <div class="tip">
-                            <strong>Materialien:</strong><br>
-                            Stahl (+10%), Gold (+20%), Diamant (+40%), Magie (+30%), Plasma (+50%)
-                        </div>
-                        <div class="tip">
-                            <strong>Effekte:</strong><br>
-                            Feuer, Eis, Blitz, Gift, Heilung, Explosiv
-                        </div>
-                    </div>
-                    
-                    <h3>Steuerung:</h3>
-                    <div class="controls-help">
-                        <p>W/A/S/D = Bewegen | Leertaste = Springen | F = Angriff | ESC = Zurück</p>
-                    </div>
-                    
-                    <h3>🎯 Beispiele für starke Waffen:</h3>
-                    <ul>
-                        <li>"Diamant-Laserkanone mit Blitzeffekt"</li>
-                        <li>"Magische Plasmaaxt der Explosion"</li>
-                        <li>"Giftiger Kristallspeer mit Eisschaden"</li>
-                    </ul>
-                </div>
-                <button class="btn btn--primary" id="close-help">
-                    <span>✅</span> Verstanden
-                </button>
-            </div>
-        </div>
-
-        <!-- Connection Error Modal -->
-        <div id="error-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Verbindungsfehler</h2>
-                <div class="error-content">
-                    <p id="error-message">Es gab ein Problem mit der Verbindung.</p>
-                    <div class="error-actions">
-                        <button class="btn btn--primary" id="retry-connection">
-                            <span>🔄</span> Erneut versuchen
-                        </button>
-                        <button class="btn btn--secondary" id="close-error">
-                            <span>❌</span> Schließen
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Particle System -->
-        <div id="particles"></div>
     </div>
+
+    <!-- Progress Tracking Display -->
+    <div class="progress-display" id="progressDisplay">
+        <div class="progress-info">
+            <span>Aktueller Fortschritt:</span>
+            <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-events" id="progressEvents">
+            <small>Events werden hier angezeigt...</small>
+        </div>
+    </div>
+
+    <!-- Content Categories -->
+    <section class="content-section">
+        <div class="container">
+            <h2 class="section-title">Beliebte Filme</h2>
+            <div class="content-grid" id="moviesGrid">
+                <!-- Movie cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="container">
+            <h2 class="section-title">Beliebte Serien</h2>
+            <div class="content-grid" id="seriesGrid">
+                <!-- TV show cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- All Content Grid -->
+    <section class="content-section">
+        <div class="container">
+            <h2 class="section-title">Alle Inhalte</h2>
+            <div class="content-grid" id="allContentGrid">
+                <!-- All content cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 StreamFlix. Powered by Vidking Player API.</p>
+        </div>
+    </footer>
 
     <script src="app.js"></script>
 </body>
