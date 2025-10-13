@@ -2,153 +2,47 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamFlix - Moderne Streaming Plattform</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>N.Ireland vs Germany Live Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: #161616;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .player-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        iframe {
+            box-shadow: 0 0 16px #444;
+            border-radius: 8px;
+            width: 90vw;
+            height: 70vh;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav container">
-            <div class="nav__brand">
-                <h2>StreamFlix</h2>
-            </div>
-            <ul class="nav__menu">
-                <li><a href="#" class="nav__link active" data-filter="all">Startseite</a></li>
-                <li><a href="#" class="nav__link" data-filter="movie">Filme</a></li>
-                <li><a href="#" class="nav__link" data-filter="tv">Serien</a></li>
-                <li><a href="#" class="nav__link" data-filter="popular">Beliebt</a></li>
-            </ul>
-            <div class="nav__search">
-                <input type="text" class="search-input" placeholder="Suchen..." id="searchInput">
-            </div>
-        </nav>
-    </header>
-
-    <!-- Hero Section with Featured Player -->
-    <section class="hero">
-        <div class="hero__content">
-            <div class="hero__info">
-                <h1 class="hero__title" id="heroTitle">Wicked</h1>
-                <p class="hero__description" id="heroDescription">
-                    Ein magisches Musical-Abenteuer über die unerzählte Geschichte der Hexen von Oz
-                </p>
-                <div class="hero__meta">
-                    <span class="hero__year" id="heroYear">2024</span>
-                    <span class="hero__genre" id="heroGenre">Musical, Fantasy</span>
-                </div>
-                <div class="hero__actions">
-                    <button class="btn btn--primary btn--large" onclick="playFeatured()">
-                        ▶ Abspielen
-                    </button>
-                    <button class="btn btn--secondary btn--large" onclick="toggleSettings()">
-                        ⚙ Einstellungen
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="hero__player">
-            <div class="player-container" id="playerContainer">
-                <iframe 
-                    id="videoPlayer"
-                    src="https://www.vidking.net/embed/movie/1078605?color=e50914&autoPlay=false"
-                    frameborder="0"
-                    allowfullscreen>
-                </iframe>
-            </div>
-        </div>
-    </section>
-
-    <!-- Settings Panel -->
-    <div class="settings-panel hidden" id="settingsPanel">
-        <div class="settings-panel__overlay" onclick="toggleSettings()"></div>
-        <div class="settings-panel__content">
-            <h3>Player Einstellungen</h3>
-            <div class="settings-group">
-                <label for="colorPicker" class="form-label">Player Farbe:</label>
-                <input type="color" id="colorPicker" class="color-picker" value="#e50914">
-                <span id="colorDisplay">#e50914</span>
-            </div>
-            <div class="settings-group">
-                <label class="form-label">
-                    <input type="checkbox" id="autoPlayToggle" checked>
-                    Auto-Play aktivieren
-                </label>
-            </div>
-            <div class="settings-group" id="tvSettings" style="display: none;">
-                <label class="form-label">
-                    <input type="checkbox" id="nextEpisodeToggle" checked>
-                    Nächste Episode anzeigen
-                </label>
-            </div>
-            <div class="settings-group" id="tvEpisodeSelector" style="display: none;">
-                <label for="episodeSelect" class="form-label">Episode auswählen:</label>
-                <select id="episodeSelect" class="form-control">
-                    <option value="1">Episode 1</option>
-                    <option value="2">Episode 2</option>
-                    <option value="3">Episode 3</option>
-                    <option value="4">Episode 4</option>
-                    <option value="5">Episode 5</option>
-                    <option value="6">Episode 6</option>
-                    <option value="7">Episode 7</option>
-                    <option value="8" selected>Episode 8</option>
-                </select>
-            </div>
-            <button class="btn btn--primary" onclick="applySettings()">Anwenden</button>
-        </div>
+    <div class="player-container">
+        <iframe 
+            title="N.Ireland vs Germany Player"
+            marginheight="0"
+            marginwidth="0"
+            src="https://embedsports.top/embed/admin/ppv-northern-ireland-vs-germany/1"
+            scrolling="no"
+            allowfullscreen="yes"
+            allow="encrypted-media; picture-in-picture;"
+            frameborder="0"
+        ></iframe>
     </div>
-
-    <!-- Progress Tracking Display -->
-    <div class="progress-display" id="progressDisplay">
-        <div class="progress-info">
-            <span>Aktueller Fortschritt:</span>
-            <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="progress-events" id="progressEvents">
-            <small>Events werden hier angezeigt...</small>
-        </div>
-    </div>
-
-    <!-- Content Categories -->
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">Beliebte Filme</h2>
-            <div class="content-grid" id="moviesGrid">
-                <!-- Movie cards will be populated by JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">Beliebte Serien</h2>
-            <div class="content-grid" id="seriesGrid">
-                <!-- TV show cards will be populated by JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- All Content Grid -->
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">Alle Inhalte</h2>
-            <div class="content-grid" id="allContentGrid">
-                <!-- All content cards will be populated by JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 StreamFlix. Powered by Vidking Player API.</p>
-        </div>
-    </footer>
-
-    <script src="app.js"></script>
 </body>
 </html>
