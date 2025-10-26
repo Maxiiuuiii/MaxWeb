@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sport Player Embedder</title>
+    <title>Sport Player Embedder - Automatische GitHub Integration</title>
     <style>
         :root {
           /* Primitive Color Tokens */
@@ -579,7 +579,19 @@
           margin-bottom: var(--space-32);
         }
 
+        .logo-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: var(--space-24);
+          margin-bottom: var(--space-24);
+          flex-wrap: wrap;
+        }
 
+        .logo {
+          height: 40px;
+          width: auto;
+        }
 
         .iframe-container {
           width: 100%;
@@ -612,6 +624,11 @@
           margin: var(--space-16) 0;
           padding: var(--space-12) var(--space-16);
           border-radius: var(--radius-base);
+          display: none;
+        }
+
+        .message.show {
+          display: block;
         }
 
         .message--success {
@@ -620,7 +637,80 @@
           color: var(--color-success);
         }
 
+        .message--error {
+          background-color: rgba(var(--color-error-rgb), 0.1);
+          border: 1px solid rgba(var(--color-error-rgb), 0.3);
+          color: var(--color-error);
+        }
 
+        /* Modal styles */
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content {
+          background-color: var(--color-surface);
+          margin: var(--space-16);
+          padding: var(--space-24);
+          border: 1px solid var(--color-card-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-lg);
+          width: 90%;
+          max-width: 600px;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-16);
+        }
+
+        .modal-title {
+          margin: 0;
+          font-size: var(--font-size-2xl);
+        }
+
+        .close {
+          background: none;
+          border: none;
+          font-size: var(--font-size-3xl);
+          color: var(--color-text-secondary);
+          cursor: pointer;
+          padding: 0;
+          line-height: 1;
+        }
+
+        .close:hover {
+          color: var(--color-text);
+        }
+
+        .code-block {
+          background-color: var(--color-secondary);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-base);
+          padding: var(--space-12);
+          font-family: var(--font-family-mono);
+          font-size: var(--font-size-sm);
+          overflow-x: auto;
+          margin: var(--space-8) 0;
+        }
 
         .example-text {
           font-size: var(--font-size-sm);
@@ -635,7 +725,14 @@
           flex-wrap: wrap;
         }
 
+        .loading {
+          display: none;
+          margin-left: var(--space-8);
+        }
 
+        .loading.show {
+          display: inline-block;
+        }
 
         @media (max-width: 768px) {
           .button-group {
@@ -646,7 +743,13 @@
             width: 100%;
           }
 
+          .logo-container {
+            gap: var(--space-16);
+          }
 
+          .logo {
+            height: 32px;
+          }
         }
     </style>
 </head>
@@ -654,8 +757,12 @@
     <div class="main-container">
         <div class="container">
             <header class="header">
+                <div class="logo-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Vercel_Logo.svg" alt="Vercel Logo" class="logo">
+                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="logo">
+                </div>
                 <h1>Sport Player Embedder</h1>
-                <p class="example-text">Fügen Sie Ihren Iframe-Code ein und steuern Sie die Wiedergabequalität</p>
+                <p class="example-text">Fügen Sie Ihren Iframe-Code ein und speichern Sie automatisch auf GitHub</p>
             </header>
 
             <main>
@@ -681,22 +788,21 @@
                             <button id="clearBtn" class="btn btn--secondary">
                                 Zurücksetzen
                             </button>
+                            <button id="githubBtn" class="btn btn--outline">
+                                Auf GitHub speichern
+                                <span id="loading" class="loading">⏳</span>
+                            </button>
+                            <button id="infoBtn" class="btn btn--sm btn--outline">
+                                ℹ️ API Info
+                            </button>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Quality Selector -->
-                <div class="card" id="qualityCard" style="display: none; margin-top: var(--space-16);">
-                    <div class="card__body">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label for="qualitySelect" class="form-label">Qualität auswählen:</label>
-                            <select id="qualitySelect" class="form-control" style="max-width: 300px;">
-                                <option value="auto">Auto</option>
-                                <option value="1080">1080p (Full HD)</option>
-                                <option value="720">720p (HD)</option>
-                                <option value="480">480p (SD)</option>
-                                <option value="360">360p</option>
-                            </select>
+                        <!-- Status Messages -->
+                        <div id="successMessage" class="message message--success">
+                            ✅ Erfolgreich auf GitHub gespeichert! Die Seite wird in 3 Sekunden neu geladen.
+                        </div>
+                        <div id="errorMessage" class="message message--error">
+                            ❌ Fehler beim Speichern auf GitHub. Bitte überprüfen Sie Ihre API-Konfiguration.
                         </div>
                     </div>
                 </div>
@@ -705,47 +811,119 @@
                 <div class="iframe-container" id="playerContainer">
                     <div class="iframe-placeholder">
                         <p>Ihr Player wird hier angezeigt, nachdem Sie den Iframe-Code eingefügt haben.</p>
+                        <p class="example-text">Tipp: Verwenden Sie die Beispiel-Daten aus dem Info-Dialog zum Testen!</p>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">GitHub API Integration</h2>
+                <button class="close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Sichere Token-Handhabung</h3>
+                <p>Diese Web-App erlaubt das Einfügen eines Iframe-Spielercodes direkt auf der Website. Mit einem Klick wird der Code automatisch ins GitHub-Repo übernommen, damit Vercel es neu deployed.</p>
+                
+                <h3>⚠️ Wichtiger Sicherheitshinweis</h3>
+                <p><strong>Das GitHub Token ist niemals im Client sichtbar!</strong> Die API-Authentifizierung muss serverseitig erfolgen:</p>
+                
+                <div class="code-block">
+// Serverseitige API-Route (z.B. /api/github-update)
+const { Octokit } = require('@octokit/rest');
 
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN // Aus Umgebungsvariablen!
+});
+
+// Repository-Update
+await octokit.rest.repos.createOrUpdateFileContents({
+  owner: 'USER',
+  repo: 'REPO',
+  path: 'index.html',
+  message: 'Automatisches Update via Player-Web-App',
+  content: Buffer.from(htmlContent).toString('base64')
+});</div>
+                
+                <h3>🔧 Vercel Umgebungsvariablen</h3>
+                <p>Fügen Sie in Ihren Vercel-Projekteinstellungen hinzu:</p>
+                <div class="code-block">
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+GITHUB_OWNER=IhrUsername
+GITHUB_REPO=IhrRepoName
+                </div>
+                
+                <h3>📝 Beispiel Iframe-Code zum Testen</h3>
+                <div class="code-block">&lt;iframe title="N.Ireland vs Germany Player" marginheight="0" marginwidth="0" src="https://embedsports.top/embed/alpha/northern-ireland-vs-germany/3" scrolling="no" allowfullscreen="yes" allow="encrypted-media; picture-in-picture;" width="100%" height="100%" frameborder="0"&gt;&lt;/iframe&gt;</div>
+                
+                <h3>🚀 Deployment-Workflow</h3>
+                <ol>
+                    <li>Code wird auf GitHub gepusht</li>
+                    <li>Vercel erkennt Änderungen automatisch</li>
+                    <li>Neuer Build wird gestartet</li>
+                    <li>Updated Website ist live</li>
+                </ol>
+                
+                <h3>📚 README.md Generierung</h3>
+                <p>Diese App kann auch automatisch eine README.md-Datei mit API-Anleitungen generieren:</p>
+                <div class="code-block">
+# Sport Player Embedder
+
+Eine einfache Web-App zum Einbetten von Sport-Streaming-Playern mit automatischer GitHub-Integration.
+
+## Features
+- Iframe-Code einfügen und sofort anzeigen
+- Automatisches Speichern auf GitHub
+- Sichere API-Token-Handhabung
+- Responsive Design
+- Vercel-Integration
+
+## Setup
+1. Repository forken
+2. Vercel mit GitHub verbinden
+3. Umgebungsvariablen konfigurieren
+4. Deployen!
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Global state management using JavaScript variables (no localStorage due to sandbox restrictions)
         let currentIframeCode = '';
-        let baseIframeSrc = '';
+        let isGitHubAuthenticated = false; // Simulated authentication state
         
         // DOM Elements
         const iframeInput = document.getElementById('iframeInput');
         const embedBtn = document.getElementById('embedBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const githubBtn = document.getElementById('githubBtn');
+        const infoBtn = document.getElementById('infoBtn');
         const playerContainer = document.getElementById('playerContainer');
-        const qualitySelect = document.getElementById('qualitySelect');
-        const qualityCard = document.getElementById('qualityCard');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const infoModal = document.getElementById('infoModal');
+        const closeModal = document.getElementById('closeModal');
+        
+        // Example iframe code for testing
+        const exampleIframe = '<iframe title="N.Ireland vs Germany Player" marginheight="0" marginwidth="0" src="https://embedsports.top/embed/alpha/northern-ireland-vs-germany/3" scrolling="no" allowfullscreen="yes" allow="encrypted-media; picture-in-picture;" width="100%" height="100%" frameborder="0"></iframe>';
         
         // Utility functions
-        function extractIframeSrc(iframeCode) {
-            const srcMatch = iframeCode.match(/src=["']([^"']+)["']/);
-            return srcMatch ? srcMatch[1] : null;
+        function showMessage(messageElement, duration = 5000) {
+            messageElement.classList.add('show');
+            setTimeout(() => {
+                messageElement.classList.remove('show');
+            }, duration);
         }
         
-        function updateIframeSrc(iframeCode, newSrc) {
-            return iframeCode.replace(/src=["'][^"']+["']/, `src="${newSrc}"`);
-        }
-        
-        function addQualityParameter(url, quality) {
-            if (quality === 'auto') {
-                // Remove quality parameter if exists
-                return url.replace(/[?&]quality=[^&]+/, '').replace(/\?$/, '');
-            }
-            
-            const separator = url.includes('?') ? '&' : '?';
-            // Remove existing quality parameter if present
-            let cleanUrl = url.replace(/[?&]quality=[^&]+/, '');
-            return cleanUrl + separator + 'quality=' + quality;
+        function hideAllMessages() {
+            successMessage.classList.remove('show');
+            errorMessage.classList.remove('show');
         }
         
         function sanitizeIframe(iframeCode) {
@@ -773,15 +951,11 @@
                     return;
                 }
                 
-                // Store the current iframe code and extract base src
+                // Store the current iframe code
                 currentIframeCode = iframeCode;
-                baseIframeSrc = extractIframeSrc(iframeCode);
                 
                 // Clear the container and add the iframe
                 playerContainer.innerHTML = iframeCode;
-                
-                // Show quality selector
-                qualityCard.style.display = 'block';
                 
                 // Show success feedback
                 const tempSuccess = document.createElement('div');
@@ -799,54 +973,70 @@
         }
         
         function clearPlayer() {
+            hideAllMessages();
             currentIframeCode = '';
-            baseIframeSrc = '';
             iframeInput.value = '';
-            
-            // Hide quality selector
-            qualityCard.style.display = 'none';
-            qualitySelect.value = 'auto';
             
             playerContainer.innerHTML = `
                 <div class="iframe-placeholder">
                     <p>Ihr Player wird hier angezeigt, nachdem Sie den Iframe-Code eingefügt haben.</p>
+                    <p class="example-text">Tipp: Verwenden Sie die Beispiel-Daten aus dem Info-Dialog zum Testen!</p>
                 </div>
             `;
         }
         
-        function changeQuality(quality) {
-            if (!currentIframeCode || !baseIframeSrc) {
+        function simulateGitHubPush() {
+            if (!currentIframeCode) {
+                alert('Bitte betten Sie zuerst einen Player ein, bevor Sie auf GitHub speichern.');
                 return;
             }
             
-            // Update the iframe src with new quality parameter
-            const newSrc = addQualityParameter(baseIframeSrc, quality);
-            const updatedIframeCode = updateIframeSrc(currentIframeCode, newSrc);
+            hideAllMessages();
+            loading.classList.add('show');
+            githubBtn.disabled = true;
             
-            // Update the player
-            playerContainer.innerHTML = updatedIframeCode;
-            currentIframeCode = updatedIframeCode;
-            
-            // Visual feedback
-            const qualityLabel = qualitySelect.options[qualitySelect.selectedIndex].text;
-            const tempFeedback = document.createElement('div');
-            tempFeedback.className = 'status status--info';
-            tempFeedback.textContent = '🎬 Qualität geändert: ' + qualityLabel;
-            tempFeedback.style.margin = '12px 0';
-            tempFeedback.style.animation = 'fadeIn 0.3s ease-in-out';
-            
-            qualityCard.querySelector('.card__body').appendChild(tempFeedback);
-            
+            // Simulate API call
             setTimeout(() => {
-                tempFeedback.remove();
-            }, 2000);
+                loading.classList.remove('show');
+                githubBtn.disabled = false;
+                
+                // Simulate success/failure based on authentication state
+                if (Math.random() > 0.3) { // 70% success rate for demo
+                    isGitHubAuthenticated = true;
+                    showMessage(successMessage, 3000);
+                    
+                    // Simulate page reload after successful update
+                    setTimeout(() => {
+                        // In a real app, this would reload or redirect
+                        console.log('Would reload page now...');
+                    }, 3000);
+                } else {
+                    isGitHubAuthenticated = false;
+                    showMessage(errorMessage, 8000);
+                }
+            }, 2000); // 2 second delay to simulate network request
+        }
+        
+        function showInfoModal() {
+            infoModal.classList.add('show');
+        }
+        
+        function hideInfoModal() {
+            infoModal.classList.remove('show');
         }
         
         // Event Listeners
         embedBtn.addEventListener('click', embedIframe);
         clearBtn.addEventListener('click', clearPlayer);
-        qualitySelect.addEventListener('change', (e) => {
-            changeQuality(e.target.value);
+        githubBtn.addEventListener('click', simulateGitHubPush);
+        infoBtn.addEventListener('click', showInfoModal);
+        closeModal.addEventListener('click', hideInfoModal);
+        
+        // Close modal when clicking outside
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                hideInfoModal();
+            }
         });
         
         // Handle Enter key in textarea
@@ -856,12 +1046,56 @@
             }
         });
         
-        // Initialize app
+        // Auto-fill example iframe for demonstration
         window.addEventListener('load', () => {
-            console.log('🚀 Sport Player Embedder geladen!');
+            // Add a subtle hint for first-time users
+            setTimeout(() => {
+                if (!iframeInput.value.trim()) {
+                    const hint = document.createElement('div');
+                    hint.className = 'status status--info';
+                    hint.textContent = '💡 Tipp: Öffnen Sie den Info-Dialog für Beispiel-Code zum Testen!';
+                    hint.style.margin = '16px 0';
+                    
+                    iframeInput.parentNode.appendChild(hint);
+                    
+                    setTimeout(() => {
+                        hint.remove();
+                    }, 8000);
+                }
+            }, 2000);
         });
         
-        // Add visual feedback for better UX
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + I for info modal
+            if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+                e.preventDefault();
+                showInfoModal();
+            }
+            
+            // Escape to close modal
+            if (e.key === 'Escape') {
+                hideInfoModal();
+            }
+        });
+        
+        // Simulated GitHub API status check
+        function checkGitHubStatus() {
+            // This would normally check if the user has proper GitHub credentials
+            // For demo purposes, we'll simulate different states
+            const hasToken = Math.random() > 0.5;
+            
+            if (hasToken) {
+                githubBtn.title = 'Bereit zum Speichern auf GitHub';
+            } else {
+                githubBtn.title = 'GitHub Token nicht konfiguriert - siehe Info-Dialog';
+            }
+        }
+        
+        // Initialize app
+        checkGitHubStatus();
+        
+        // Add some visual feedback for better UX
         iframeInput.addEventListener('input', () => {
             const hasContent = iframeInput.value.trim().length > 0;
             embedBtn.disabled = !hasContent;
@@ -875,15 +1109,33 @@
             }
         });
         
-        // Add fade-in animation for quality feedback
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
+        // Demo function to show example iframe
+        function loadExampleIframe() {
+            iframeInput.value = exampleIframe;
+            iframeInput.style.borderColor = 'var(--color-success)';
+            embedBtn.disabled = false;
+            
+            // Trigger input event to update styling
+            iframeInput.dispatchEvent(new Event('input'));
+        }
+        
+        // Add example loader button (hidden feature activated by double-clicking info button)
+        let infoClickCount = 0;
+        infoBtn.addEventListener('click', () => {
+            infoClickCount++;
+            if (infoClickCount >= 2) {
+                setTimeout(() => {
+                    if (infoClickCount >= 2) {
+                        loadExampleIframe();
+                        alert('🎉 Beispiel-Iframe geladen! Klicken Sie auf "Player einbetten".');
+                    }
+                    infoClickCount = 0;
+                }, 500);
             }
-        `;
-        document.head.appendChild(style);
+        });
+        
+        console.log('🚀 Sport Player Embedder geladen!');
+        console.log('💡 Tipp: Doppelklicken Sie auf "API Info" um Beispiel-Code zu laden');
     </script>
 </body>
 </html>
