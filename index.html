@@ -3,1139 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sport Player Embedder - Automatische GitHub Integration</title>
+    <title>Live Stream Embed Player</title>
     <style>
         :root {
-          /* Primitive Color Tokens */
-          --color-white: rgba(255, 255, 255, 1);
-          --color-black: rgba(0, 0, 0, 1);
-          --color-cream-50: rgba(252, 252, 249, 1);
-          --color-cream-100: rgba(255, 255, 253, 1);
-          --color-gray-200: rgba(245, 245, 245, 1);
-          --color-gray-300: rgba(167, 169, 169, 1);
-          --color-gray-400: rgba(119, 124, 124, 1);
-          --color-slate-500: rgba(98, 108, 113, 1);
-          --color-brown-600: rgba(94, 82, 64, 1);
-          --color-charcoal-700: rgba(31, 33, 33, 1);
-          --color-charcoal-800: rgba(38, 40, 40, 1);
-          --color-slate-900: rgba(19, 52, 59, 1);
-          --color-teal-300: rgba(50, 184, 198, 1);
-          --color-teal-400: rgba(45, 166, 178, 1);
-          --color-teal-500: rgba(33, 128, 141, 1);
-          --color-teal-600: rgba(29, 116, 128, 1);
-          --color-teal-700: rgba(26, 104, 115, 1);
-          --color-teal-800: rgba(41, 150, 161, 1);
-          --color-red-400: rgba(255, 84, 89, 1);
-          --color-red-500: rgba(192, 21, 47, 1);
-          --color-orange-400: rgba(230, 129, 97, 1);
-          --color-orange-500: rgba(168, 75, 47, 1);
-
-          /* RGB versions for opacity control */
-          --color-brown-600-rgb: 94, 82, 64;
-          --color-teal-500-rgb: 33, 128, 141;
-          --color-slate-900-rgb: 19, 52, 59;
-          --color-slate-500-rgb: 98, 108, 113;
-          --color-red-500-rgb: 192, 21, 47;
-          --color-red-400-rgb: 255, 84, 89;
-          --color-orange-500-rgb: 168, 75, 47;
-          --color-orange-400-rgb: 230, 129, 97;
-
-          /* Background color tokens (Light Mode) */
-          --color-bg-1: rgba(59, 130, 246, 0.08); /* Light blue */
-          --color-bg-2: rgba(245, 158, 11, 0.08); /* Light yellow */
-          --color-bg-3: rgba(34, 197, 94, 0.08); /* Light green */
-          --color-bg-4: rgba(239, 68, 68, 0.08); /* Light red */
-          --color-bg-5: rgba(147, 51, 234, 0.08); /* Light purple */
-          --color-bg-6: rgba(249, 115, 22, 0.08); /* Light orange */
-          --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
-          --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
-
-          /* Semantic Color Tokens (Light Mode) */
-          --color-background: var(--color-cream-50);
-          --color-surface: var(--color-cream-100);
-          --color-text: var(--color-slate-900);
-          --color-text-secondary: var(--color-slate-500);
-          --color-primary: var(--color-teal-500);
-          --color-primary-hover: var(--color-teal-600);
-          --color-primary-active: var(--color-teal-700);
-          --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
-          --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
-          --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
-          --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-          --color-btn-primary-text: var(--color-cream-50);
-          --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
-          --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
-          --color-error: var(--color-red-500);
-          --color-success: var(--color-teal-500);
-          --color-warning: var(--color-orange-500);
-          --color-info: var(--color-slate-500);
-          --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
-
-          /* Common style patterns */
-          --focus-ring: 0 0 0 3px var(--color-focus-ring);
-          --focus-outline: 2px solid var(--color-primary);
-          --status-bg-opacity: 0.15;
-          --status-border-opacity: 0.25;
-
-          /* RGB versions for opacity control */
-          --color-success-rgb: 33, 128, 141;
-          --color-error-rgb: 192, 21, 47;
-          --color-warning-rgb: 168, 75, 47;
-          --color-info-rgb: 98, 108, 113;
-
-          /* Typography */
-          --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
-            BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo,
-            Monaco, Consolas, monospace;
-          --font-size-xs: 11px;
-          --font-size-sm: 12px;
-          --font-size-base: 14px;
-          --font-size-md: 14px;
-          --font-size-lg: 16px;
-          --font-size-xl: 18px;
-          --font-size-2xl: 20px;
-          --font-size-3xl: 24px;
-          --font-size-4xl: 30px;
-          --font-weight-normal: 400;
-          --font-weight-medium: 500;
-          --font-weight-semibold: 550;
-          --font-weight-bold: 600;
-          --line-height-tight: 1.2;
-          --line-height-normal: 1.5;
-          --letter-spacing-tight: -0.01em;
-
-          /* Spacing */
-          --space-0: 0;
-          --space-1: 1px;
-          --space-2: 2px;
-          --space-4: 4px;
-          --space-6: 6px;
-          --space-8: 8px;
-          --space-10: 10px;
-          --space-12: 12px;
-          --space-16: 16px;
-          --space-20: 20px;
-          --space-24: 24px;
-          --space-32: 32px;
-
-          /* Border Radius */
-          --radius-sm: 6px;
-          --radius-base: 8px;
-          --radius-md: 10px;
-          --radius-lg: 12px;
-          --radius-full: 9999px;
-
-          /* Shadows */
-          --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
-          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-          --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04),
-            0 2px 4px -1px rgba(0, 0, 0, 0.02);
-          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
-            0 4px 6px -2px rgba(0, 0, 0, 0.02);
-          --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-
-          /* Animation */
-          --duration-fast: 150ms;
-          --duration-normal: 250ms;
-          --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
-
-          /* Layout */
-          --container-sm: 640px;
-          --container-md: 768px;
-          --container-lg: 1024px;
-          --container-xl: 1280px;
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #2d2d2d;
+            --accent-color: #4CAF50;
+            --text-color: #ffffff;
+            --input-bg: #333333;
+            --border-color: #444444;
         }
 
-        /* Dark mode colors */
-        @media (prefers-color-scheme: dark) {
-          :root {
-            /* RGB versions for opacity control (Dark Mode) */
-            --color-gray-400-rgb: 119, 124, 124;
-            --color-teal-300-rgb: 50, 184, 198;
-            --color-gray-300-rgb: 167, 169, 169;
-            --color-gray-200-rgb: 245, 245, 245;
-
-            /* Background color tokens (Dark Mode) */
-            --color-bg-1: rgba(29, 78, 216, 0.15); /* Dark blue */
-            --color-bg-2: rgba(180, 83, 9, 0.15); /* Dark yellow */
-            --color-bg-3: rgba(21, 128, 61, 0.15); /* Dark green */
-            --color-bg-4: rgba(185, 28, 28, 0.15); /* Dark red */
-            --color-bg-5: rgba(107, 33, 168, 0.15); /* Dark purple */
-            --color-bg-6: rgba(194, 65, 12, 0.15); /* Dark orange */
-            --color-bg-7: rgba(190, 24, 93, 0.15); /* Dark pink */
-            --color-bg-8: rgba(8, 145, 178, 0.15); /* Dark cyan */
-
-            /* Semantic Color Tokens (Dark Mode) */
-            --color-background: var(--color-charcoal-700);
-            --color-surface: var(--color-charcoal-800);
-            --color-text: var(--color-gray-200);
-            --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
-            --color-primary: var(--color-teal-300);
-            --color-primary-hover: var(--color-teal-400);
-            --color-primary-active: var(--color-teal-800);
-            --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
-            --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
-            --color-secondary-active: rgba(var(--color-gray-400-rgb), 0.3);
-            --color-border: rgba(var(--color-gray-400-rgb), 0.3);
-            --color-error: var(--color-red-400);
-            --color-success: var(--color-teal-300);
-            --color-warning: var(--color-orange-400);
-            --color-info: var(--color-gray-300);
-            --color-focus-ring: rgba(var(--color-teal-300-rgb), 0.4);
-            --color-btn-primary-text: var(--color-slate-900);
-            --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
-            --color-card-border-inner: rgba(var(--color-gray-400-rgb), 0.15);
-            --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-
-            /* RGB versions for dark mode */
-            --color-success-rgb: var(--color-teal-300-rgb);
-            --color-error-rgb: var(--color-red-400-rgb);
-            --color-warning-rgb: var(--color-orange-400-rgb);
-            --color-info-rgb: var(--color-gray-300-rgb);
-          }
-        }
-
-        @font-face {
-          font-family: 'FKGroteskNeue';
-          src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2')
-            format('woff2');
-        }
-
-        /* Base styles */
-        html {
-          font-size: var(--font-size-base);
-          font-family: var(--font-family-base);
-          line-height: var(--line-height-normal);
-          color: var(--color-text);
-          background-color: var(--color-background);
-          -webkit-font-smoothing: antialiased;
-          box-sizing: border-box;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-          margin: 0;
-          padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
 
-        *,
-        *::before,
-        *::after {
-          box-sizing: inherit;
-        }
-
-        /* Typography */
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          margin: 0;
-          font-weight: var(--font-weight-semibold);
-          line-height: var(--line-height-tight);
-          color: var(--color-text);
-          letter-spacing: var(--letter-spacing-tight);
-        }
-
-        h1 {
-          font-size: var(--font-size-4xl);
-        }
-        h2 {
-          font-size: var(--font-size-3xl);
-        }
-        h3 {
-          font-size: var(--font-size-2xl);
-        }
-
-        p {
-          margin: 0 0 var(--space-16) 0;
-        }
-
-        a {
-          color: var(--color-primary);
-          text-decoration: none;
-          transition: color var(--duration-fast) var(--ease-standard);
-        }
-
-        a:hover {
-          color: var(--color-primary-hover);
-        }
-
-        /* Buttons */
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: var(--space-8) var(--space-16);
-          border-radius: var(--radius-base);
-          font-size: var(--font-size-base);
-          font-weight: 500;
-          line-height: 1.5;
-          cursor: pointer;
-          transition: all var(--duration-normal) var(--ease-standard);
-          border: none;
-          text-decoration: none;
-          position: relative;
-        }
-
-        .btn:focus-visible {
-          outline: none;
-          box-shadow: var(--focus-ring);
-        }
-
-        .btn--primary {
-          background: var(--color-primary);
-          color: var(--color-btn-primary-text);
-        }
-
-        .btn--primary:hover {
-          background: var(--color-primary-hover);
-        }
-
-        .btn--primary:active {
-          background: var(--color-primary-active);
-        }
-
-        .btn--secondary {
-          background: var(--color-secondary);
-          color: var(--color-text);
-        }
-
-        .btn--secondary:hover {
-          background: var(--color-secondary-hover);
-        }
-
-        .btn--secondary:active {
-          background: var(--color-secondary-active);
-        }
-
-        .btn--outline {
-          background: transparent;
-          border: 1px solid var(--color-border);
-          color: var(--color-text);
-        }
-
-        .btn--outline:hover {
-          background: var(--color-secondary);
-        }
-
-        .btn--sm {
-          padding: var(--space-4) var(--space-12);
-          font-size: var(--font-size-sm);
-          border-radius: var(--radius-sm);
-        }
-
-        .btn--lg {
-          padding: var(--space-10) var(--space-20);
-          font-size: var(--font-size-lg);
-          border-radius: var(--radius-md);
-        }
-
-        .btn--full-width {
-          width: 100%;
-        }
-
-        .btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        /* Form elements */
-        .form-control {
-          display: block;
-          width: 100%;
-          padding: var(--space-8) var(--space-12);
-          font-size: var(--font-size-md);
-          line-height: 1.5;
-          color: var(--color-text);
-          background-color: var(--color-surface);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-base);
-          transition: border-color var(--duration-fast) var(--ease-standard),
-            box-shadow var(--duration-fast) var(--ease-standard);
-        }
-
-        textarea.form-control {
-          font-family: var(--font-family-base);
-          font-size: var(--font-size-base);
-          resize: vertical;
-          min-height: 120px;
-        }
-
-        .form-control:focus {
-          border-color: var(--color-primary);
-          outline: var(--focus-outline);
-        }
-
-        .form-label {
-          display: block;
-          margin-bottom: var(--space-8);
-          font-weight: var(--font-weight-medium);
-          font-size: var(--font-size-sm);
-        }
-
-        .form-group {
-          margin-bottom: var(--space-16);
-        }
-
-        /* Card component */
-        .card {
-          background-color: var(--color-surface);
-          border-radius: var(--radius-lg);
-          border: 1px solid var(--color-card-border);
-          box-shadow: var(--shadow-sm);
-          overflow: hidden;
-          transition: box-shadow var(--duration-normal) var(--ease-standard);
-        }
-
-        .card:hover {
-          box-shadow: var(--shadow-md);
-        }
-
-        .card__body {
-          padding: var(--space-16);
-        }
-
-        /* Status indicators */
-        .status {
-          display: inline-flex;
-          align-items: center;
-          padding: var(--space-6) var(--space-12);
-          border-radius: var(--radius-full);
-          font-weight: var(--font-weight-medium);
-          font-size: var(--font-size-sm);
-        }
-
-        .status--success {
-          background-color: rgba(
-            var(--color-success-rgb, 33, 128, 141),
-            var(--status-bg-opacity)
-          );
-          color: var(--color-success);
-          border: 1px solid
-            rgba(var(--color-success-rgb, 33, 128, 141), var(--status-border-opacity));
-        }
-
-        .status--error {
-          background-color: rgba(
-            var(--color-error-rgb, 192, 21, 47),
-            var(--status-bg-opacity)
-          );
-          color: var(--color-error);
-          border: 1px solid
-            rgba(var(--color-error-rgb, 192, 21, 47), var(--status-border-opacity));
-        }
-
-        .status--warning {
-          background-color: rgba(
-            var(--color-warning-rgb, 168, 75, 47),
-            var(--status-bg-opacity)
-          );
-          color: var(--color-warning);
-          border: 1px solid
-            rgba(var(--color-warning-rgb, 168, 75, 47), var(--status-border-opacity));
-        }
-
-        .status--info {
-          background-color: rgba(
-            var(--color-info-rgb, 98, 108, 113),
-            var(--status-bg-opacity)
-          );
-          color: var(--color-info);
-          border: 1px solid
-            rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
-        }
-
-        /* Container layout */
         .container {
-          width: 100%;
-          margin-right: auto;
-          margin-left: auto;
-          padding-right: var(--space-16);
-          padding-left: var(--space-16);
-        }
-
-        @media (min-width: 640px) {
-          .container {
-            max-width: var(--container-sm);
-          }
-        }
-        @media (min-width: 768px) {
-          .container {
-            max-width: var(--container-md);
-          }
-        }
-        @media (min-width: 1024px) {
-          .container {
-            max-width: var(--container-lg);
-          }
-        }
-        @media (min-width: 1280px) {
-          .container {
-            max-width: var(--container-xl);
-          }
-        }
-
-        /* Utility classes */
-        .flex {
-          display: flex;
-        }
-        .flex-col {
-          flex-direction: column;
-        }
-        .items-center {
-          align-items: center;
-        }
-        .justify-center {
-          justify-content: center;
-        }
-        .justify-between {
-          justify-content: space-between;
-        }
-        .gap-4 {
-          gap: var(--space-4);
-        }
-        .gap-8 {
-          gap: var(--space-8);
-        }
-        .gap-16 {
-          gap: var(--space-16);
-        }
-
-        .m-0 {
-          margin: 0;
-        }
-        .mt-8 {
-          margin-top: var(--space-8);
-        }
-        .mb-8 {
-          margin-bottom: var(--space-8);
-        }
-        .mx-8 {
-          margin-left: var(--space-8);
-          margin-right: var(--space-8);
-        }
-        .my-8 {
-          margin-top: var(--space-8);
-          margin-bottom: var(--space-8);
-        }
-
-        .p-0 {
-          padding: 0;
-        }
-        .py-8 {
-          padding-top: var(--space-8);
-          padding-bottom: var(--space-8);
-        }
-        .px-8 {
-          padding-left: var(--space-8);
-          padding-right: var(--space-8);
-        }
-        .py-16 {
-          padding-top: var(--space-16);
-          padding-bottom: var(--space-16);
-        }
-        .px-16 {
-          padding-left: var(--space-16);
-          padding-right: var(--space-16);
-        }
-
-        .block {
-          display: block;
-        }
-        .hidden {
-          display: none;
-        }
-
-        /* Accessibility */
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border-width: 0;
-        }
-
-        :focus-visible {
-          outline: var(--focus-outline);
-          outline-offset: 2px;
-        }
-
-        /* Custom styles for this application */
-        .main-container {
-          min-height: 100vh;
-          padding: var(--space-24) 0;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .header {
-          text-align: center;
-          margin-bottom: var(--space-32);
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .logo-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: var(--space-24);
-          margin-bottom: var(--space-24);
-          flex-wrap: wrap;
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .logo {
-          height: 40px;
-          width: auto;
+        .header p {
+            color: #aaa;
+            font-size: 14px;
         }
 
-        .iframe-container {
-          width: 100%;
-          height: 400px;
-          border: 2px dashed var(--color-border);
-          border-radius: var(--radius-lg);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: var(--space-16) 0;
-          background-color: var(--color-bg-1);
-          color: var(--color-text-secondary);
-          font-size: var(--font-size-lg);
-          text-align: center;
-          position: relative;
+        .input-section {
+            background-color: var(--secondary-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        .iframe-container iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-          border-radius: var(--radius-base);
+        .input-section.hidden {
+            display: none;
         }
 
-        .iframe-placeholder {
-          padding: var(--space-24);
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .message {
-          margin: var(--space-16) 0;
-          padding: var(--space-12) var(--space-16);
-          border-radius: var(--radius-base);
-          display: none;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
         }
 
-        .message.show {
-          display: block;
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.3s;
         }
 
-        .message--success {
-          background-color: rgba(var(--color-success-rgb), 0.1);
-          border: 1px solid rgba(var(--color-success-rgb), 0.3);
-          color: var(--color-success);
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
-        .message--error {
-          background-color: rgba(var(--color-error-rgb), 0.1);
-          border: 1px solid rgba(var(--color-error-rgb), 0.3);
-          color: var(--color-error);
+        textarea::placeholder {
+            color: #666;
         }
 
-        /* Modal styles */
-        .modal {
-          display: none;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          backdrop-filter: blur(4px);
+        .quality-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .modal.show {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        select {
+            flex: 1;
+            padding: 12px 15px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color 0.3s;
         }
 
-        .modal-content {
-          background-color: var(--color-surface);
-          margin: var(--space-16);
-          padding: var(--space-24);
-          border: 1px solid var(--color-card-border);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-lg);
-          width: 90%;
-          max-width: 600px;
-          max-height: 80vh;
-          overflow-y: auto;
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: var(--space-16);
+        select option {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
         }
 
-        .modal-title {
-          margin: 0;
-          font-size: var(--font-size-2xl);
+        .btn {
+            padding: 14px 28px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
         }
 
-        .close {
-          background: none;
-          border: none;
-          font-size: var(--font-size-3xl);
-          color: var(--color-text-secondary);
-          cursor: pointer;
-          padding: 0;
-          line-height: 1;
+        .btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         }
 
-        .close:hover {
-          color: var(--color-text);
+        .btn:active {
+            transform: translateY(0);
         }
 
-        .code-block {
-          background-color: var(--color-secondary);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-base);
-          padding: var(--space-12);
-          font-family: var(--font-family-mono);
-          font-size: var(--font-size-sm);
-          overflow-x: auto;
-          margin: var(--space-8) 0;
+        .btn-secondary {
+            background-color: var(--secondary-bg);
+            border: 2px solid var(--border-color);
+            margin-top: 15px;
         }
 
-        .example-text {
-          font-size: var(--font-size-sm);
-          color: var(--color-text-secondary);
-          margin-bottom: var(--space-8);
+        .btn-secondary:hover {
+            background-color: #3a3a3a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
         }
 
-        .button-group {
-          display: flex;
-          gap: var(--space-12);
-          margin-top: var(--space-16);
-          flex-wrap: wrap;
+        .player-section {
+            display: none;
         }
 
-        .loading {
-          display: none;
-          margin-left: var(--space-8);
+        .player-section.active {
+            display: block;
         }
 
-        .loading.show {
-          display: inline-block;
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .player-controls .quality-selector {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 200px;
+        }
+
+        .player-controls .btn-secondary {
+            margin-top: 0;
+            width: auto;
+            padding: 12px 24px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .error-message {
+            background-color: #d32f2f;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         @media (max-width: 768px) {
-          .button-group {
-            flex-direction: column;
-          }
+            body {
+                padding: 15px;
+            }
 
-          .btn {
-            width: 100%;
-          }
+            .header h1 {
+                font-size: 24px;
+            }
 
-          .logo-container {
-            gap: var(--space-16);
-          }
+            .input-section {
+                padding: 20px;
+            }
 
-          .logo {
-            height: 32px;
-          }
+            .player-controls {
+                flex-direction: column;
+            }
+
+            .player-controls .quality-selector,
+            .player-controls .btn-secondary {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="container">
-            <header class="header">
-                <div class="logo-container">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Vercel_Logo.svg" alt="Vercel Logo" class="logo">
-                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="logo">
-                </div>
-                <h1>Sport Player Embedder</h1>
-                <p class="example-text">Fügen Sie Ihren Iframe-Code ein und speichern Sie automatisch auf GitHub</p>
-            </header>
-
-            <main>
-                <div class="card">
-                    <div class="card__body">
-                        <div class="form-group">
-                            <label for="iframeInput" class="form-label">Iframe-Code einfügen:</label>
-                            <div class="example-text">
-                                Beispiel: &lt;iframe src="..." width="100%" height="100%" frameborder="0"&gt;&lt;/iframe&gt;
-                            </div>
-                            <textarea 
-                                id="iframeInput" 
-                                class="form-control" 
-                                placeholder="Fügen Sie hier Ihren Iframe-Code ein..."
-                                rows="4"
-                            ></textarea>
-                        </div>
-
-                        <div class="button-group">
-                            <button id="embedBtn" class="btn btn--primary">
-                                Player einbetten
-                            </button>
-                            <button id="clearBtn" class="btn btn--secondary">
-                                Zurücksetzen
-                            </button>
-                            <button id="githubBtn" class="btn btn--outline">
-                                Auf GitHub speichern
-                                <span id="loading" class="loading">⏳</span>
-                            </button>
-                            <button id="infoBtn" class="btn btn--sm btn--outline">
-                                ℹ️ API Info
-                            </button>
-                        </div>
-
-                        <!-- Status Messages -->
-                        <div id="successMessage" class="message message--success">
-                            ✅ Erfolgreich auf GitHub gespeichert! Die Seite wird in 3 Sekunden neu geladen.
-                        </div>
-                        <div id="errorMessage" class="message message--error">
-                            ❌ Fehler beim Speichern auf GitHub. Bitte überprüfen Sie Ihre API-Konfiguration.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Player Display Area -->
-                <div class="iframe-container" id="playerContainer">
-                    <div class="iframe-placeholder">
-                        <p>Ihr Player wird hier angezeigt, nachdem Sie den Iframe-Code eingefügt haben.</p>
-                        <p class="example-text">Tipp: Verwenden Sie die Beispiel-Daten aus dem Info-Dialog zum Testen!</p>
-                    </div>
-                </div>
-            </main>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Live Stream Embed Player</h1>
+            <p>Fügen Sie Ihren Stream-Embed-Code ein und genießen Sie Ihr Video</p>
         </div>
-    </div>
 
-    <!-- Info Modal -->
-    <div id="infoModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">GitHub API Integration</h2>
-                <button class="close" id="closeModal">&times;</button>
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Input Section -->
+        <div class="input-section" id="inputSection">
+            <div class="form-group">
+                <label for="embedCode">Iframe Embed Code einfügen:</label>
+                <textarea 
+                    id="embedCode" 
+                    placeholder="<iframe src=&quot;https://example.com/embed/...&quot; width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot;></iframe>"></textarea>
             </div>
-            <div class="modal-body">
-                <h3>Sichere Token-Handhabung</h3>
-                <p>Diese Web-App erlaubt das Einfügen eines Iframe-Spielercodes direkt auf der Website. Mit einem Klick wird der Code automatisch ins GitHub-Repo übernommen, damit Vercel es neu deployed.</p>
-                
-                <h3>⚠️ Wichtiger Sicherheitshinweis</h3>
-                <p><strong>Das GitHub Token ist niemals im Client sichtbar!</strong> Die API-Authentifizierung muss serverseitig erfolgen:</p>
-                
-                <div class="code-block">
-// Serverseitige API-Route (z.B. /api/github-update)
-const { Octokit } = require('@octokit/rest');
 
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN // Aus Umgebungsvariablen!
-});
+            <div class="quality-selector">
+                <label for="qualitySelect">Qualität:</label>
+                <select id="qualitySelect">
+                    <option value="auto">Auto</option>
+                    <option value="1080">1080p (Full HD)</option>
+                    <option value="720">720p (HD)</option>
+                    <option value="480">480p (SD)</option>
+                    <option value="360">360p</option>
+                </select>
+            </div>
 
-// Repository-Update
-await octokit.rest.repos.createOrUpdateFileContents({
-  owner: 'USER',
-  repo: 'REPO',
-  path: 'index.html',
-  message: 'Automatisches Update via Player-Web-App',
-  content: Buffer.from(htmlContent).toString('base64')
-});</div>
-                
-                <h3>🔧 Vercel Umgebungsvariablen</h3>
-                <p>Fügen Sie in Ihren Vercel-Projekteinstellungen hinzu:</p>
-                <div class="code-block">
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-GITHUB_OWNER=IhrUsername
-GITHUB_REPO=IhrRepoName
+            <button class="btn" id="loadBtn">Stream laden</button>
+        </div>
+
+        <!-- Player Section -->
+        <div class="player-section" id="playerSection">
+            <div class="player-controls">
+                <div class="quality-selector">
+                    <label for="qualitySelectPlayer">Qualität:</label>
+                    <select id="qualitySelectPlayer">
+                        <option value="auto">Auto</option>
+                        <option value="1080">1080p (Full HD)</option>
+                        <option value="720">720p (HD)</option>
+                        <option value="480">480p (SD)</option>
+                        <option value="360">360p</option>
+                    </select>
                 </div>
-                
-                <h3>📝 Beispiel Iframe-Code zum Testen</h3>
-                <div class="code-block">&lt;iframe title="N.Ireland vs Germany Player" marginheight="0" marginwidth="0" src="https://embedsports.top/embed/alpha/northern-ireland-vs-germany/3" scrolling="no" allowfullscreen="yes" allow="encrypted-media; picture-in-picture;" width="100%" height="100%" frameborder="0"&gt;&lt;/iframe&gt;</div>
-                
-                <h3>🚀 Deployment-Workflow</h3>
-                <ol>
-                    <li>Code wird auf GitHub gepusht</li>
-                    <li>Vercel erkennt Änderungen automatisch</li>
-                    <li>Neuer Build wird gestartet</li>
-                    <li>Updated Website ist live</li>
-                </ol>
-                
-                <h3>📚 README.md Generierung</h3>
-                <p>Diese App kann auch automatisch eine README.md-Datei mit API-Anleitungen generieren:</p>
-                <div class="code-block">
-# Sport Player Embedder
+                <button class="btn btn-secondary" id="changeStreamBtn">Stream wechseln</button>
+            </div>
 
-Eine einfache Web-App zum Einbetten von Sport-Streaming-Playern mit automatischer GitHub-Integration.
-
-## Features
-- Iframe-Code einfügen und sofort anzeigen
-- Automatisches Speichern auf GitHub
-- Sichere API-Token-Handhabung
-- Responsive Design
-- Vercel-Integration
-
-## Setup
-1. Repository forken
-2. Vercel mit GitHub verbinden
-3. Umgebungsvariablen konfigurieren
-4. Deployen!
-                </div>
+            <div class="video-container" id="videoContainer">
+                <!-- iframe will be injected here -->
             </div>
         </div>
     </div>
 
     <script>
-        // Global state management using JavaScript variables (no localStorage due to sandbox restrictions)
-        let currentIframeCode = '';
-        let isGitHubAuthenticated = false; // Simulated authentication state
-        
-        // DOM Elements
-        const iframeInput = document.getElementById('iframeInput');
-        const embedBtn = document.getElementById('embedBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const githubBtn = document.getElementById('githubBtn');
-        const infoBtn = document.getElementById('infoBtn');
-        const playerContainer = document.getElementById('playerContainer');
-        const successMessage = document.getElementById('successMessage');
+        let currentSrc = '';
+        let baseSrc = '';
+
+        const embedCodeInput = document.getElementById('embedCode');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const qualitySelectPlayer = document.getElementById('qualitySelectPlayer');
+        const loadBtn = document.getElementById('loadBtn');
+        const changeStreamBtn = document.getElementById('changeStreamBtn');
+        const inputSection = document.getElementById('inputSection');
+        const playerSection = document.getElementById('playerSection');
+        const videoContainer = document.getElementById('videoContainer');
         const errorMessage = document.getElementById('errorMessage');
-        const loading = document.getElementById('loading');
-        const infoModal = document.getElementById('infoModal');
-        const closeModal = document.getElementById('closeModal');
-        
-        // Example iframe code for testing
-        const exampleIframe = '<iframe title="N.Ireland vs Germany Player" marginheight="0" marginwidth="0" src="https://embedsports.top/embed/alpha/northern-ireland-vs-germany/3" scrolling="no" allowfullscreen="yes" allow="encrypted-media; picture-in-picture;" width="100%" height="100%" frameborder="0"></iframe>';
-        
-        // Utility functions
-        function showMessage(messageElement, duration = 5000) {
-            messageElement.classList.add('show');
+
+        // Extract src from iframe code
+        function extractSrc(iframeCode) {
+            const srcMatch = iframeCode.match(/src=["']([^"']+)["']/);
+            return srcMatch ? srcMatch[1] : null;
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
             setTimeout(() => {
-                messageElement.classList.remove('show');
-            }, duration);
+                errorMessage.classList.remove('show');
+            }, 5000);
         }
-        
-        function hideAllMessages() {
-            successMessage.classList.remove('show');
-            errorMessage.classList.remove('show');
-        }
-        
-        function sanitizeIframe(iframeCode) {
-            // Basic validation for iframe code
-            if (!iframeCode.trim()) {
-                return null;
+
+        // Modify URL with quality parameter
+        function getUrlWithQuality(url, quality) {
+            if (quality === 'auto') {
+                return url;
             }
-            
-            // Check if it contains iframe tags
-            if (!iframeCode.toLowerCase().includes('<iframe') || !iframeCode.toLowerCase().includes('</iframe>')) {
-                throw new Error('Der Code muss ein gültiges iframe-Element enthalten.');
-            }
-            
-            return iframeCode.trim();
-        }
-        
-        function embedIframe() {
-            hideAllMessages();
             
             try {
-                const iframeCode = sanitizeIframe(iframeInput.value);
-                
-                if (!iframeCode) {
-                    alert('Bitte fügen Sie einen gültigen Iframe-Code ein.');
-                    return;
-                }
-                
-                // Store the current iframe code
-                currentIframeCode = iframeCode;
-                
-                // Clear the container and add the iframe
-                playerContainer.innerHTML = iframeCode;
-                
-                // Show success feedback
-                const tempSuccess = document.createElement('div');
-                tempSuccess.className = 'message message--success show';
-                tempSuccess.textContent = '✅ Player erfolgreich eingebettet!';
-                playerContainer.parentNode.insertBefore(tempSuccess, playerContainer);
-                
-                setTimeout(() => {
-                    tempSuccess.remove();
-                }, 3000);
-                
-            } catch (error) {
-                alert('Fehler beim Einbetten: ' + error.message);
+                const urlObj = new URL(url);
+                urlObj.searchParams.set('quality', quality);
+                return urlObj.toString();
+            } catch (e) {
+                // If URL parsing fails, just append parameter
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}quality=${quality}`;
             }
         }
-        
-        function clearPlayer() {
-            hideAllMessages();
-            currentIframeCode = '';
-            iframeInput.value = '';
+
+        // Load stream
+        function loadStream() {
+            const embedCode = embedCodeInput.value.trim();
             
-            playerContainer.innerHTML = `
-                <div class="iframe-placeholder">
-                    <p>Ihr Player wird hier angezeigt, nachdem Sie den Iframe-Code eingefügt haben.</p>
-                    <p class="example-text">Tipp: Verwenden Sie die Beispiel-Daten aus dem Info-Dialog zum Testen!</p>
-                </div>
-            `;
-        }
-        
-        function simulateGitHubPush() {
-            if (!currentIframeCode) {
-                alert('Bitte betten Sie zuerst einen Player ein, bevor Sie auf GitHub speichern.');
+            if (!embedCode) {
+                showError('Bitte fügen Sie einen Embed-Code ein.');
                 return;
             }
+
+            const src = extractSrc(embedCode);
             
-            hideAllMessages();
-            loading.classList.add('show');
-            githubBtn.disabled = true;
-            
-            // Simulate API call
-            setTimeout(() => {
-                loading.classList.remove('show');
-                githubBtn.disabled = false;
-                
-                // Simulate success/failure based on authentication state
-                if (Math.random() > 0.3) { // 70% success rate for demo
-                    isGitHubAuthenticated = true;
-                    showMessage(successMessage, 3000);
-                    
-                    // Simulate page reload after successful update
-                    setTimeout(() => {
-                        // In a real app, this would reload or redirect
-                        console.log('Would reload page now...');
-                    }, 3000);
-                } else {
-                    isGitHubAuthenticated = false;
-                    showMessage(errorMessage, 8000);
-                }
-            }, 2000); // 2 second delay to simulate network request
+            if (!src) {
+                showError('Ungültiger Embed-Code. Bitte stellen Sie sicher, dass ein src-Attribut vorhanden ist.');
+                return;
+            }
+
+            baseSrc = src;
+            const quality = qualitySelect.value;
+            currentSrc = getUrlWithQuality(baseSrc, quality);
+
+            // Update player quality selector
+            qualitySelectPlayer.value = quality;
+
+            // Create iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = currentSrc;
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allowFullscreen = true;
+            iframe.allow = 'encrypted-media; picture-in-picture; autoplay';
+            iframe.scrolling = 'no';
+
+            // Clear container and add new iframe
+            videoContainer.innerHTML = '';
+            videoContainer.appendChild(iframe);
+
+            // Switch views
+            inputSection.classList.add('hidden');
+            playerSection.classList.add('active');
         }
-        
-        function showInfoModal() {
-            infoModal.classList.add('show');
-        }
-        
-        function hideInfoModal() {
-            infoModal.classList.remove('show');
-        }
-        
-        // Event Listeners
-        embedBtn.addEventListener('click', embedIframe);
-        clearBtn.addEventListener('click', clearPlayer);
-        githubBtn.addEventListener('click', simulateGitHubPush);
-        infoBtn.addEventListener('click', showInfoModal);
-        closeModal.addEventListener('click', hideInfoModal);
-        
-        // Close modal when clicking outside
-        infoModal.addEventListener('click', (e) => {
-            if (e.target === infoModal) {
-                hideInfoModal();
-            }
-        });
-        
-        // Handle Enter key in textarea
-        iframeInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                embedIframe();
-            }
-        });
-        
-        // Auto-fill example iframe for demonstration
-        window.addEventListener('load', () => {
-            // Add a subtle hint for first-time users
-            setTimeout(() => {
-                if (!iframeInput.value.trim()) {
-                    const hint = document.createElement('div');
-                    hint.className = 'status status--info';
-                    hint.textContent = '💡 Tipp: Öffnen Sie den Info-Dialog für Beispiel-Code zum Testen!';
-                    hint.style.margin = '16px 0';
-                    
-                    iframeInput.parentNode.appendChild(hint);
-                    
-                    setTimeout(() => {
-                        hint.remove();
-                    }, 8000);
-                }
-            }, 2000);
-        });
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + I for info modal
-            if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
-                e.preventDefault();
-                showInfoModal();
-            }
+
+        // Change quality in player
+        function changeQuality() {
+            const quality = qualitySelectPlayer.value;
+            currentSrc = getUrlWithQuality(baseSrc, quality);
             
-            // Escape to close modal
-            if (e.key === 'Escape') {
-                hideInfoModal();
-            }
-        });
-        
-        // Simulated GitHub API status check
-        function checkGitHubStatus() {
-            // This would normally check if the user has proper GitHub credentials
-            // For demo purposes, we'll simulate different states
-            const hasToken = Math.random() > 0.5;
-            
-            if (hasToken) {
-                githubBtn.title = 'Bereit zum Speichern auf GitHub';
-            } else {
-                githubBtn.title = 'GitHub Token nicht konfiguriert - siehe Info-Dialog';
+            const iframe = videoContainer.querySelector('iframe');
+            if (iframe) {
+                iframe.src = currentSrc;
             }
         }
-        
-        // Initialize app
-        checkGitHubStatus();
-        
-        // Add some visual feedback for better UX
-        iframeInput.addEventListener('input', () => {
-            const hasContent = iframeInput.value.trim().length > 0;
-            embedBtn.disabled = !hasContent;
-            
-            if (hasContent && iframeInput.value.toLowerCase().includes('<iframe')) {
-                iframeInput.style.borderColor = 'var(--color-success)';
-            } else if (hasContent) {
-                iframeInput.style.borderColor = 'var(--color-warning)';
-            } else {
-                iframeInput.style.borderColor = '';
-            }
-        });
-        
-        // Demo function to show example iframe
-        function loadExampleIframe() {
-            iframeInput.value = exampleIframe;
-            iframeInput.style.borderColor = 'var(--color-success)';
-            embedBtn.disabled = false;
-            
-            // Trigger input event to update styling
-            iframeInput.dispatchEvent(new Event('input'));
+
+        // Go back to input
+        function changeStream() {
+            inputSection.classList.remove('hidden');
+            playerSection.classList.remove('active');
+            videoContainer.innerHTML = '';
         }
-        
-        // Add example loader button (hidden feature activated by double-clicking info button)
-        let infoClickCount = 0;
-        infoBtn.addEventListener('click', () => {
-            infoClickCount++;
-            if (infoClickCount >= 2) {
-                setTimeout(() => {
-                    if (infoClickCount >= 2) {
-                        loadExampleIframe();
-                        alert('🎉 Beispiel-Iframe geladen! Klicken Sie auf "Player einbetten".');
-                    }
-                    infoClickCount = 0;
-                }, 500);
+
+        // Event listeners
+        loadBtn.addEventListener('click', loadStream);
+        changeStreamBtn.addEventListener('click', changeStream);
+        qualitySelectPlayer.addEventListener('change', changeQuality);
+
+        // Allow Enter key to load (Ctrl+Enter for textarea)
+        embedCodeInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                loadStream();
             }
         });
-        
-        console.log('🚀 Sport Player Embedder geladen!');
-        console.log('💡 Tipp: Doppelklicken Sie auf "API Info" um Beispiel-Code zu laden');
     </script>
 </body>
 </html>
