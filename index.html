@@ -3,274 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player</title>
+    <title>Embed Player</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            background: #1a1a1a;
             font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-        
-        .container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: #2d2d2d;
-            padding: 10px 20px;
+            background: #1a1a1a;
             color: #fff;
-            font-size: 16px;
-            border-bottom: 2px solid #444;
         }
-        
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
         .player-wrapper {
-            flex: 1;
             position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
             background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        
-        iframe {
+
+        .player-wrapper iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: none;
-            pointer-events: auto;
         }
-        
-        .blocker {
-            position: fixed;
-            top: 0;
-            left: 0;
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
             width: 100%;
-            height: 100%;
-            background: rgba(255,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
+            max-width: 600px;
+            padding: 10px;
+            font-size: 14px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
             color: #fff;
-            font-size: 24px;
-            font-weight: bold;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        button {
+            padding: 10px 30px;
+            font-size: 16px;
+            background: #0066cc;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0052a3;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <!-- EMBEDS HIER EINFÜGEN -->
-    <script>
-        const IFRAME_EMBEDS = [
-            {
-                title: "Cagliari vs Juventus",
-                src: "https://embedsports.top/embed/admin/ppv-cagliari-vs-juventus/1"
-            }
-            // Weitere Embeds hier hinzufügen im Format:
-            // { title: "Stream Titel", src: "deine-iframe-url" }
-        ];
-    </script>
-    <!-- EMBEDS ENDE -->
-
     <div class="container">
-        <div class="header">
-            <span id="stream-title">Live Stream Player</span>
-        </div>
-        <div class="player-wrapper" id="player-wrapper"></div>
-    </div>
+        <h1>🎬 IFRAME Embed Player</h1>
+        
+        <div class="player-wrapper" id="playerWrapper" style="display: none;"></div>
 
-    <div class="blocker" id="blocker">
-        🚫 POP-UP BLOCKIERT!
+        <div class="controls">
+            <div class="input-group">
+                <label for="embedCode">IFRAME Code einfügen:</label>
+                <textarea 
+                    id="embedCode" 
+                    placeholder="<iframe src='...' ...></iframe>"
+                    rows="4"></textarea>
+            </div>
+            <button onclick="updateEmbed()">Player laden</button>
+        </div>
     </div>
 
     <script>
-        (function() {
-            'use strict';
-
-            let popupBlocked = false;
-
-            // MAXIMALER SCHUTZ - Überschreibe window.open KOMPLETT
-            const noop = function() {
-                showBlocker();
-                return {
-                    closed: false,
-                    close: function() {},
-                    focus: function() {},
-                    blur: function() {},
-                    postMessage: function() {}
-                };
-            };
-
-            window.open = noop;
-            Window.prototype.open = noop;
-
-            // Blockiere ALLE Navigationsversuche
-            const blockNavigation = function(e) {
-                if (e.target && e.target.tagName === 'A') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    showBlocker();
-                    return false;
-                }
-            };
-
-            // Überwache ALLE Klick-Events auf Capture-Phase
-            document.addEventListener('click', blockNavigation, true);
-            document.addEventListener('mousedown', blockNavigation, true);
-            document.addEventListener('mouseup', blockNavigation, true);
-            document.addEventListener('auxclick', blockNavigation, true);
-
-            // Blockiere Touch-Events (für Mobile)
-            document.addEventListener('touchstart', function(e) {
-                if (e.target && e.target.tagName === 'A') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showBlocker();
-                    return false;
-                }
-            }, true);
-
-            // Verhindere beforeunload Pop-ups
-            window.addEventListener('beforeunload', function(e) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            });
-
-            // Überwache Fenster-Öffnungen
-            let windowCount = 1;
-            setInterval(function() {
-                if (window.length !== windowCount) {
-                    windowCount = window.length;
-                    showBlocker();
-                }
-            }, 100);
-
-            // Blockiere Context Menu
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            });
-
-            // Überschreibe Location-Änderungen
-            const originalAssign = window.location.assign;
-            const originalReplace = window.location.replace;
+        function updateEmbed() {
+            const code = document.getElementById('embedCode').value.trim();
+            const wrapper = document.getElementById('playerWrapper');
             
-            window.location.assign = function(url) {
-                if (url && !url.includes(window.location.hostname)) {
-                    showBlocker();
-                    return;
-                }
-                originalAssign.call(window.location, url);
-            };
-            
-            window.location.replace = function(url) {
-                if (url && !url.includes(window.location.hostname)) {
-                    showBlocker();
-                    return;
-                }
-                originalReplace.call(window.location, url);
-            };
-
-            // Blockiere window.location.href Änderungen
-            let currentHref = window.location.href;
-            setInterval(function() {
-                if (window.location.href !== currentHref) {
-                    showBlocker();
-                    window.history.back();
-                    setTimeout(function() {
-                        currentHref = window.location.href;
-                    }, 100);
-                }
-            }, 50);
-
-            // Blocker Anzeige
-            function showBlocker() {
-                if (popupBlocked) return;
-                popupBlocked = true;
-                
-                const blocker = document.getElementById('blocker');
-                blocker.style.display = 'flex';
-                
-                setTimeout(() => {
-                    blocker.style.display = 'none';
-                    popupBlocked = false;
-                }, 3000);
+            if (code) {
+                wrapper.innerHTML = code;
+                wrapper.style.display = 'block';
+            } else {
+                alert('Bitte füge einen IFRAME Code ein.');
             }
+        }
 
-            // Lade Embed
-            function loadEmbed(index) {
-                if (!IFRAME_EMBEDS || IFRAME_EMBEDS.length === 0) {
-                    console.error('Keine Embeds definiert!');
-                    return;
-                }
-
-                const embed = IFRAME_EMBEDS[index] || IFRAME_EMBEDS[0];
-                const wrapper = document.getElementById('player-wrapper');
-                const titleEl = document.getElementById('stream-title');
-                
-                const iframe = document.createElement('iframe');
-                iframe.src = embed.src;
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen;');
-                iframe.setAttribute('scrolling', 'no');
-                iframe.setAttribute('frameborder', '0');
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                
-                wrapper.innerHTML = '';
-                wrapper.appendChild(iframe);
-                titleEl.textContent = embed.title;
-
-                // Überwache iframe-Load
-                iframe.addEventListener('load', function() {
-                    try {
-                        if (iframe.contentWindow) {
-                            iframe.contentWindow.open = noop;
-                        }
-                    } catch(e) {}
-                });
+        // Enter-Taste zum Aktualisieren (Strg+Enter bei Textarea)
+        document.getElementById('embedCode').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                updateEmbed();
             }
-
-            // Initialisiere
-            loadEmbed(0);
-
-            // Zusätzlicher Schutz: Überwache alle DOM-Änderungen
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.tagName === 'A' && node.target === '_blank') {
-                            node.removeAttribute('target');
-                            node.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                showBlocker();
-                            });
-                        }
-                    });
-                });
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            // Blockiere Formular-Submits zu externen Seiten
-            document.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showBlocker();
-                return false;
-            }, true);
-
-        })();
+        });
     </script>
 </body>
 </html>
