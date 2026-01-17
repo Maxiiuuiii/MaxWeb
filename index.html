@@ -45,6 +45,7 @@
             width: 100%;
             height: 100%;
             border: none;
+            pointer-events: auto;
         }
         
         .blocker {
@@ -53,13 +54,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(255,0,0,0.8);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 10000;
             color: #fff;
-            font-size: 18px;
+            font-size: 24px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -72,7 +74,7 @@
                 src: "https://embedsports.top/embed/admin/ppv-cagliari-vs-juventus/1"
             }
             // Weitere Embeds hier hinzufügen im Format:
-            // { title: "Stream Titel", src: "iframe-url" }
+            // { title: "Stream Titel", src: "deine-iframe-url" }
         ];
     </script>
     <!-- EMBEDS ENDE -->
@@ -85,38 +87,50 @@
     </div>
 
     <div class="blocker" id="blocker">
-        ⚠️ Pop-up blockiert
+        🚫 POP-UP BLOCKIERT!
     </div>
 
     <script>
-        // Strikte Sicherheitsmaßnahmen
         (function() {
             'use strict';
 
-            // Pop-up Blocker - verhindert window.open
-            const originalOpen = window.open;
-            window.open = function() {
+            let popupBlocked = false;
+
+            // MAXIMALER SCHUTZ - Überschreibe window.open KOMPLETT
+            const noop = function() {
                 showBlocker();
-                return null;
+                return {
+                    closed: false,
+                    close: function() {},
+                    focus: function() {},
+                    blur: function() {},
+                    postMessage: function() {}
+                };
             };
 
-            // Verhindert neue Tabs/Fenster
-            window.addEventListener('beforeunload', function(e) {
-                const iframe = document.querySelector('iframe');
-                if (iframe && iframe.contentWindow) {
-                    try {
-                        iframe.contentWindow.open = function() {
-                            showBlocker();
-                            return null;
-                        };
-                    } catch(e) {}
-                }
-            });
+            window.open = noop;
+            Window.prototype.open = noop;
 
-            // Blockiert alle neuen Fenster/Tabs
-            document.addEventListener('click', function(e) {
-                const target = e.target;
-                if (target.tagName === 'A' && target.target === '_blank') {
+            // Blockiere ALLE Navigationsversuche
+            const blockNavigation = function(e) {
+                if (e.target && e.target.tagName === 'A') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    showBlocker();
+                    return false;
+                }
+            };
+
+            // Überwache ALLE Klick-Events auf Capture-Phase
+            document.addEventListener('click', blockNavigation, true);
+            document.addEventListener('mousedown', blockNavigation, true);
+            document.addEventListener('mouseup', blockNavigation, true);
+            document.addEventListener('auxclick', blockNavigation, true);
+
+            // Blockiere Touch-Events (für Mobile)
+            document.addEventListener('touchstart', function(e) {
+                if (e.target && e.target.tagName === 'A') {
                     e.preventDefault();
                     e.stopPropagation();
                     showBlocker();
@@ -124,24 +138,75 @@
                 }
             }, true);
 
-            // Verhindert Kontextmenü im iframe
-            document.addEventListener('contextmenu', function(e) {
-                if (e.target.tagName === 'IFRAME') {
-                    e.preventDefault();
-                    return false;
-                }
+            // Verhindere beforeunload Pop-ups
+            window.addEventListener('beforeunload', function(e) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
             });
+
+            // Überwache Fenster-Öffnungen
+            let windowCount = 1;
+            setInterval(function() {
+                if (window.length !== windowCount) {
+                    windowCount = window.length;
+                    showBlocker();
+                }
+            }, 100);
+
+            // Blockiere Context Menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Überschreibe Location-Änderungen
+            const originalAssign = window.location.assign;
+            const originalReplace = window.location.replace;
+            
+            window.location.assign = function(url) {
+                if (url && !url.includes(window.location.hostname)) {
+                    showBlocker();
+                    return;
+                }
+                originalAssign.call(window.location, url);
+            };
+            
+            window.location.replace = function(url) {
+                if (url && !url.includes(window.location.hostname)) {
+                    showBlocker();
+                    return;
+                }
+                originalReplace.call(window.location, url);
+            };
+
+            // Blockiere window.location.href Änderungen
+            let currentHref = window.location.href;
+            setInterval(function() {
+                if (window.location.href !== currentHref) {
+                    showBlocker();
+                    window.history.back();
+                    setTimeout(function() {
+                        currentHref = window.location.href;
+                    }, 100);
+                }
+            }, 50);
 
             // Blocker Anzeige
             function showBlocker() {
+                if (popupBlocked) return;
+                popupBlocked = true;
+                
                 const blocker = document.getElementById('blocker');
                 blocker.style.display = 'flex';
+                
                 setTimeout(() => {
                     blocker.style.display = 'none';
-                }, 2000);
+                    popupBlocked = false;
+                }, 3000);
             }
 
-            // Lade erstes Embed
+            // Lade Embed
             function loadEmbed(index) {
                 if (!IFRAME_EMBEDS || IFRAME_EMBEDS.length === 0) {
                     console.error('Keine Embeds definiert!');
@@ -152,7 +217,6 @@
                 const wrapper = document.getElementById('player-wrapper');
                 const titleEl = document.getElementById('stream-title');
                 
-                // Erstelle iframe ohne Sandbox (für Kompatibilität)
                 const iframe = document.createElement('iframe');
                 iframe.src = embed.src;
                 iframe.setAttribute('allowfullscreen', 'true');
@@ -162,48 +226,48 @@
                 iframe.style.width = '100%';
                 iframe.style.height = '100%';
                 
-                // Entferne altes iframe
                 wrapper.innerHTML = '';
                 wrapper.appendChild(iframe);
                 titleEl.textContent = embed.title;
 
-                // Überwache iframe für Pop-up Versuche
+                // Überwache iframe-Load
                 iframe.addEventListener('load', function() {
                     try {
-                        iframe.contentWindow.open = function() {
-                            showBlocker();
-                            return null;
-                        };
-                    } catch(e) {
-                        // Cross-origin Sicherheit verhindert Zugriff - das ist OK
-                    }
+                        if (iframe.contentWindow) {
+                            iframe.contentWindow.open = noop;
+                        }
+                    } catch(e) {}
                 });
             }
 
-            // Verhindere alle Focus-Events die neue Fenster öffnen könnten
-            window.addEventListener('blur', function(e) {
-                const openWindows = window.length;
-                if (openWindows > 1) {
-                    showBlocker();
-                }
-            });
-
-            // CSP Meta-Tag hinzufügen für zusätzliche Sicherheit
-            const meta = document.createElement('meta');
-            meta.httpEquiv = 'Content-Security-Policy';
-            meta.content = "frame-ancestors 'self'";
-            document.head.appendChild(meta);
-
-            // Initialisiere ersten Stream
+            // Initialisiere
             loadEmbed(0);
 
-            // Verhindere alle Form-Submits die neue Fenster öffnen
+            // Zusätzlicher Schutz: Überwache alle DOM-Änderungen
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'A' && node.target === '_blank') {
+                            node.removeAttribute('target');
+                            node.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                showBlocker();
+                            });
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Blockiere Formular-Submits zu externen Seiten
             document.addEventListener('submit', function(e) {
-                if (e.target.target === '_blank') {
-                    e.preventDefault();
-                    showBlocker();
-                    return false;
-                }
+                e.preventDefault();
+                showBlocker();
+                return false;
             }, true);
 
         })();
