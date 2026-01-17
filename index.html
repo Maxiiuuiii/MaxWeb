@@ -3,249 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaxFUT - Bundesliga Live</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Live Stream Player</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background-color: #0a0a0a;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-        }
-        .stream-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-            overflow: hidden;
             background: #1a1a1a;
-            border-radius: 8px;
-            border: 2px solid #333;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        .stream-container iframe {
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2d2d2d;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            border-bottom: 2px solid #444;
+        }
+        
+        .player-wrapper {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+        
+        iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: 0;
+            border: none;
         }
-        .match-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid #222;
-        }
-        .match-card:hover {
-            background-color: #1a1a1a;
-            border-color: #e10600; /* Bundesliga Red */
-            transform: translateY(-2px);
-        }
-        /* Anti-Ad Overlay */
-        #ad-guard {
-            display: none;
+        
+        .blocker {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 9999;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
+            display: none;
             justify-content: center;
             align-items: center;
-            text-align: center;
+            z-index: 10000;
+            color: #fff;
+            font-size: 18px;
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body>
+    <!-- EMBEDS HIER EINFÜGEN -->
+    <script>
+        const IFRAME_EMBEDS = [
+            {
+                title: "Cagliari vs Juventus",
+                src: "https://embedsports.top/embed/admin/ppv-cagliari-vs-juventus/1"
+            }
+            // Weitere Embeds hier hinzufügen im Format:
+            // { title: "Stream Titel", src: "iframe-url" }
+        ];
+    </script>
+    <!-- EMBEDS ENDE -->
 
-    <!-- Header -->
-    <header class="max-w-6xl mx-auto mb-8 flex justify-between items-center border-b border-zinc-800 pb-4">
-        <div>
-            <h1 class="text-4xl font-black text-red-600 tracking-tighter">MaxFUT</h1>
-            <p class="text-zinc-400 text-sm">Nur Live Bundesliga Streams</p>
+    <div class="container">
+        <div class="header">
+            <span id="stream-title">Live Stream Player</span>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="relative flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
-            <span class="font-bold text-sm uppercase">Live</span>
-        </div>
-    </header>
+        <div class="player-wrapper" id="player-wrapper"></div>
+    </div>
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Match Liste -->
-        <div class="lg:col-span-1">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                Aktuelle Spiele
-            </h2>
-            <div id="matches-list" class="space-y-3">
-                <div class="animate-pulse text-zinc-500">Suche nach Bundesliga Spielen...</div>
-            </div>
-        </div>
-
-        <!-- Player Bereich -->
-        <div class="lg:col-span-2">
-            <div id="player-status" class="mb-4 p-4 bg-zinc-900 rounded-lg border border-zinc-800 hidden">
-                <p id="current-match-title" class="font-bold text-red-500"></p>
-                <p class="text-xs text-zinc-500">Admin Modus: Stream 1 aktiv</p>
-            </div>
-
-            <div class="stream-container" id="stream-wrapper">
-                <div id="placeholder-text" class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 p-6 text-center">
-                    <svg class="w-16 h-16 mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg>
-                    <p>Wähle ein Spiel aus der Liste, um den Stream zu starten.</p>
-                </div>
-                <!-- Sandbox-Attribute verhindern das Öffnen neuer Tabs oder Popups -->
-                <iframe 
-                    id="main-player" 
-                    src="" 
-                    allowfullscreen 
-                    sandbox="allow-scripts allow-same-origin allow-forms"
-                    style="display: none;">
-                </iframe>
-            </div>
-            
-            <div id="error-message" class="mt-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 hidden">
-                Kein Stream für dieses Spiel verfügbar. Bitte versuche es später erneut.
-            </div>
-        </div>
-    </main>
-
-    <!-- Ad-Guard Overlay -->
-    <div id="ad-guard">
-        <div class="bg-zinc-900 p-8 rounded-2xl border border-red-500 max-w-sm">
-            <h3 class="text-2xl font-bold mb-2">Werbung blockiert</h3>
-            <p class="text-zinc-400 mb-4">Ein unerwünschtes Fenster wurde verhindert. MaxFUT hält deine Verbindung sauber.</p>
-            <button onclick="document.getElementById('ad-guard').style.display='none'" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition">OK</button>
-        </div>
+    <div class="blocker" id="blocker">
+        ⚠️ Pop-up blockiert
     </div>
 
     <script>
-        // API Konfiguration
-        const API_BASE = 'https://streamed.pk/api';
-        const player = document.getElementById('main-player');
-        const streamWrapper = document.getElementById('stream-wrapper');
-        const placeholder = document.getElementById('placeholder-text');
-        const errorMsg = document.getElementById('error-message');
-        const matchesList = document.getElementById('matches-list');
-        const statusBox = document.getElementById('player-status');
-        const currentTitle = document.getElementById('current-match-title');
+        // Strikte Sicherheitsmaßnahmen
+        (function() {
+            'use strict';
 
-        // STRENGER SCHUTZ GEGEN WERBUNG
-        // 1. window.open überschreiben
-        window.open = function() {
-            showAdBlockAlert();
-            return null;
-        };
+            // Pop-up Blocker - verhindert window.open
+            const originalOpen = window.open;
+            window.open = function() {
+                showBlocker();
+                return null;
+            };
 
-        // 2. Klick-Event-Listener für externe Links/Tabs
-        document.addEventListener('click', function(e) {
-            const target = e.target.closest('a');
-            if (target && (target.target === '_blank' || target.hostname !== window.location.hostname)) {
-                e.preventDefault();
-                showAdBlockAlert();
-            }
-        }, true);
-
-        function showAdBlockAlert() {
-            document.getElementById('ad-guard').style.display = 'flex';
-        }
-
-        // Spiele laden
-        async function fetchBundesligaMatches() {
-            try {
-                const response = await fetch(`${API_BASE}/matches/live`);
-                if (!response.ok) throw new Error('API Fehler');
-                const matches = await response.json();
-                
-                // Filtere nach Bundesliga im Titel
-                const bundesligaMatches = matches.filter(m => 
-                    m.title.toLowerCase().includes('bundesliga')
-                );
-
-                renderMatches(bundesligaMatches);
-            } catch (error) {
-                matchesList.innerHTML = '<p class="text-red-500">Fehler beim Laden der Spiele.</p>';
-            }
-        }
-
-        function renderMatches(matches) {
-            if (matches.length === 0) {
-                matchesList.innerHTML = '<p class="text-zinc-500">Aktuell keine Live Bundesliga Spiele gefunden.</p>';
-                return;
-            }
-
-            matchesList.innerHTML = '';
-            matches.forEach(match => {
-                const card = document.createElement('div');
-                card.className = 'match-card p-4 rounded-lg bg-zinc-900 flex flex-col gap-2';
-                
-                const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : '';
-                const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : '';
-
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Live</span>
-                        <span class="text-[10px] text-zinc-500">${new Date(match.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        ${homeBadge ? `<img src="${homeBadge}" class="w-6 h-6 object-contain">` : ''}
-                        <span class="font-medium text-sm truncate">${match.title}</span>
-                        ${awayBadge ? `<img src="${awayBadge}" class="w-6 h-6 object-contain">` : ''}
-                    </div>
-                `;
-                
-                card.onclick = () => startStream(match);
-                matchesList.appendChild(card);
-            });
-        }
-
-        async function startStream(match) {
-            // Reset UI
-            errorMsg.classList.add('hidden');
-            player.style.display = 'none';
-            placeholder.style.display = 'flex';
-            statusBox.classList.add('hidden');
-
-            const source = match.sources[0]; // Nutze die erste verfügbare Quelle
-            if (!source) {
-                showError();
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/stream/${source.source}/${source.id}`);
-                const streams = await response.json();
-
-                // Suche gezielt nach Stream 1 (Admin Wunsch)
-                const stream1 = streams.find(s => s.streamNo === 1) || streams[0];
-
-                if (stream1 && stream1.embedUrl) {
-                    player.src = stream1.embedUrl;
-                    player.style.display = 'block';
-                    placeholder.style.display = 'none';
-                    statusBox.classList.remove('hidden');
-                    currentTitle.textContent = match.title;
-                } else {
-                    showError();
+            // Verhindert neue Tabs/Fenster
+            window.addEventListener('beforeunload', function(e) {
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    try {
+                        iframe.contentWindow.open = function() {
+                            showBlocker();
+                            return null;
+                        };
+                    } catch(e) {}
                 }
-            } catch (e) {
-                showError();
+            });
+
+            // Blockiert alle neuen Fenster/Tabs
+            document.addEventListener('click', function(e) {
+                const target = e.target;
+                if (target.tagName === 'A' && target.target === '_blank') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showBlocker();
+                    return false;
+                }
+            }, true);
+
+            // Verhindert Kontextmenü im iframe
+            document.addEventListener('contextmenu', function(e) {
+                if (e.target.tagName === 'IFRAME') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Blocker Anzeige
+            function showBlocker() {
+                const blocker = document.getElementById('blocker');
+                blocker.style.display = 'flex';
+                setTimeout(() => {
+                    blocker.style.display = 'none';
+                }, 2000);
             }
-        }
 
-        function showError() {
-            errorMsg.classList.remove('hidden');
-            player.src = "";
-            player.style.display = 'none';
-            placeholder.style.display = 'flex';
-        }
+            // Lade erstes Embed
+            function loadEmbed(index) {
+                if (!IFRAME_EMBEDS || IFRAME_EMBEDS.length === 0) {
+                    console.error('Keine Embeds definiert!');
+                    return;
+                }
 
-        // Initialisierung
-        fetchBundesligaMatches();
-        // Alle 60 Sekunden aktualisieren
-        setInterval(fetchBundesligaMatches, 60000);
+                const embed = IFRAME_EMBEDS[index] || IFRAME_EMBEDS[0];
+                const wrapper = document.getElementById('player-wrapper');
+                const titleEl = document.getElementById('stream-title');
+                
+                // Erstelle iframe mit Sicherheitsattributen
+                const iframe = document.createElement('iframe');
+                iframe.src = embed.src;
+                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+                iframe.setAttribute('allowfullscreen', 'true');
+                iframe.setAttribute('allow', 'encrypted-media; picture-in-picture;');
+                iframe.setAttribute('scrolling', 'no');
+                iframe.setAttribute('frameborder', '0');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                
+                // Entferne altes iframe
+                wrapper.innerHTML = '';
+                wrapper.appendChild(iframe);
+                titleEl.textContent = embed.title;
 
+                // Überwache iframe für Pop-up Versuche
+                iframe.addEventListener('load', function() {
+                    try {
+                        iframe.contentWindow.open = function() {
+                            showBlocker();
+                            return null;
+                        };
+                    } catch(e) {
+                        // Cross-origin Sicherheit verhindert Zugriff - das ist OK
+                    }
+                });
+            }
+
+            // Verhindere alle Focus-Events die neue Fenster öffnen könnten
+            window.addEventListener('blur', function(e) {
+                const openWindows = window.length;
+                if (openWindows > 1) {
+                    showBlocker();
+                }
+            });
+
+            // CSP Meta-Tag hinzufügen für zusätzliche Sicherheit
+            const meta = document.createElement('meta');
+            meta.httpEquiv = 'Content-Security-Policy';
+            meta.content = "frame-ancestors 'self'";
+            document.head.appendChild(meta);
+
+            // Initialisiere ersten Stream
+            loadEmbed(0);
+
+            // Verhindere alle Form-Submits die neue Fenster öffnen
+            document.addEventListener('submit', function(e) {
+                if (e.target.target === '_blank') {
+                    e.preventDefault();
+                    showBlocker();
+                    return false;
+                }
+            }, true);
+
+        })();
     </script>
 </body>
 </html>
