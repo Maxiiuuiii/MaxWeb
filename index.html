@@ -152,10 +152,9 @@
                 const wrapper = document.getElementById('player-wrapper');
                 const titleEl = document.getElementById('stream-title');
                 
-                // Erstelle iframe mit erweiterten Berechtigungen
+                // Erstelle iframe ohne Sandbox (für Kompatibilität)
                 const iframe = document.createElement('iframe');
                 iframe.src = embed.src;
-                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation allow-top-navigation-by-user-activation');
                 iframe.setAttribute('allowfullscreen', 'true');
                 iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen;');
                 iframe.setAttribute('scrolling', 'no');
