@@ -3,28 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaxFUT - Live Bundesliga</title>
+    <title>MaxFUT - Bundesliga Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #0f172a; /* Dunkler Hintergrund */
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
         }
-        
-        /* Strenger Container für den Player, um Klick-Hijacking zu erschweren */
-        .player-wrapper {
+        .stream-container {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Verhältnis */
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
             height: 0;
-            background: #000;
-            border-radius: 0.5rem;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 2px solid #333;
         }
-
-        .player-wrapper iframe {
+        .stream-container iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -32,347 +28,223 @@
             height: 100%;
             border: 0;
         }
-
-        .bundesliga-card {
+        .match-card {
             transition: all 0.3s ease;
-            border: 1px solid #1e293b;
+            cursor: pointer;
+            border: 1px solid #222;
         }
-
-        .bundesliga-card:hover {
-            transform: translateY(-5px);
-            border-color: #22c55e;
-            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+        .match-card:hover {
+            background-color: #1a1a1a;
+            border-color: #e10600; /* Bundesliga Red */
+            transform: translateY(-2px);
         }
-
-        .live-badge {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-
-        /* Lade-Spinner */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #22c55e;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Anti-Ad Overlay */
+        #ad-guard {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="p-4 md:p-8">
 
     <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fas fa-futbol text-green-500 text-2xl"></i>
-                <h1 class="text-2xl font-bold tracking-wider text-white">Max<span class="text-green-500">FUT</span></h1>
-            </div>
-            <div class="text-sm font-semibold px-3 py-1 bg-red-600 rounded-full flex items-center gap-2">
-                <span class="w-2 h-2 bg-white rounded-full live-badge"></span>
-                LIVE
-            </div>
+    <header class="max-w-6xl mx-auto mb-8 flex justify-between items-center border-b border-zinc-800 pb-4">
+        <div>
+            <h1 class="text-4xl font-black text-red-600 tracking-tighter">MaxFUT</h1>
+            <p class="text-zinc-400 text-sm">Nur Live Bundesliga Streams</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            <span class="font-bold text-sm uppercase">Live</span>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- Status Message Area -->
-        <div id="status-area" class="mb-6 text-center hidden">
-            <p class="text-slate-400" id="status-text"></p>
-        </div>
-
-        <!-- Matches Grid -->
-        <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Matches will be injected here via JS -->
-            <div class="col-span-full flex flex-col items-center justify-center py-20">
-                <div class="loader mb-4"></div>
-                <p class="text-slate-400">Suche nach Live Bundesliga Spielen...</p>
+        <!-- Match Liste -->
+        <div class="lg:col-span-1">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                Aktuelle Spiele
+            </h2>
+            <div id="matches-list" class="space-y-3">
+                <div class="animate-pulse text-zinc-500">Suche nach Bundesliga Spielen...</div>
             </div>
         </div>
 
+        <!-- Player Bereich -->
+        <div class="lg:col-span-2">
+            <div id="player-status" class="mb-4 p-4 bg-zinc-900 rounded-lg border border-zinc-800 hidden">
+                <p id="current-match-title" class="font-bold text-red-500"></p>
+                <p class="text-xs text-zinc-500">Admin Modus: Stream 1 aktiv</p>
+            </div>
+
+            <div class="stream-container" id="stream-wrapper">
+                <div id="placeholder-text" class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 p-6 text-center">
+                    <svg class="w-16 h-16 mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg>
+                    <p>Wähle ein Spiel aus der Liste, um den Stream zu starten.</p>
+                </div>
+                <!-- Sandbox-Attribute verhindern das Öffnen neuer Tabs oder Popups -->
+                <iframe 
+                    id="main-player" 
+                    src="" 
+                    allowfullscreen 
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                    style="display: none;">
+                </iframe>
+            </div>
+            
+            <div id="error-message" class="mt-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 hidden">
+                Kein Stream für dieses Spiel verfügbar. Bitte versuche es später erneut.
+            </div>
+        </div>
     </main>
 
-    <!-- Modal for Video Player -->
-    <div id="video-modal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 w-full max-w-5xl rounded-lg shadow-2xl border border-slate-700 overflow-hidden flex flex-col">
-            
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900">
-                <h3 id="modal-title" class="text-lg font-bold text-white truncate pr-4">Match Title</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white hover:bg-red-600 p-2 rounded transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <!-- Video Container -->
-            <div class="p-4 bg-black">
-                <div id="player-container" class="player-wrapper relative bg-slate-800 flex items-center justify-center">
-                    <!-- Iframe or Error message goes here -->
-                    <p class="text-slate-500">Lade Stream...</p>
-                </div>
-            </div>
-
-            <!-- Modal Footer / Info -->
-            <div class="p-4 bg-slate-900 text-sm text-slate-400 flex justify-between items-center">
-                <span><i class="fas fa-shield-alt text-green-500 mr-2"></i>Werbe-Blocker aktiv</span>
-                <span class="text-xs text-slate-500">Quelle: Admin 1 (Alpha)</span>
-            </div>
+    <!-- Ad-Guard Overlay -->
+    <div id="ad-guard">
+        <div class="bg-zinc-900 p-8 rounded-2xl border border-red-500 max-w-sm">
+            <h3 class="text-2xl font-bold mb-2">Werbung blockiert</h3>
+            <p class="text-zinc-400 mb-4">Ein unerwünschtes Fenster wurde verhindert. MaxFUT hält deine Verbindung sauber.</p>
+            <button onclick="document.getElementById('ad-guard').style.display='none'" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition">OK</button>
         </div>
     </div>
 
-    <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-8">
-        <div class="container mx-auto px-4 text-center text-slate-500 text-sm">
-            <p>&copy; 2024 MaxFUT. Nur Live Bundesliga.</p>
-        </div>
-    </footer>
-
     <script>
-        // API Configuration
-        const BASE_URL = 'https://streamed.pk/api';
-        
-        // Liste deutscher Teams/Keywords um Bundesliga zu erkennen, falls die API keine Liga liefert
-        const BUNDESLIGA_KEYWORDS = [
-            "bundesliga", "bayern", "munich", "dortmund", "bvb", "leverkusen", 
-            "leipzig", "stuttgart", "frankfurt", "hoffenheim", "bremen", "freiburg", 
-            "augsburg", "wolfsburg", "mainz", "gladbach", "borussia", "union berlin", 
-            "bochum", "köln", "darmstadt", "heidenheim", "st. pauli", "kiel", "hannover",
-            "hsv", "hamburg", "schalke", "hertha", "düsseldorf", "karlsruhe"
-        ];
+        // API Konfiguration
+        const API_BASE = 'https://streamed.pk/api';
+        const player = document.getElementById('main-player');
+        const streamWrapper = document.getElementById('stream-wrapper');
+        const placeholder = document.getElementById('placeholder-text');
+        const errorMsg = document.getElementById('error-message');
+        const matchesList = document.getElementById('matches-list');
+        const statusBox = document.getElementById('player-status');
+        const currentTitle = document.getElementById('current-match-title');
 
-        // Main function to start the app
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchLiveMatches();
-            // Refresh every 60 seconds automatically
-            setInterval(fetchLiveMatches, 60000);
-        });
+        // STRENGER SCHUTZ GEGEN WERBUNG
+        // 1. window.open überschreiben
+        window.open = function() {
+            showAdBlockAlert();
+            return null;
+        };
 
-        async function fetchLiveMatches() {
-            const grid = document.getElementById('matches-grid');
-            
+        // 2. Klick-Event-Listener für externe Links/Tabs
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('a');
+            if (target && (target.target === '_blank' || target.hostname !== window.location.hostname)) {
+                e.preventDefault();
+                showAdBlockAlert();
+            }
+        }, true);
+
+        function showAdBlockAlert() {
+            document.getElementById('ad-guard').style.display = 'flex';
+        }
+
+        // Spiele laden
+        async function fetchBundesligaMatches() {
             try {
-                // Fetch ALL live matches
-                const response = await fetch(`${BASE_URL}/matches/live`);
-                if (!response.ok) throw new Error('Netzwerk Fehler');
-                
+                const response = await fetch(`${API_BASE}/matches/live`);
+                if (!response.ok) throw new Error('API Fehler');
                 const matches = await response.json();
                 
-                // Filter 1: Must be Football
-                // Filter 2: Must be Bundesliga (Title or Team Name Check)
-                const bundesligaMatches = matches.filter(match => {
-                    const isFootball = match.category === 'football';
-                    
-                    if (!isFootball) return false;
-
-                    // Robust check for Bundesliga
-                    const title = (match.title || "").toLowerCase();
-                    const homeTeam = (match.teams?.home?.name || "").toLowerCase();
-                    const awayTeam = (match.teams?.away?.name || "").toLowerCase();
-                    
-                    const isGermanContext = BUNDESLIGA_KEYWORDS.some(keyword => 
-                        title.includes(keyword) || 
-                        homeTeam.includes(keyword) || 
-                        awayTeam.includes(keyword)
-                    );
-
-                    return isGermanContext;
-                });
+                // Filtere nach Bundesliga im Titel
+                const bundesligaMatches = matches.filter(m => 
+                    m.title.toLowerCase().includes('bundesliga')
+                );
 
                 renderMatches(bundesligaMatches);
-
             } catch (error) {
-                console.error('Fehler:', error);
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-10">
-                        <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
-                        <p class="text-xl text-white">Fehler beim Laden der Spiele.</p>
-                        <p class="text-slate-500 text-sm mt-2">${error.message}</p>
-                        <button onclick="fetchLiveMatches()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Erneut versuchen</button>
-                    </div>
-                `;
+                matchesList.innerHTML = '<p class="text-red-500">Fehler beim Laden der Spiele.</p>';
             }
         }
 
         function renderMatches(matches) {
-            const grid = document.getElementById('matches-grid');
-            
             if (matches.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-20 bg-slate-800/50 rounded-xl border border-slate-700">
-                        <i class="far fa-sad-tear text-slate-500 text-5xl mb-4"></i>
-                        <h2 class="text-2xl font-bold text-white mb-2">Keine Live Bundesliga Spiele</h2>
-                        <p class="text-slate-400">Aktuell sind keine Spiele live oder die API liefert keine Daten.</p>
-                    </div>
-                `;
+                matchesList.innerHTML = '<p class="text-zinc-500">Aktuell keine Live Bundesliga Spiele gefunden.</p>';
                 return;
             }
 
-            grid.innerHTML = matches.map(match => {
-                const homeBadge = match.teams?.home?.badge 
-                    ? `${BASE_URL}/images/badge/${match.teams.home.badge}.webp` 
-                    : 'https://placehold.co/50x50/1e293b/FFF?text=H';
+            matchesList.innerHTML = '';
+            matches.forEach(match => {
+                const card = document.createElement('div');
+                card.className = 'match-card p-4 rounded-lg bg-zinc-900 flex flex-col gap-2';
                 
-                const awayBadge = match.teams?.away?.badge 
-                    ? `${BASE_URL}/images/badge/${match.teams.away.badge}.webp` 
-                    : 'https://placehold.co/50x50/1e293b/FFF?text=A';
+                const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : '';
+                const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : '';
 
-                const homeName = match.teams?.home?.name || "Heim";
-                const awayName = match.teams?.away?.name || "Gast";
-                
-                // Wir speichern das ganze match objekt im data attribut als JSON string
-                // Achtung: Einfache Anführungszeichen escapen
-                const matchDataSafe = JSON.stringify(match).replace(/'/g, "&#39;");
-
-                return `
-                    <div class="bundesliga-card bg-slate-800 rounded-xl p-6 cursor-pointer group" 
-                         onclick='handleMatchClick(${matchDataSafe})'>
-                        
-                        <div class="flex justify-between items-center mb-4 text-xs font-mono text-slate-400">
-                            <span class="flex items-center text-red-500 font-bold">
-                                <span class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></span>
-                                LIVE
-                            </span>
-                            <span>Bundesliga</span>
-                        </div>
-
-                        <div class="flex items-center justify-between gap-4">
-                            <!-- Home -->
-                            <div class="flex flex-col items-center text-center w-1/3">
-                                <img src="${homeBadge}" alt="${homeName}" class="w-16 h-16 object-contain mb-2 drop-shadow-lg group-hover:scale-110 transition-transform">
-                                <span class="font-bold text-sm md:text-base leading-tight">${homeName}</span>
-                            </div>
-
-                            <!-- VS -->
-                            <div class="text-slate-500 font-bold text-xl italic">VS</div>
-
-                            <!-- Away -->
-                            <div class="flex flex-col items-center text-center w-1/3">
-                                <img src="${awayBadge}" alt="${awayName}" class="w-16 h-16 object-contain mb-2 drop-shadow-lg group-hover:scale-110 transition-transform">
-                                <span class="font-bold text-sm md:text-base leading-tight">${awayName}</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-6">
-                            <button class="w-full py-3 bg-slate-700 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
-                                <i class="fas fa-play"></i> Stream Starten
-                            </button>
-                            <p class="text-center text-[10px] text-slate-500 mt-2 uppercase tracking-widest">Nur Admin 1</p>
-                        </div>
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Live</span>
+                        <span class="text-[10px] text-zinc-500">${new Date(match.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        ${homeBadge ? `<img src="${homeBadge}" class="w-6 h-6 object-contain">` : ''}
+                        <span class="font-medium text-sm truncate">${match.title}</span>
+                        ${awayBadge ? `<img src="${awayBadge}" class="w-6 h-6 object-contain">` : ''}
                     </div>
                 `;
-            }).join('');
+                
+                card.onclick = () => startStream(match);
+                matchesList.appendChild(card);
+            });
         }
 
-        async function handleMatchClick(match) {
-            const modal = document.getElementById('video-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const playerContainer = document.getElementById('player-container');
-            
-            // Set basic info
-            modalTitle.textContent = match.title;
-            modal.classList.remove('hidden');
-            playerContainer.innerHTML = '<div class="loader"></div>';
+        async function startStream(match) {
+            // Reset UI
+            errorMsg.classList.add('hidden');
+            player.style.display = 'none';
+            placeholder.style.display = 'flex';
+            statusBox.classList.add('hidden');
 
-            // 1. Suche nach Quelle "alpha" (Admin 1)
-            // Die API nennt Quellen meist "alpha", "bravo" etc.
-            const adminSource = match.sources.find(s => s.source === 'alpha');
-
-            if (!adminSource) {
-                showErrorInPlayer("Kein Admin 1 Stream verfügbar.");
+            const source = match.sources[0]; // Nutze die erste verfügbare Quelle
+            if (!source) {
+                showError();
                 return;
             }
 
-            // 2. Stream Details abrufen
             try {
-                const response = await fetch(`${BASE_URL}/stream/${adminSource.source}/${adminSource.id}`);
+                const response = await fetch(`${API_BASE}/stream/${source.source}/${source.id}`);
                 const streams = await response.json();
 
-                if (!streams || streams.length === 0) {
-                    showErrorInPlayer("Stream Daten konnten nicht geladen werden.");
-                    return;
+                // Suche gezielt nach Stream 1 (Admin Wunsch)
+                const stream1 = streams.find(s => s.streamNo === 1) || streams[0];
+
+                if (stream1 && stream1.embedUrl) {
+                    player.src = stream1.embedUrl;
+                    player.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    statusBox.classList.remove('hidden');
+                    currentTitle.textContent = match.title;
+                } else {
+                    showError();
                 }
-
-                // Wir nehmen den ersten verfügbaren Stream von Alpha
-                const streamData = streams[0];
-                
-                if (!streamData.embedUrl) {
-                    showErrorInPlayer("Keine URL gefunden.");
-                    return;
-                }
-
-                embedStream(streamData.embedUrl);
-
-            } catch (err) {
-                console.error(err);
-                showErrorInPlayer("Verbindungsfehler beim Laden des Streams.");
+            } catch (e) {
+                showError();
             }
         }
 
-        function embedStream(url) {
-            const container = document.getElementById('player-container');
-            
-            // STRICT SECURITY:
-            // Wir nutzen das 'sandbox' Attribut.
-            // allow-scripts: Nötig damit der Player überhaupt läuft.
-            // allow-same-origin: Nötig für viele Player um Ressourcen zu laden.
-            // allow-presentation: Nötig für Vollbild.
-            // WICHTIG: KEIN 'allow-popups' oder 'allow-popups-to-escape-sandbox'.
-            // Das verhindert das Öffnen neuer Tabs/Fenster.
-            
-            container.innerHTML = `
-                <iframe 
-                    src="${url}" 
-                    width="100%" 
-                    height="100%" 
-                    frameborder="0" 
-                    scrolling="no" 
-                    allowfullscreen
-                    sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
-                ></iframe>
-            `;
+        function showError() {
+            errorMsg.classList.remove('hidden');
+            player.src = "";
+            player.style.display = 'none';
+            placeholder.style.display = 'flex';
         }
 
-        function showErrorInPlayer(msg) {
-            const container = document.getElementById('player-container');
-            container.innerHTML = `
-                <div class="text-center p-6">
-                    <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
-                    <h3 class="text-xl font-bold text-white mb-2">Nicht Verfügbar</h3>
-                    <p class="text-red-400">${msg}</p>
-                    <p class="text-slate-500 text-sm mt-4">Vorschrift: Es wird nur der "Admin 1" Stream akzeptiert.</p>
-                </div>
-            `;
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('video-modal');
-            const playerContainer = document.getElementById('player-container');
-            
-            // Iframe entfernen um Ton/Stream zu stoppen
-            playerContainer.innerHTML = '';
-            modal.classList.add('hidden');
-        }
-
-        // Close modal on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // Close modal if clicking outside
-        document.getElementById('video-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'video-modal') closeModal();
-        });
+        // Initialisierung
+        fetchBundesligaMatches();
+        // Alle 60 Sekunden aktualisieren
+        setInterval(fetchBundesligaMatches, 60000);
 
     </script>
 </body>
