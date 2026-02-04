@@ -263,7 +263,7 @@
 <body>
     <div class="container">
         <h1>🎨 Bildgenerator</h1>
-        <p class="subtitle">Erstelle Bilder mit Gemini 3 Pro - Kostenlos &amp; ohne laufende Gebühren</p>
+        <p class="subtitle">Erstelle Bilder mit Flux 1.1 Pro - Komplett kostenlos ohne API-Schlüssel</p>
 
         <div class="input-section">
             <label for="prompt">Bildbeschreibung</label>
@@ -290,10 +290,8 @@
         </div>
     </div>
 
+    <script src="https://js.puter.com/v2/"></script>
     <script>
-        const API_KEY = 'AIzaSyD27QOj-n6Sp-ouEBQGhy-q3umwafB2mUo';
-        const API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateImages';
-
         function showError(message) {
             const errorElement = document.getElementById('errorMessage');
             errorElement.textContent = message;
@@ -320,11 +318,6 @@
             
             const prompt = document.getElementById('prompt').value.trim();
 
-            if (!API_KEY || API_KEY === 'DEIN_API_SCHLÜSSEL_HIER') {
-                showError('Bitte trage deinen API-Schlüssel im Code ein (const API_KEY).');
-                return;
-            }
-
             if (!prompt) {
                 showError('Bitte beschreibe das Bild, das du erstellen möchtest.');
                 return;
@@ -333,48 +326,23 @@
             showLoading();
 
             try {
-                const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        instances: [
-                            {
-                                prompt: prompt
-                            }
-                        ],
-                        parameters: {
-                            sampleCount: 1,
-                            aspectRatio: "1:1",
-                            safetyFilterLevel: "block_some",
-                            personGeneration: "allow_all"
-                        }
-                    })
+                const result = await puter.ai.txt2img(prompt, {
+                    model: 'flux-1.1-pro',
+                    width: 1024,
+                    height: 1024
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error?.message || `API-Fehler: ${response.status}`);
-                }
-
-                const data = await response.json();
                 
-                if (data.predictions && data.predictions.length > 0) {
-                    const imageData = data.predictions[0].bytesBase64Encoded;
-                    const imageUrl = `data:image/png;base64,${imageData}`;
-                    
-                    document.getElementById('generatedImage').src = imageUrl;
-                    document.getElementById('resultSection').classList.add('active');
-                    
-                    document.querySelector('.input-section').style.display = 'none';
-                } else {
-                    throw new Error('Keine Bilddaten erhalten.');
-                }
+                const blob = await result.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                document.getElementById('generatedImage').src = imageUrl;
+                document.getElementById('resultSection').classList.add('active');
+                
+                document.querySelector('.input-section').style.display = 'none';
 
             } catch (error) {
                 console.error('Fehler:', error);
-                showError(`Fehler beim Generieren: ${error.message}`);
+                showError(`Fehler beim Generieren: ${error.message || 'Unbekannter Fehler'}`);
             } finally {
                 hideLoading();
             }
@@ -399,4 +367,3 @@
     </script>
 </body>
 </html>
-
