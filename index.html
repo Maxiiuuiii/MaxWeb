@@ -3,107 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BVB vs Heidenheim Live</title>
-    
-    <!-- Optimierung: DNS-Prefetching für embedsports.top -->
-    <link rel="preconnect" href="https://embedsports.top" crossorigin>
-    
+    <title>Bildgenerator - Gemini 3 Pro</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f0f0f;
-            color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+        :root {
+            --color-bg-primary: #fcfcf9;
+            --color-bg-secondary: #ffffff;
+            --color-text-primary: #13343b;
+            --color-text-secondary: #626c7c;
+            --color-accent: #2180a0;
+            --color-accent-hover: #1d749d;
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-shadow: rgba(0, 0, 0, 0.1);
         }
 
-        /* Navigationsleiste - minimal gehalten */
-        .controls {
-            padding: 10px;
-            background-color: #1a1a1a;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-bg-primary: #1f2121;
+                --color-bg-secondary: #262828;
+                --color-text-primary: #f5f5f5;
+                --color-text-secondary: #a7a9a9;
+                --color-accent: #32b8c6;
+                --color-accent-hover: #2da6b2;
+                --color-border: rgba(119, 124, 124, 0.3);
+                --color-shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 2rem;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid #333;
-            height: 50px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .input-section {
+            background: var(--color-bg-secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--color-shadow);
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: var(--color-text-primary);
+        }
+
+        .api-key-container {
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .info-text a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+
+        .info-text a:hover {
+            text-decoration: underline;
         }
 
         button {
-            padding: 8px 16px;
-            cursor: pointer;
-            background-color: #333;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background-color: #555;
-        }
-
-        /* Container für den Player */
-        .video-container {
-            flex-grow: 1;
-            position: relative;
             width: 100%;
-            height: 100%;
-            background: #000;
+            padding: 1rem 2rem;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
+        button:hover:not(:disabled) {
+            background: var(--color-accent-hover);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--color-text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--color-border);
+            border-top: 3px solid var(--color-accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            background: var(--color-bg-secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--color-shadow);
+        }
+
+        .result-section.active {
             display: block;
         }
 
-        .status {
-            font-size: 12px;
-            color: #888;
-            margin-left: auto;
-            padding-right: 15px;
+        .image-container {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px var(--color-shadow);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            border: 2px solid var(--color-border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--color-border);
+        }
+
+        .error-message {
+            background: rgba(255, 84, 89, 0.15);
+            border: 1px solid rgba(255, 84, 89, 0.3);
+            color: #ff5459;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .generated-image, .generated-image * {
+                visibility: visible;
+            }
+            .generated-image {
+                position: absolute;
+                left: 0;
+                top: 0;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .input-section,
+            .result-section {
+                padding: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎨 Bildgenerator</h1>
+        <p class="subtitle">Erstelle Bilder mit Gemini 3 Pro - Kostenlos &amp; ohne laufende Gebühren</p>
 
-    <div class="controls">
-        <span style="font-weight:bold; margin-right: 15px;">Dortmund vs Heidenheim</span>
-        <button onclick="refreshStream()" style="background-color: #c92a2a;">⟳ Reload Stream</button>
-        <div class="status">VPN Mode: Optimized</div>
-    </div>
+        <div class="input-section">
+            <label for="prompt">Bildbeschreibung</label>
+            <textarea id="prompt" placeholder="Beschreibe das Bild, das du erstellen möchtest..."></textarea>
 
-    <div class="video-container" id="player-wrapper">
-        <!-- Iframe wird direkt geladen -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <button id="generateBtn" onclick="generateImage()">Bild generieren</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Bild wird generiert...</p>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <div class="image-container">
+                <img id="generatedImage" class="generated-image" alt="Generiertes Bild">
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="createNewImage()">Neues Bild erstellen</button>
+                <button onclick="printImage()">🖨️ Bild drucken</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Der neue Stream
-        const streamCode = '<iframe title="Borussia Dortmund vs FC Heidenheim Player" marginheight="0" marginwidth="0" src="https://embedsports.top/embed/admin/ppv-borussia-dortmund-vs-1-fc-heidenheim-1846/1" scrolling="no" allowfullscreen="yes" allow="encrypted-media; picture-in-picture;" width="100%" height="100%" frameborder="0"></iframe>';
+        const API_KEY = 'AIzaSyD27QOj-n6Sp-ouEBQGhy-q3umwafB2mUo';
+        const API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generate';
 
-        function loadStream() {
-            const wrapper = document.getElementById('player-wrapper');
-            wrapper.innerHTML = streamCode;
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('active');
         }
 
-        function refreshStream() {
-            const wrapper = document.getElementById('player-wrapper');
-            wrapper.innerHTML = ''; 
-            setTimeout(() => {
-                wrapper.innerHTML = streamCode;
-            }, 50); 
+        function hideError() {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.classList.remove('active');
         }
 
-        // Direktes Laden beim Start
-        loadStream();
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('generateBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('generateBtn').disabled = false;
+        }
+
+        async function generateImage() {
+            hideError();
+            
+            const prompt = document.getElementById('prompt').value.trim();
+
+            if (!API_KEY || API_KEY === 'DEIN_API_SCHLÜSSEL_HIER') {
+                showError('Bitte trage deinen API-Schlüssel im Code ein (const API_KEY).');
+                return;
+            }
+
+            if (!prompt) {
+                showError('Bitte beschreibe das Bild, das du erstellen möchtest.');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        number_of_images: 1,
+                        aspect_ratio: '1:1',
+                        safety_filter_level: 'block_some',
+                        person_generation: 'allow_all'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API-Fehler: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.generated_images && data.generated_images.length > 0) {
+                    const imageData = data.generated_images[0].image.image_bytes;
+                    const imageUrl = `data:image/png;base64,${imageData}`;
+                    
+                    document.getElementById('generatedImage').src = imageUrl;
+                    document.getElementById('resultSection').classList.add('active');
+                    
+                    document.querySelector('.input-section').style.display = 'none';
+                } else {
+                    throw new Error('Keine Bilddaten erhalten.');
+                }
+
+            } catch (error) {
+                console.error('Fehler:', error);
+                showError(`Fehler beim Generieren: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function printImage() {
+            window.print();
+        }
+
+        function createNewImage() {
+            document.getElementById('resultSection').classList.remove('active');
+            document.querySelector('.input-section').style.display = 'block';
+            document.getElementById('prompt').value = '';
+            document.getElementById('prompt').focus();
+        }
+
+        document.getElementById('prompt').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generateImage();
+            }
+        });
     </script>
 </body>
 </html>
+
