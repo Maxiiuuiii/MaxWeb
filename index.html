@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilder-Zaubermaschine 🎨</title>
+    <title>Bilder-Zaubermaschine</title>
     <style>
         * {
             margin: 0;
@@ -12,389 +12,320 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #a8edea 50%, #fed6e3 75%, #d299c2 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             padding: 20px;
         }
 
         .container {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
             max-width: 800px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
-            color: #667eea;
-            font-size: 2.5rem;
+            font-size: 3.5em;
+            color: #ff6b6b;
+            text-shadow: 3px 3px 0px #ffd93d;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: bounce 2s infinite;
         }
 
-        .emoji {
-            font-size: 3rem;
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .input-section {
             margin-bottom: 30px;
         }
 
-        label {
-            display: block;
-            font-size: 1.2rem;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
         textarea {
             width: 100%;
-            min-height: 100px;
-            padding: 15px;
-            font-size: 1.1rem;
-            border: 3px solid #667eea;
-            border-radius: 15px;
+            min-height: 120px;
+            font-size: 1.5em;
+            padding: 20px;
+            border: 4px solid #4ecdc4;
+            border-radius: 25px;
             resize: vertical;
-            font-family: 'Arial', sans-serif;
-            transition: border-color 0.3s;
+            font-family: inherit;
+            background: #f8f9fa;
+            text-align: center;
         }
 
         textarea:focus {
             outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            border-color: #45b7d1;
+            background: white;
+            box-shadow: 0 0 20px rgba(69, 183, 209, 0.3);
         }
 
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 20px;
-            font-size: 1.3rem;
-            font-weight: bold;
+        .generate-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
             border: none;
-            border-radius: 25px;
+            font-size: 2em;
+            padding: 20px 40px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: bold;
+            margin-bottom: 30px;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4);
         }
 
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .btn:disabled {
+        .generate-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
 
-        .btn-generate {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .loading {
-            text-align: center;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .loading-text {
-            font-size: 1.3rem;
-            color: #667eea;
-            font-weight: bold;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .image-container {
-            text-align: center;
-            margin: 30px 0;
             display: none;
+            margin: 30px 0;
         }
 
         .generated-image {
-            max-width: 100%;
+            max-width: 90%;
+            max-height: 500px;
+            width: auto;
             height: auto;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
 
         .action-buttons {
             display: none;
-            gap: 15px;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .btn-print {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-            color: white;
-        }
-
-        .btn-reset {
-            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-            color: white;
-        }
-
-        .error-message {
-            display: none;
-            background: #ffe0e0;
-            border: 3px solid #ff6b6b;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .error-message p {
-            color: #d63031;
-            font-size: 1.2rem;
+        .btn {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: inherit;
             font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 200px;
         }
 
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
+        .print-btn {
+            background: linear-gradient(45deg, #ff9a56, #ff6b6b);
+            color: white;
+        }
 
-            .container {
-                padding: 25px;
-            }
+        .reset-btn {
+            background: linear-gradient(45deg, #a8edea, #74b9ff);
+            color: #2d3436;
+        }
 
-            .btn {
-                font-size: 1.1rem;
-                padding: 15px;
-            }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+        }
+
+        .loading, .error {
+            font-size: 1.8em;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 20px;
+            display: none;
+        }
+
+        .loading {
+            background: #ffd93d;
+            color: #2d3436;
+        }
+
+        .error {
+            background: #ff7675;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            .generate-btn { font-size: 1.5em; padding: 15px 30px; }
+            .btn { font-size: 1.2em; padding: 12px 24px; min-width: 150px; }
+            .container { padding: 20px; margin: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><span class="emoji">🎨</span> Bilder-Zaubermaschine <span class="emoji">✨</span></h1>
+        <h1>🪄 Bilder-Zaubermaschine 🪄</h1>
         
         <div class="input-section">
-            <label for="prompt">Was möchtest du sehen? 🖼️</label>
-            <textarea 
-                id="prompt" 
-                placeholder="Zum Beispiel: Ein blauer Drache mit Sonnenbrille auf dem Pausenhof"
-            ></textarea>
+            <textarea id="promptInput" placeholder="Schreib hier, was für ein Bild du zaubern möchtest! 
+z.B. 'Ein blauer Drache mit Sonnenbrille auf dem Pausenhof' ✨"></textarea>
+            <br>
+            <button class="generate-btn" id="generateBtn">🎨 Bild erstellen</button>
         </div>
 
-        <button class="btn btn-generate" id="generateBtn">
-            🪄 Bild erstellen
-        </button>
+        <div id="loading" class="loading">✨ Bild wird gezaubert... bitte warte! ✨</div>
+        <div id="error" class="error">😴 Ups, der KI-Zauberstab ist gerade müde. Versuch es noch einmal!</div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p class="loading-text">✨ Bild wird gezaubert... ✨</p>
-        </div>
-
-        <div class="error-message" id="error">
-            <p>😕 Ups, der KI-Zauberstab ist gerade müde. Versuch es noch einmal!</p>
-        </div>
-
-        <div class="image-container" id="imageContainer">
+        <div id="imageContainer" class="image-container">
             <img id="generatedImage" class="generated-image" alt="Generiertes Bild">
-        </div>
-
-        <div class="action-buttons" id="actionButtons">
-            <button class="btn btn-print" id="printBtn">
-                🖨️ Drucken
-            </button>
-            <button class="btn btn-reset" id="resetBtn">
-                🔄 Neues Bild
-            </button>
+            <div class="action-buttons">
+                <button class="btn print-btn" id="printBtn">🖨️ Drucken</button>
+                <button class="btn reset-btn" id="resetBtn">🔄 Neues Bild</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ========================================
-        // HIER DEINE DATEN EINTRAGEN! 👇
-        // ========================================
+        // =====================================================
+        // HIER DEINE API-EINSTELLUNGEN EINFÜGEN:
+        // =====================================================
+        // 1. Hole dir einen kostenlosen API-Key von: https://huggingface.co/settings/tokens
+        // 2. Wähle ein Bildgenerierungs-Modell, z.B.:
+        //    - "stabilityai/stable-diffusion-2" (gut für realistische Bilder)
+        //    - "runwayml/stable-diffusion-v1-5" 
+        //    - "black-forest-labs/FLUX.1-schnell" (sehr schnell, gute Qualität)
+        // 3. Füge hier deinen Key und Modellname ein:
+        const HF_API_KEY = "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";  // z.B. "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        const MODEL_ID = "black-forest-labs/FLUX.1-schnell"; // z.B. "stabilityai/stable-diffusion-2"
         
-        // Trage hier deinen Hugging Face API-Key ein
-        // Den bekommst du auf: https://huggingface.co/settings/tokens
-        const HF_API_KEY = "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";
-        
-        // Trage hier das Modell ein, das du verwenden möchtest
-        // Beispiele:
-        // - "black-forest-labs/FLUX.1-schnell" (schnell, gute Qualität)
-        // - "stabilityai/stable-diffusion-xl-base-1.0"
-        // - "runwayml/stable-diffusion-v1-5"
-        const MODEL_ID = "black-forest-labs/FLUX.1-schnell";
-        
-        // ========================================
-        // AB HIER NICHTS MEHR ÄNDERN 😊
-        // ========================================
+        // API Basis-URL
+        const API_URL = `https://api-inference.huggingface.co/models/${MODEL_ID}`;
+        // =====================================================
 
-        // DOM-Elemente
-        const promptInput = document.getElementById('prompt');
+        const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
         const loading = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
+        const error = document.getElementById('error');
         const imageContainer = document.getElementById('imageContainer');
         const generatedImage = document.getElementById('generatedImage');
-        const actionButtons = document.getElementById('actionButtons');
         const printBtn = document.getElementById('printBtn');
         const resetBtn = document.getElementById('resetBtn');
 
-        // Event Listener für "Bild erstellen"
-        generateBtn.addEventListener('click', generateImage);
+        let currentImageBlob = null;
 
-        // Event Listener für "Drucken"
-        printBtn.addEventListener('click', printImage);
-
-        // Event Listener für "Neues Bild"
-        resetBtn.addEventListener('click', resetApp);
-
-        // Enter-Taste im Textarea soll auch Bild generieren (optional)
-        promptInput.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                generateImage();
-            }
-        });
-
-        async function generateImage() {
+        generateBtn.addEventListener('click', async () => {
             const prompt = promptInput.value.trim();
-
-            // Prüfen ob Prompt leer ist
             if (!prompt) {
-                alert('🤔 Bitte schreibe zuerst, was du sehen möchtest!');
+                alert('✨ Schreib erst einen Zaubertext! ✨');
                 return;
             }
 
+            if (!HF_API_KEY || HF_API_KEY === "HIER_DEIN_API_KEY_EINFÜGEN") {
+                alert('🚨 Bitte füge zuerst deinen Hugging Face API-Key im JavaScript-Code ein!');
+                return;
+            }
+
+            if (!MODEL_ID || MODEL_ID === "HIER_DEIN_MODELLNAME_EINFÜGEN") {
+                alert('🚨 Bitte füge zuerst eine Modell-ID im JavaScript-Code ein!');
+                return;
+            }
+
+            // UI-Status: Laden
             generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Zaubern...';
             loading.style.display = 'block';
-            errorDiv.style.display = 'none';
+            error.style.display = 'none';
             imageContainer.style.display = 'none';
-            actionButtons.style.display = 'none';
 
             try {
-                // API-Anfrage an Hugging Face
-                const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL_ID}`, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${HF_API_KEY}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        inputs: prompt
-                    })
+                        inputs: prompt,
+                        parameters: {
+                            num_inference_steps: 20, // Schnellere Generierung
+                        }
+                    }),
                 });
 
                 if (!response.ok) {
                     throw new Error(`API Fehler: ${response.status}`);
                 }
 
-                // Bild als Blob empfangen
-                const blob = await response.blob();
+                const buffer = await response.arrayBuffer();
+                const blob = new Blob([buffer], { type: 'image/png' });
+                currentImageBlob = blob;
 
-                // Blob in URL umwandeln und anzeigen
+                // Bild als URL erstellen und anzeigen
                 const imageUrl = URL.createObjectURL(blob);
                 generatedImage.src = imageUrl;
-
-                // Bild anzeigen
                 imageContainer.style.display = 'block';
-                actionButtons.style.display = 'grid';
-                actionButtons.style.gridTemplateColumns = '1fr 1fr';
 
-            } catch (error) {
-                console.error('Fehler beim Generieren:', error);
-                errorDiv.style.display = 'block';
+            } catch (err) {
+                console.error('Generierungsfehler:', err);
+                error.style.display = 'block';
             } finally {
-                // Loading verstecken und Button wieder aktivieren
+                // UI zurücksetzen
                 loading.style.display = 'none';
                 generateBtn.disabled = false;
+                generateBtn.textContent = '🎨 Bild erstellen';
             }
-        }
+        });
 
-        function printImage() {
-            // Neues Fenster öffnen, nur mit dem Bild
+        // Druck-Button: Neues Fenster mit nur dem Bild
+        printBtn.addEventListener('click', () => {
+            if (!currentImageBlob) return;
+
             const printWindow = window.open('', '_blank');
+            const imageUrl = URL.createObjectURL(currentImageBlob);
             
-            printWindow.document.write(
-                '<!DOCTYPE html>' +
-                '<html>' +
-                '<head>' +
-                    '<title>Bild drucken</title>' +
-                    '<style>' +
-                        'body {' +
-                            'margin: 0;' +
-                            'display: flex;' +
-                            'justify-content: center;' +
-                            'align-items: center;' +
-                            'min-height: 100vh;' +
-                        '}' +
-                        'img {' +
-                            'max-width: 100%;' +
-                            'height: auto;' +
-                        '}' +
-                    '</style>' +
-                '</head>' +
-                '<body>' +
-                    '<img src="' + generatedImage.src + '" alt="Generiertes Bild">' +
-                    '<script>' +
-                        'window.onload = function() {' +
-                            'window.print();' +
-                        '};' +
-                    '<\/script>' +
-                '</body>' +
-                '</html>'
-            );
-            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Drucke dein Bild</title>
+                    <style>
+                        body { margin: 0; padding: 20px; background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                        img { max-width: 100%; max-height: 100vh; box-shadow: none; }
+                    </style>
+                </head>
+                <body>
+                    <img src="${imageUrl}" onload="window.print();">
+                </body>
+                </html>
+            `);
             printWindow.document.close();
-        }
+        });
 
-        function resetApp() {
-            // Eingabefeld leeren
+        // Reset-Button
+        resetBtn.addEventListener('click', () => {
             promptInput.value = '';
-            
-            // Bild und Buttons verstecken
+            generatedImage.src = '';
             imageContainer.style.display = 'none';
-            actionButtons.style.display = 'none';
-            errorDiv.style.display = 'none';
-            
-            // Alte Bild-URL freigeben (Speicher sparen)
-            if (generatedImage.src) {
-                URL.revokeObjectURL(generatedImage.src);
-                generatedImage.src = '';
-            }
-            
-            // Focus zurück auf Eingabefeld
+            currentImageBlob = null;
+            error.style.display = 'none';
             promptInput.focus();
-        }
+        });
+
+        // Enter-Taste im Eingabefeld = Generieren
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generateBtn.click();
+            }
+        });
     </script>
 </body>
 </html>
