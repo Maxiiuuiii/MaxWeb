@@ -246,14 +246,14 @@
         
         // Trage hier deinen Hugging Face API-Key ein
         // Den bekommst du auf: https://huggingface.co/settings/tokens
-        const HF_API_KEY = "HIER_DEIN_API_KEY";
+        const HF_API_KEY = "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";
         
         // Trage hier das Modell ein, das du verwenden möchtest
         // Beispiele:
         // - "black-forest-labs/FLUX.1-schnell" (schnell, gute Qualität)
         // - "stabilityai/stable-diffusion-xl-base-1.0"
         // - "runwayml/stable-diffusion-v1-5"
-        const MODEL_ID = "HIER_DEIN_MODELLNAME";
+        const MODEL_ID = "black-forest-labs/FLUX.1-schnell";
         
         // ========================================
         // AB HIER NICHTS MEHR ÄNDERN 😊
@@ -296,12 +296,7 @@
             }
 
             // Prüfen ob API-Key und Modell eingetragen sind
-            if (HF_API_KEY === "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" || MODEL_ID === "black-forest-labs/FLUX.1-schnell") {
-                alert('⚠️ Bitte trage zuerst deinen API-Key und Modellnamen im Code ein!');
-                return;
-            }
-
-            // UI vorbereiten
+    if (HF_API_KEY === "HIER_DEIN_API_KEY" || MODEL_ID === "HIER_DEIN_MODELLNAME") {            // UI vorbereiten
             generateBtn.disabled = true;
             loading.style.display = 'block';
             errorDiv.style.display = 'none';
