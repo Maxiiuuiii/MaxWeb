@@ -3,20 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Livestream Player</title>
+  <title>Livestream Player - Embed einfügen</title>
   <style>
     body {
       margin: 0;
-      background-color: #000;
+      background-color: #121212;
       color: #fff;
       font-family: Arial, sans-serif;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 1em;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 100px;
+      font-family: monospace;
+      padding: 10px;
+      resize: none;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #0078ff;
+      color: white;
     }
 
     .player-container {
-      position: relative;
-      width: 100%;
-      height: 100vh; /* Vollbildhöhe */
+      width: 90%;
+      max-width: 1000px;
+      height: 70vh;
+      margin-top: 30px;
+      background-color: #000;
+      border-radius: 5px;
       overflow: hidden;
     }
 
@@ -28,12 +63,21 @@
   </style>
 </head>
 <body>
-  <h1>Mein Livestream</h1>
-  <div class="player-container">
-    <iframe 
-      src="https://dlhd.link/stream/stream-23.php" 
-      allowfullscreen>
-    </iframe>
+  <h1>Livestream Player</h1>
+  <p>Füge unten deinen Embed-Code (z. B. ein &lt;iframe&gt;) ein:</p>
+  <textarea id="embedInput" placeholder='<iframe src="https://example.com/stream" width="100%" height="100%" allowfullscreen></iframe>'></textarea>
+  <button onclick="einfügen()">Einfügen</button>
+
+  <div class="player-container" id="playerContainer">
+    <p style="text-align:center; padding-top:20px;">Hier erscheint dein Stream …</p>
   </div>
+
+  <script>
+    function einfügen() {
+      const embedCode = document.getElementById("embedInput").value;
+      const container = document.getElementById("playerContainer");
+      container.innerHTML = embedCode;
+    }
+  </script>
 </body>
 </html>
