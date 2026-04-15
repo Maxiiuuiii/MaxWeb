@@ -10,6 +10,7 @@
             --bg-color: #0f172a;
             --text-color: #f8fafc;
             --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
             --panel-bg: #1e293b;
             --border-color: #334155;
         }
@@ -34,6 +35,49 @@
             margin-top: 2vh;
         }
 
+        /* --- Eingabebereich für eigenen Iframe --- */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background-color: var(--panel-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group input {
+            flex: 1;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .input-group button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .input-group button:hover {
+            background-color: var(--accent-hover);
+        }
+
         /* Responsiver Player-Container (16:9) */
         .player-wrapper {
             position: relative;
@@ -53,6 +97,7 @@
             width: 100%;
             height: 100%;
             transition: filter 0.3s ease; /* Weicher Übergang beim Wechseln der Filter */
+            border: none;
         }
 
         /* --- Filter Profile --- */
@@ -60,19 +105,15 @@
             filter: none; 
         }
         .filter-bigscreen { 
-            /* Hoher Kontrast, leicht erhöhte Sättigung für das Wohnzimmer */
             filter: contrast(1.25) saturate(1.3) brightness(1.05); 
         }
         .filter-vibrant { 
-            /* Sehr starkes Grün für den Rasen */
             filter: contrast(1.1) saturate(1.6) brightness(1.1); 
         }
         .filter-stadium { 
-            /* Klarere Linien durch Kontrast, leicht gedimmte Helligkeit */
             filter: contrast(1.15) saturate(1.1) brightness(0.95); 
         }
         .filter-night { 
-            /* Augenschonend für spätere Spiele */
             filter: contrast(1.1) brightness(0.8) sepia(0.15); 
         }
 
@@ -159,9 +200,16 @@
 <body>
 
     <div class="container">
-        <div class="player-wrapper">
+        
+        <!-- Neues Eingabefeld für den Iframe -->
+        <div class="input-group">
+            <input type="text" id="embed-input" placeholder="Füge hier deinen kompletten <iframe... > Code oder eine Stream-URL ein">
+            <button id="load-btn">Stream Laden</button>
+        </div>
+
+        <div class="player-wrapper" id="player-container">
+            <!-- Standard-Iframe beim Laden der Seite -->
             <iframe 
-                id="stream-iframe"
                 src="https://bintv.pages.dev/?id=pl-e2c.pages.dev/tntsports2hdfootballlinklatestnew&data=aHR0cHM6Ly9iaW50dnBsYXllci5ibG9nc3BvdC5jb20vP3E9aHR0cHM6Ly9pcGwtZTJjLnBhZ2VzLmRldi90bnRzcG9ydHMyaGRmb290YmFsbGxpbmtsYXRlc3RuZXc=" 
                 frameborder="0" 
                 allowfullscreen 
@@ -191,23 +239,71 @@
     </div>
 
     <script>
-        const iframe = document.getElementById('stream-iframe');
+        const playerContainer = document.getElementById('player-container');
         const toggle = document.getElementById('filter-toggle');
         const select = document.getElementById('profile-select');
+        const embedInput = document.getElementById('embed-input');
+        const loadBtn = document.getElementById('load-btn');
 
-        // Funktion, die den Filter auf den iFrame anwendet oder entfernt
+        // Funktion, die den Filter auf den AKTUELLEN iFrame anwendet
         function updateFilter() {
+            // Holt sich immer den Iframe, der gerade im Container ist
+            const currentIframe = playerContainer.querySelector('iframe');
+            if (!currentIframe) return;
+
             // Alte Klassen entfernen
-            iframe.classList.remove('filter-none', 'filter-bigscreen', 'filter-vibrant', 'filter-stadium', 'filter-night');
+            currentIframe.classList.remove('filter-none', 'filter-bigscreen', 'filter-vibrant', 'filter-stadium', 'filter-night');
             
             if (toggle.checked) {
-                // Das im Dropdown gewählte Profil anwenden
-                iframe.classList.add(select.value);
+                currentIframe.classList.add(select.value);
             } else {
-                // Wenn Toggle aus ist, keinen Filter setzen
-                iframe.classList.add('filter-none');
+                currentIframe.classList.add('filter-none');
             }
         }
+
+        // Funktion um einen neuen Iframe zu laden
+        function loadNewStream() {
+            const inputValue = embedInput.value.trim();
+            if (!inputValue) return;
+
+            let newIframeHTML = '';
+
+            // Prüfen, ob der Nutzer einen kompletten <iframe ...> Tag oder nur einen Link gepostet hat
+            if (inputValue.toLowerCase().startsWith('<iframe')) {
+                newIframeHTML = inputValue;
+            } else if (inputValue.startsWith('http')) {
+                // Wenn es nur ein Link ist, bauen wir den Iframe selbst zusammen
+                newIframeHTML = `<iframe src="${inputValue}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+            } else {
+                alert("Bitte einen gültigen Iframe-Code oder eine URL eingeben.");
+                return;
+            }
+
+            // Den alten Inhalt im Wrapper mit dem neuen Iframe ersetzen
+            playerContainer.innerHTML = newIframeHTML;
+
+            // Den gerade eingefügten Iframe anpassen (damit er CSS ignoriert, das im Code des Nutzers stehen könnte)
+            const newlyAddedIframe = playerContainer.querySelector('iframe');
+            if (newlyAddedIframe) {
+                newlyAddedIframe.removeAttribute('width');
+                newlyAddedIframe.removeAttribute('height');
+                newlyAddedIframe.removeAttribute('style'); // Entfernt Inline-Styles die das 16:9 Layout kaputt machen könnten
+                
+                // Filter direkt auf den neuen Stream anwenden
+                updateFilter();
+                
+                // Eingabefeld leeren (optional)
+                embedInput.value = '';
+            }
+        }
+
+        // Listener für Button und Enter-Taste im Eingabefeld
+        loadBtn.addEventListener('click', loadNewStream);
+        embedInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                loadNewStream();
+            }
+        });
 
         // Listener für Schalter und Dropdown
         toggle.addEventListener('change', updateFilter);
