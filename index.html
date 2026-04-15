@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player - Bayern vs Real Madrid</title>
+    <title>Live Stream Player - Multi-Source</title>
     <style>
         :root {
             --bg-color: #0f172a;
             --primary: #3b82f6;
             --text: #f8fafc;
+            --panel-bg: #1e293b;
         }
         
         body {
@@ -31,33 +32,51 @@
         .player-container {
             width: 100%;
             max-width: 1200px;
-            aspect-ratio: 16 / 9; /* Hält das 16:9 Format responsive */
+            aspect-ratio: 16 / 9;
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            /* Weicher Übergang beim Wechseln der Filter */
             transition: filter 0.4s ease-in-out;
         }
 
-        /* --- Button & UI Styling --- */
+        /* --- UI Styling --- */
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .control-group {
+            background-color: var(--panel-bg);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .control-group h3 {
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
         .controls {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            justify-content: center;
-            max-width: 800px;
         }
 
         button {
-            background-color: #1e293b;
+            background-color: #0f172a;
             color: var(--text);
             border: 2px solid #334155;
             padding: 10px 16px;
@@ -78,66 +97,73 @@
             color: var(--primary);
         }
 
-        /* --- Die CSS Video-Filter --- */
-        
-        .filter-normal {
-            filter: none;
-        }
-        
-        .filter-bigscreen {
-            /* Ideal für TVs: Erhöhter Kontrast, mehr Sättigung für den Rasen und leicht angehobene Helligkeit */
-            filter: contrast(1.15) saturate(1.25) brightness(1.05);
-        }
-        
-        .filter-vivid {
-            /* Stadion-Modus: Sehr starkes Grün und leuchtende Trikots */
-            filter: contrast(1.2) saturate(1.4) brightness(1.1);
-        }
-        
-        .filter-night {
-            /* Abendspiel: Etwas dunkler, starker Kontrast, schont die Augen in dunklen Räumen */
-            filter: contrast(1.2) saturate(1.15) brightness(0.9);
-        }
+        /* --- CSS Video-Filter --- */
+        .filter-normal { filter: none; }
+        .filter-bigscreen { filter: contrast(1.15) saturate(1.25) brightness(1.05); }
+        .filter-vivid { filter: contrast(1.2) saturate(1.4) brightness(1.1); }
+        .filter-night { filter: contrast(1.2) saturate(1.15) brightness(0.9); }
     </style>
 </head>
 <body>
 
-    <h1>⚽ Bayern Munich vs Real Madrid</h1>
+    <h1>⚽ Live Match Player</h1>
 
     <div class="player-container">
-        <!-- Dein Embed-Code inkl. ID, um ihn mit JavaScript ansprechen zu können -->
+        <!-- Das iframe lädt standardmäßig Stream 1 -->
         <iframe 
             id="stream-frame" 
             class="filter-normal"
-            title="Bayern Munich vs Real Madrid Player" 
-            marginheight="0" 
-            marginwidth="0" 
+            title="Live Player" 
             src="https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1" 
-            scrolling="no" 
-            allowfullscreen="yes" 
-            allow="encrypted-media; picture-in-picture;" 
-            width="100%" 
-            height="100%" 
-            frameborder="0">
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
         </iframe>
     </div>
 
-    <!-- Steuerelemente für die Filter -->
-    <div class="controls">
-        <button class="active" onclick="setFilter('filter-normal', this)">Standard</button>
-        <button onclick="setFilter('filter-bigscreen', this)">📺 Big Screen (Empfohlen)</button>
-        <button onclick="setFilter('filter-vivid', this)">🌿 Vivid Rasen</button>
-        <button onclick="setFilter('filter-night', this)">🌙 Abendspiel</button>
+    <div class="controls-wrapper">
+        <!-- Stream Auswahl -->
+        <div class="control-group">
+            <h3>📡 Stream Quelle wählen:</h3>
+            <div class="controls" id="stream-controls">
+                <button class="active" onclick="setStream('https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1', this)">Stream 1 (Main)</button>
+                <button onclick="setStream('http://dlstreams.com/stream/stream-32.php', this)">Stream 2 (Backup 1)</button>
+                <button onclick="setStream('https://ntv.cx/embed?t=RnBicEVST3ZWdWxIOTdKVHE4MlUydFlKR00weWtLd1orQ21LeUtTNTVuQzNJYWN4NEdIQkZMRUM1aHBIKzMyV0R2b1JDZmtxMkNuVCt6WUVjV1NsNjlsbzdEcVdNMUlCMDEvcEh3bE5Cakk9', this)">Stream 3 (Backup 2)</button>
+            </div>
+        </div>
+
+        <!-- Filter Auswahl -->
+        <div class="control-group">
+            <h3>🎨 Bild-Filter:</h3>
+            <div class="controls" id="filter-controls">
+                <button class="active" onclick="setFilter('filter-normal', this)">Standard</button>
+                <button onclick="setFilter('filter-bigscreen', this)">📺 Big Screen</button>
+                <button onclick="setFilter('filter-vivid', this)">🌿 Vivid Rasen</button>
+                <button onclick="setFilter('filter-night', this)">🌙 Abendspiel</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Funktion zum Wechseln der Stream-URL
+        function setStream(url, btn) {
+            const iframe = document.getElementById('stream-frame');
+            // Tauscht die src-URL des iframes aus, um den neuen Stream zu laden
+            iframe.src = url;
+
+            // Markiert den aktiven Button in der Stream-Auswahl
+            const container = document.getElementById('stream-controls');
+            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Funktion zum Wechseln des CSS-Filters (bleibt über Stream-Wechsel hinweg aktiv)
         function setFilter(filterClass, btn) {
-            // Sucht das Iframe und ändert dessen Klasse auf den gewählten Filter
             const iframe = document.getElementById('stream-frame');
             iframe.className = filterClass;
 
-            // Markiert den aktuell geklickten Button farblich
-            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+            // Markiert den aktiven Button in der Filter-Auswahl
+            const container = document.getElementById('filter-controls');
+            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
     </script>
