@@ -126,7 +126,7 @@
             <h3>📡 Stream Quelle wählen:</h3>
             <div class="controls" id="stream-controls">
                 <button class="active" onclick="setStream('https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1', this)">Stream 1 (Main)</button>
-                <button onclick="setStream('http://dlstreams.com/stream/stream-32.php', this)">Stream 2 (Backup 1)</button>
+                <button onclick="setStream('https://dlstreams.com/stream/stream-32.php', this)">Stream 2 (Backup 1)</button>
                 <button onclick="setStream('https://ntv.cx/embed?t=RnBicEVST3ZWdWxIOTdKVHE4MlUydFlKR00weWtLd1orQ21LeUtTNTVuQzNJYWN4NEdIQkZMRUM1aHBIKzMyV0R2b1JDZmtxMkNuVCt6WUVjV1NsNjlsbzdEcVdNMUlCMDEvcEh3bE5Cakk9', this)">Stream 3 (Backup 2)</button>
             </div>
         </div>
@@ -143,25 +143,39 @@
         </div>
     </div>
 
-    <script>
+       <script>
         // Funktion zum Wechseln der Stream-URL
         function setStream(url, btn) {
-            const iframe = document.getElementById('stream-frame');
-            // Tauscht die src-URL des iframes aus, um den neuen Stream zu laden
-            iframe.src = url;
+            const container = document.querySelector('.player-container');
+            const oldIframe = document.getElementById('stream-frame');
+            
+            // 1. Speichere den aktuell ausgewählten Bild-Filter
+            const currentFilter = oldIframe ? oldIframe.className : 'filter-normal';
 
-            // Markiert den aktiven Button in der Stream-Auswahl
-            const container = document.getElementById('stream-controls');
-            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            // 2. Erstelle ein komplett neues iframe (Hard Reset für den Player)
+            const newIframe = document.createElement('iframe');
+            newIframe.id = 'stream-frame';
+            newIframe.className = currentFilter; // Filter wieder anwenden
+            newIframe.title = "Live Player";
+            newIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            newIframe.allowFullscreen = true;
+            newIframe.src = url;
+
+            // 3. Lösche das alte iframe und füge das neue ein
+            container.innerHTML = '';
+            container.appendChild(newIframe);
+
+            // 4. Button-Farbe aktualisieren
+            const controlsContainer = document.getElementById('stream-controls');
+            controlsContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
 
-        // Funktion zum Wechseln des CSS-Filters (bleibt über Stream-Wechsel hinweg aktiv)
+        // Funktion zum Wechseln des CSS-Filters
         function setFilter(filterClass, btn) {
             const iframe = document.getElementById('stream-frame');
-            iframe.className = filterClass;
+            if (iframe) iframe.className = filterClass;
 
-            // Markiert den aktiven Button in der Filter-Auswahl
             const container = document.getElementById('filter-controls');
             container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
