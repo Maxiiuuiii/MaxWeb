@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Wichtig: Verhindert, dass die Streaming-Seite blockiert, weil sie in einer fremden Seite eingebettet ist -->
+    <meta name="referrer" content="no-referrer">
     <title>Minimalist Live Stream Player</title>
     <style>
-        /* Farbpalette und Basis-Styling */
         :root {
             --bg-color: #0f172a;
             --text-color: #f8fafc;
@@ -35,7 +36,6 @@
             margin-top: 2vh;
         }
 
-        /* --- Eingabebereich für eigenen Iframe --- */
         .input-group {
             display: flex;
             gap: 10px;
@@ -81,7 +81,7 @@
         /* Responsiver Player-Container (16:9) */
         .player-wrapper {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Seitenverhältnis */
+            padding-bottom: 56.25%; 
             height: 0;
             overflow: hidden;
             background-color: #000;
@@ -96,28 +96,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            transition: filter 0.3s ease; /* Weicher Übergang beim Wechseln der Filter */
+            transition: filter 0.3s ease;
             border: none;
         }
 
         /* --- Filter Profile --- */
-        .filter-none { 
-            filter: none; 
-        }
-        .filter-bigscreen { 
-            filter: contrast(1.25) saturate(1.3) brightness(1.05); 
-        }
-        .filter-vibrant { 
-            filter: contrast(1.1) saturate(1.6) brightness(1.1); 
-        }
-        .filter-stadium { 
-            filter: contrast(1.15) saturate(1.1) brightness(0.95); 
-        }
-        .filter-night { 
-            filter: contrast(1.1) brightness(0.8) sepia(0.15); 
-        }
+        .filter-none { filter: none; }
+        .filter-bigscreen { filter: contrast(1.25) saturate(1.3) brightness(1.05); }
+        .filter-vibrant { filter: contrast(1.1) saturate(1.6) brightness(1.1); }
+        .filter-stadium { filter: contrast(1.15) saturate(1.1) brightness(0.95); }
+        .filter-night { filter: contrast(1.1) brightness(0.8) sepia(0.15); }
 
-        /* --- Minimalistisches Kontrollpanel --- */
+        /* --- Kontrollpanel --- */
         .controls {
             margin-top: 20px;
             background-color: var(--panel-bg);
@@ -154,22 +144,16 @@
             transition: border-color 0.2s;
         }
 
-        select:focus, select:hover {
-            border-color: var(--accent-color);
-        }
+        select:focus, select:hover { border-color: var(--accent-color); }
 
-        /* --- Toggle Switch Design --- */
+        /* --- Toggle Switch --- */
         .switch {
             position: relative;
             display: inline-block;
             width: 46px;
             height: 24px;
         }
-        .switch input { 
-            opacity: 0; 
-            width: 0; 
-            height: 0; 
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute;
             cursor: pointer;
@@ -189,31 +173,26 @@
             transition: .3s;
             border-radius: 50%;
         }
-        input:checked + .slider { 
-            background-color: var(--accent-color); 
-        }
-        input:checked + .slider:before { 
-            transform: translateX(22px); 
-        }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
     </style>
 </head>
 <body>
 
     <div class="container">
         
-        <!-- Neues Eingabefeld für den Iframe -->
         <div class="input-group">
             <input type="text" id="embed-input" placeholder="Füge hier deinen kompletten <iframe... > Code oder eine Stream-URL ein">
             <button id="load-btn">Stream Laden</button>
         </div>
 
         <div class="player-wrapper" id="player-container">
-            <!-- Standard-Iframe beim Laden der Seite -->
+            <!-- Dein gewünschter Iframe als Standard -->
+            <!-- Hinweis: inline style und width/height wurden vom Javascript/CSS überschrieben, damit das 16:9 Format erhalten bleibt -->
             <iframe 
-                src="https://bintv.pages.dev/?id=pl-e2c.pages.dev/tntsports2hdfootballlinklatestnew&data=aHR0cHM6Ly9iaW50dnBsYXllci5ibG9nc3BvdC5jb20vP3E9aHR0cHM6Ly9pcGwtZTJjLnBhZ2VzLmRldi90bnRzcG9ydHMyaGRmb290YmFsbGxpbmtsYXRlc3RuZXc=" 
+                src="http://dlstreams.com/stream/stream-8.php" 
                 frameborder="0" 
-                allowfullscreen 
-                allow="autoplay; encrypted-media">
+                allowfullscreen>
             </iframe>
         </div>
 
@@ -245,13 +224,10 @@
         const embedInput = document.getElementById('embed-input');
         const loadBtn = document.getElementById('load-btn');
 
-        // Funktion, die den Filter auf den AKTUELLEN iFrame anwendet
         function updateFilter() {
-            // Holt sich immer den Iframe, der gerade im Container ist
             const currentIframe = playerContainer.querySelector('iframe');
             if (!currentIframe) return;
 
-            // Alte Klassen entfernen
             currentIframe.classList.remove('filter-none', 'filter-bigscreen', 'filter-vibrant', 'filter-stadium', 'filter-night');
             
             if (toggle.checked) {
@@ -261,56 +237,29 @@
             }
         }
 
-        // Funktion um einen neuen Iframe zu laden
         function loadNewStream() {
             const inputValue = embedInput.value.trim();
             if (!inputValue) return;
 
             let newIframeHTML = '';
 
-            // Prüfen, ob der Nutzer einen kompletten <iframe ...> Tag oder nur einen Link gepostet hat
             if (inputValue.toLowerCase().startsWith('<iframe')) {
                 newIframeHTML = inputValue;
             } else if (inputValue.startsWith('http')) {
-                // Wenn es nur ein Link ist, bauen wir den Iframe selbst zusammen
-                newIframeHTML = `<iframe src="${inputValue}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+                newIframeHTML = `<iframe src="${inputValue}" frameborder="0" allowfullscreen></iframe>`;
             } else {
                 alert("Bitte einen gültigen Iframe-Code oder eine URL eingeben.");
                 return;
             }
 
-            // Den alten Inhalt im Wrapper mit dem neuen Iframe ersetzen
             playerContainer.innerHTML = newIframeHTML;
 
-            // Den gerade eingefügten Iframe anpassen (damit er CSS ignoriert, das im Code des Nutzers stehen könnte)
             const newlyAddedIframe = playerContainer.querySelector('iframe');
             if (newlyAddedIframe) {
                 newlyAddedIframe.removeAttribute('width');
                 newlyAddedIframe.removeAttribute('height');
-                newlyAddedIframe.removeAttribute('style'); // Entfernt Inline-Styles die das 16:9 Layout kaputt machen könnten
+                newlyAddedIframe.removeAttribute('style'); 
                 
-                // Filter direkt auf den neuen Stream anwenden
                 updateFilter();
-                
-                // Eingabefeld leeren (optional)
                 embedInput.value = '';
-            }
-        }
-
-        // Listener für Button und Enter-Taste im Eingabefeld
-        loadBtn.addEventListener('click', loadNewStream);
-        embedInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                loadNewStream();
-            }
-        });
-
-        // Listener für Schalter und Dropdown
-        toggle.addEventListener('change', updateFilter);
-        select.addEventListener('change', updateFilter);
-
-        // Filter beim ersten Laden der Seite initialisieren
-        updateFilter();
-    </script>
-</body>
-</html>
+            
