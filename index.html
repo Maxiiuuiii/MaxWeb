@@ -3,263 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Wichtig: Verhindert, dass die Streaming-Seite blockiert, weil sie in einer fremden Seite eingebettet ist -->
-    <meta name="referrer" content="no-referrer">
-    <title>Minimalist Live Stream Player</title>
+    <title>Live Stream Player - Bayern vs Real Madrid</title>
     <style>
         :root {
             --bg-color: #0f172a;
-            --text-color: #f8fafc;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --panel-bg: #1e293b;
-            --border-color: #334155;
+            --primary: #3b82f6;
+            --text: #f8fafc;
         }
-
+        
         body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            padding: 20px;
-            box-sizing: border-box;
-            margin-top: 2vh;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
+        h1 {
+            font-size: 1.5rem;
             margin-bottom: 20px;
-            background-color: var(--panel-bg);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            text-align: center;
         }
 
-        .input-group input {
-            flex: 1;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-group input:focus {
-            border-color: var(--accent-color);
-        }
-
-        .input-group button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .input-group button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        /* Responsiver Player-Container (16:9) */
-        .player-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; 
-            height: 0;
-            overflow: hidden;
+        .player-container {
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 16 / 9; /* Hält das 16:9 Format responsive */
             background-color: #000;
             border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
 
-        .player-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        iframe {
             width: 100%;
             height: 100%;
-            transition: filter 0.3s ease;
             border: none;
+            /* Weicher Übergang beim Wechseln der Filter */
+            transition: filter 0.4s ease-in-out;
         }
 
-        /* --- Filter Profile --- */
-        .filter-none { filter: none; }
-        .filter-bigscreen { filter: contrast(1.25) saturate(1.3) brightness(1.05); }
-        .filter-vibrant { filter: contrast(1.1) saturate(1.6) brightness(1.1); }
-        .filter-stadium { filter: contrast(1.15) saturate(1.1) brightness(0.95); }
-        .filter-night { filter: contrast(1.1) brightness(0.8) sepia(0.15); }
-
-        /* --- Kontrollpanel --- */
+        /* --- Button & UI Styling --- */
         .controls {
-            margin-top: 20px;
-            background-color: var(--panel-bg);
-            padding: 15px 20px;
-            border-radius: 10px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            border: 1px solid var(--border-color);
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
         }
 
-        label {
+        button {
+            background-color: #1e293b;
+            color: var(--text);
+            border: 2px solid #334155;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 0.95rem;
             font-weight: 500;
+            transition: all 0.2s;
         }
 
-        select {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            outline: none;
-            transition: border-color 0.2s;
+        button:hover {
+            background-color: #334155;
         }
 
-        select:focus, select:hover { border-color: var(--accent-color); }
+        button.active {
+            border-color: var(--primary);
+            background-color: rgba(59, 130, 246, 0.15);
+            color: var(--primary);
+        }
 
-        /* --- Toggle Switch --- */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
+        /* --- Die CSS Video-Filter --- */
+        
+        .filter-normal {
+            filter: none;
         }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--border-color);
-            transition: .3s;
-            border-radius: 24px;
+        
+        .filter-bigscreen {
+            /* Ideal für TVs: Erhöhter Kontrast, mehr Sättigung für den Rasen und leicht angehobene Helligkeit */
+            filter: contrast(1.15) saturate(1.25) brightness(1.05);
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
+        
+        .filter-vivid {
+            /* Stadion-Modus: Sehr starkes Grün und leuchtende Trikots */
+            filter: contrast(1.2) saturate(1.4) brightness(1.1);
         }
-        input:checked + .slider { background-color: var(--accent-color); }
-        input:checked + .slider:before { transform: translateX(22px); }
+        
+        .filter-night {
+            /* Abendspiel: Etwas dunkler, starker Kontrast, schont die Augen in dunklen Räumen */
+            filter: contrast(1.2) saturate(1.15) brightness(0.9);
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="input-group">
-            <input type="text" id="embed-input" placeholder="Füge hier deinen kompletten <iframe... > Code oder eine Stream-URL ein">
-            <button id="load-btn">Stream Laden</button>
-        </div>
+    <h1>⚽ Bayern Munich vs Real Madrid</h1>
 
-        <div class="player-wrapper" id="player-container">
-            <!-- Dein gewünschter Iframe als Standard -->
-            <!-- Hinweis: inline style und width/height wurden vom Javascript/CSS überschrieben, damit das 16:9 Format erhalten bleibt -->
-            <iframe 
-                src="http://dlstreams.com/stream/stream-8.php" 
-                frameborder="0" 
-                allowfullscreen>
-            </iframe>
-        </div>
+    <div class="player-container">
+        <!-- Dein Embed-Code inkl. ID, um ihn mit JavaScript ansprechen zu können -->
+        <iframe 
+            id="stream-frame" 
+            class="filter-normal"
+            title="Bayern Munich vs Real Madrid Player" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1" 
+            scrolling="no" 
+            allowfullscreen="yes" 
+            allow="encrypted-media; picture-in-picture;" 
+            width="100%" 
+            height="100%" 
+            frameborder="0">
+        </iframe>
+    </div>
 
-        <div class="controls">
-            <div class="control-group">
-                <label for="filter-toggle">Filter Aktiv:</label>
-                <label class="switch">
-                    <input type="checkbox" id="filter-toggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="control-group">
-                <label for="profile-select">Bild-Profil:</label>
-                <select id="profile-select">
-                    <option value="filter-bigscreen">Fußball Bigscreen (Kontrast & Schärfe)</option>
-                    <option value="filter-vibrant">Vibrant Pitch (Sattes Rasengrün)</option>
-                    <option value="filter-stadium">Stadion-Atmosphäre (Klar & Natürlich)</option>
-                    <option value="filter-night">Nachtmodus (Augenschonend)</option>
-                </select>
-            </div>
-        </div>
+    <!-- Steuerelemente für die Filter -->
+    <div class="controls">
+        <button class="active" onclick="setFilter('filter-normal', this)">Standard</button>
+        <button onclick="setFilter('filter-bigscreen', this)">📺 Big Screen (Empfohlen)</button>
+        <button onclick="setFilter('filter-vivid', this)">🌿 Vivid Rasen</button>
+        <button onclick="setFilter('filter-night', this)">🌙 Abendspiel</button>
     </div>
 
     <script>
-        const playerContainer = document.getElementById('player-container');
-        const toggle = document.getElementById('filter-toggle');
-        const select = document.getElementById('profile-select');
-        const embedInput = document.getElementById('embed-input');
-        const loadBtn = document.getElementById('load-btn');
+        function setFilter(filterClass, btn) {
+            // Sucht das Iframe und ändert dessen Klasse auf den gewählten Filter
+            const iframe = document.getElementById('stream-frame');
+            iframe.className = filterClass;
 
-        function updateFilter() {
-            const currentIframe = playerContainer.querySelector('iframe');
-            if (!currentIframe) return;
-
-            currentIframe.classList.remove('filter-none', 'filter-bigscreen', 'filter-vibrant', 'filter-stadium', 'filter-night');
-            
-            if (toggle.checked) {
-                currentIframe.classList.add(select.value);
-            } else {
-                currentIframe.classList.add('filter-none');
-            }
+            // Markiert den aktuell geklickten Button farblich
+            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
+    </script>
 
-        function loadNewStream() {
-            const inputValue = embedInput.value.trim();
-            if (!inputValue) return;
-
-            let newIframeHTML = '';
-
-            if (inputValue.toLowerCase().startsWith('<iframe')) {
-                newIframeHTML = inputValue;
-            } else if (inputValue.startsWith('http')) {
-                newIframeHTML = `<iframe src="${inputValue}" frameborder="0" allowfullscreen></iframe>`;
-            } else {
-                alert("Bitte einen gültigen Iframe-Code oder eine URL eingeben.");
-                return;
-            }
-
-            playerContainer.innerHTML = newIframeHTML;
-
-            const newlyAddedIframe = playerContainer.querySelector('iframe');
-            if (newlyAddedIframe) {
-                newlyAddedIframe.removeAttribute('width');
-                newlyAddedIframe.removeAttribute('height');
-                newlyAddedIframe.removeAttribute('style'); 
-                
-                updateFilter();
-                embedInput.value = '';
-            
+</body>
+</html>
