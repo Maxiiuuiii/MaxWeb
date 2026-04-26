@@ -1,186 +1,735 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player - Multi-Source</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --primary: #3b82f6;
-            --text: #f8fafc;
-            --panel-bg: #1e293b;
-        }
-        
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Stream Player</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg2: #0c1830;
+      --panel: rgba(12, 20, 36, 0.86);
+      --field: #0b1424;
+      --text: #eef4ff;
+      --muted: #9aabcb;
+      --accent: #20d4ff;
+      --accent2: #00ff95;
+      --border: rgba(255,255,255,0.10);
+      --glow: rgba(32,212,255,0.22);
+      --live: #ff465f;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 22px;
+    }
 
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .player-container {
-            width: 100%;
-            max-width: 1200px;
-            aspect-ratio: 16 / 9;
-            background-color: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 24px;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(32,212,255,0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(0,255,149,0.12), transparent 22%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+    }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            transition: filter 0.4s ease-in-out;
-        }
+    .app {
+      width: min(1200px, calc(100% - 32px));
+      margin: 28px auto;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 22px;
+    }
 
-        /* --- UI Styling --- */
-        .controls-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-        }
+    .panel,
+    .player-shell {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
 
-        .control-group {
-            background-color: var(--panel-bg);
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-        }
+    .panel {
+      padding: 18px;
+    }
 
-        .control-group h3 {
-            margin: 0 0 12px 0;
-            font-size: 1rem;
-            color: #94a3b8;
-        }
+    .title {
+      margin: 0 0 8px;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
 
-        .controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
 
-        button {
-            background-color: #0f172a;
-            color: var(--text);
-            border: 2px solid #334155;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+    .label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 700;
+    }
 
-        button:hover {
-            background-color: #334155;
-        }
+    textarea,
+    select,
+    input {
+      width: 100%;
+      background: var(--field);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      font: inherit;
+      outline: none;
+      transition: 0.2s ease;
+    }
 
-        button.active {
-            border-color: var(--primary);
-            background-color: rgba(59, 130, 246, 0.15);
-            color: var(--primary);
-        }
+    textarea {
+      min-height: 170px;
+      resize: vertical;
+      line-height: 1.45;
+    }
 
-        /* --- CSS Video-Filter --- */
-        .filter-normal { filter: none; }
-        .filter-bigscreen { filter: contrast(1.15) saturate(1.25) brightness(1.05); }
-        .filter-vivid { filter: contrast(1.2) saturate(1.4) brightness(1.1); }
-        .filter-night { filter: contrast(1.2) saturate(1.15) brightness(0.9); }
-    </style>
+    textarea:focus,
+    select:focus,
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--glow);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: #04111d;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 12px 28px var(--glow);
+    }
+
+    .btn-secondary {
+      color: var(--text);
+      background: #162238;
+      border: 1px solid var(--border);
+    }
+
+    .themes {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .theme-preview {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .swatch {
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hint {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .player-shell {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 620px;
+    }
+
+    .player-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+      padding: 8px 6px 6px;
+      flex-wrap: wrap;
+    }
+
+    .player-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      background: rgba(255, 70, 95, 0.14);
+      border: 1px solid rgba(255, 70, 95, 0.30);
+      color: #ffd8df;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 16px var(--live);
+      animation: pulse 1.3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.55; }
+    }
+
+    .theme-chip,
+    .status-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .player-stage {
+      position: relative;
+      flex: 1;
+      min-height: 420px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+        #000;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.02),
+        0 16px 40px rgba(0,0,0,0.34);
+      aspect-ratio: 16 / 9;
+    }
+
+    .player-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, transparent, rgba(0,0,0,0.18)),
+        radial-gradient(circle at top center, var(--glow), transparent 36%);
+      z-index: 2;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: #000;
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      text-align: center;
+      z-index: 1;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,0.02) 0px,
+          rgba(255,255,255,0.02) 1px,
+          transparent 1px,
+          transparent 32px
+        ),
+        #05080d;
+    }
+
+    .placeholder-box {
+      max-width: 520px;
+    }
+
+    .placeholder-icon {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 18px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid;
+      place-items: center;
+      color: #031019;
+      font-size: 2rem;
+      font-weight: 900;
+      box-shadow: 0 18px 38px var(--glow);
+    }
+
+    .placeholder h2 {
+      margin: 0 0 10px;
+      font-size: 1.4rem;
+    }
+
+    .placeholder p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .footer-tools {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tiny-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .player-shell {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        width: min(100% - 18px, 1200px);
+        margin: 12px auto 18px;
+      }
+
+      .panel,
+      .player-shell {
+        border-radius: 18px;
+      }
+
+      .row,
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .player-stage {
+        min-height: 260px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <aside class="panel">
+      <h1 class="title">Live Stream Embed Player</h1>
+      <p class="subtitle">
+        Füge deinen kompletten iframe-Code oder nur die direkte src-URL ein.
+        Wähle danach ein Fußball-Farbprofil wie Bigscreen, Stadion oder Flutlicht.
+      </p>
 
-    <h1>⚽ Live Match Player</h1>
+      <label class="label" for="embedCode">Embed-Code oder Stream-URL</label>
+      <textarea id="embedCode" placeholder='<iframe src="https://dein-stream.de/embed/123" allowfullscreen></iframe>'></textarea>
 
-    <div class="player-container">
-        <!-- Das iframe lädt standardmäßig Stream 1 -->
-        <iframe 
-            id="stream-frame" 
-            class="filter-normal"
-            title="Live Player" 
-            src="https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-        </iframe>
-    </div>
-
-    <div class="controls-wrapper">
-        <!-- Stream Auswahl -->
-        <div class="control-group">
-            <h3>📡 Stream Quelle wählen:</h3>
-            <div class="controls" id="stream-controls">
-                <button class="active" onclick="setStream('https://embedsports.top/embed/admin/ppv-bayern-munich-vs-real-madrid/1', this)">Stream 1 (Main)</button>
-                <button onclick="setStream('https://dlstreams.com/stream/stream-32.php', this)">Stream 2 (Backup 1)</button>
-                <button onclick="setStream('https://ntv.cx/embed?t=RnBicEVST3ZWdWxIOTdKVHE4MlUydFlKR00weWtLd1orQ21LeUtTNTVuQzNJYWN4NEdIQkZMRUM1aHBIKzMyV0R2b1JDZmtxMkNuVCt6WUVjV1NsNjlsbzdEcVdNMUlCMDEvcEh3bE5Cakk9', this)">Stream 3 (Backup 2)</button>
-            </div>
+      <div class="row">
+        <div>
+          <label class="label" for="themeSelect">Farbprofil</label>
+          <select id="themeSelect">
+            <option value="bigscreen">Fußball Bigscreen</option>
+            <option value="stadion">Stadion Grün</option>
+            <option value="flutlicht">Flutlicht Blau</option>
+            <option value="derby">Derby Rot</option>
+            <option value="classic">Classic Dark</option>
+          </select>
         </div>
 
-        <!-- Filter Auswahl -->
-        <div class="control-group">
-            <h3>🎨 Bild-Filter:</h3>
-            <div class="controls" id="filter-controls">
-                <button class="active" onclick="setFilter('filter-normal', this)">Standard</button>
-                <button onclick="setFilter('filter-bigscreen', this)">📺 Big Screen</button>
-                <button onclick="setFilter('filter-vivid', this)">🌿 Vivid Rasen</button>
-                <button onclick="setFilter('filter-night', this)">🌙 Abendspiel</button>
-            </div>
+        <div>
+          <label class="label" for="streamTitleInput">Titel</label>
+          <input id="streamTitleInput" type="text" placeholder="z. B. Bundesliga Live" />
         </div>
-    </div>
+      </div>
 
-       <script>
-        // Funktion zum Wechseln der Stream-URL
-        function setStream(url, btn) {
-            const container = document.querySelector('.player-container');
-            const oldIframe = document.getElementById('stream-frame');
-            
-            // 1. Speichere den aktuell ausgewählten Bild-Filter
-            const currentFilter = oldIframe ? oldIframe.className : 'filter-normal';
+      <div class="buttons">
+        <button class="btn-primary" id="loadBtn">Stream laden</button>
+        <button class="btn-secondary" id="clearBtn">Zurücksetzen</button>
+      </div>
 
-            // 2. Erstelle ein komplett neues iframe (Hard Reset für den Player)
-            const newIframe = document.createElement('iframe');
-            newIframe.id = 'stream-frame';
-            newIframe.className = currentFilter; // Filter wieder anwenden
-            newIframe.title = "Live Player";
-            newIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            newIframe.allowFullscreen = true;
-            newIframe.src = url;
+      <div class="themes">
+        <span class="label">Theme-Vorschau</span>
+        <div class="theme-preview" id="themePreview"></div>
+      </div>
 
-            // 3. Lösche das alte iframe und füge das neue ein
-            container.innerHTML = '';
-            container.appendChild(newIframe);
+      <div class="hint">
+        Tipp: Du kannst entweder den kompletten iframe einfügen oder nur die URL wie
+        <code>https://seite.de/embed/stream</code>. Das Theme wird automatisch gespeichert.
+      </div>
+    </aside>
 
-            // 4. Button-Farbe aktualisieren
-            const controlsContainer = document.getElementById('stream-controls');
-            controlsContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    <main class="player-shell">
+      <div class="player-top">
+        <div class="player-left">
+          <div class="badge-live"><span class="dot"></span> LIVE</div>
+          <div class="theme-chip" id="currentTheme">Fußball Bigscreen</div>
+          <div class="status-chip" id="statusText">Bereit</div>
+        </div>
+
+        <div class="footer-tools">
+          <button class="tiny-btn" id="fullscreenBtn" type="button">Vollbild</button>
+          <button class="tiny-btn" id="copySrcBtn" type="button">Src kopieren</button>
+        </div>
+      </div>
+
+      <div class="player-stage" id="playerStage">
+        <div class="placeholder" id="placeholder">
+          <div class="placeholder-box">
+            <div class="placeholder-icon">▶</div>
+            <h2 id="streamHeadline">Noch kein Stream geladen</h2>
+            <p>
+              Füge links deinen Embed-Code ein und starte den Player.
+              Die Oberfläche passt sich sofort an dein ausgewähltes Fußball-Farbprofil an.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const themes = {
+      bigscreen: {
+        label: "Fußball Bigscreen",
+        vars: {
+          "--bg": "#07111f",
+          "--bg2": "#0c1830",
+          "--panel": "rgba(12, 20, 36, 0.86)",
+          "--field": "#0b1424",
+          "--text": "#eef4ff",
+          "--muted": "#9aabcb",
+          "--accent": "#20d4ff",
+          "--accent2": "#00ff95",
+          "--border": "rgba(255,255,255,0.10)",
+          "--glow": "rgba(32,212,255,0.22)",
+          "--live": "#ff465f"
+        },
+        preview: ["#07111f", "#20d4ff", "#00ff95", "#ffffff", "#ff465f"]
+      },
+      stadion: {
+        label: "Stadion Grün",
+        vars: {
+          "--bg": "#09150e",
+          "--bg2": "#10261a",
+          "--panel": "rgba(10, 25, 18, 0.88)",
+          "--field": "#0e1c13",
+          "--text": "#effff4",
+          "--muted": "#a8c7b2",
+          "--accent": "#55ff7a",
+          "--accent2": "#d7ff57",
+          "--border": "rgba(255,255,255,0.10)",
+          "--glow": "rgba(85,255,122,0.22)",
+          "--live": "#ff4d67"
+        },
+        preview: ["#09150e", "#55ff7a", "#d7ff57", "#effff4", "#ff4d67"]
+      },
+      flutlicht: {
+        label: "Flutlicht Blau",
+        vars: {
+          "--bg": "#060b16",
+          "--bg2": "#101c3b",
+          "--panel": "rgba(8, 14, 28, 0.88)",
+          "--field": "#0b1220",
+          "--text": "#f1f6ff",
+          "--muted": "#9db0d7",
+          "--accent": "#80b9ff",
+          "--accent2": "#dff3ff",
+          "--border": "rgba(255,255,255,0.10)",
+          "--glow": "rgba(128,185,255,0.22)",
+          "--live": "#ff5d73"
+        },
+        preview: ["#060b16", "#80b9ff", "#dff3ff", "#f1f6ff", "#ff5d73"]
+      },
+      derby: {
+        label: "Derby Rot",
+        vars: {
+          "--bg": "#180709",
+          "--bg2": "#2f0d14",
+          "--panel": "rgba(28, 9, 12, 0.88)",
+          "--field": "#210c0f",
+          "--text": "#fff1f3",
+          "--muted": "#d3a6ad",
+          "--accent": "#ff546b",
+          "--accent2": "#ff9a3d",
+          "--border": "rgba(255,255,255,0.10)",
+          "--glow": "rgba(255,84,107,0.22)",
+          "--live": "#ff7a00"
+        },
+        preview: ["#180709", "#ff546b", "#ff9a3d", "#fff1f3", "#ff7a00"]
+      },
+      classic: {
+        label: "Classic Dark",
+        vars: {
+          "--bg": "#0d1017",
+          "--bg2": "#171c26",
+          "--panel": "rgba(17, 22, 30, 0.90)",
+          "--field": "#0f141c",
+          "--text": "#f5f7fb",
+          "--muted": "#a5adba",
+          "--accent": "#c9a227",
+          "--accent2": "#f8df80",
+          "--border": "rgba(255,255,255,0.10)",
+          "--glow": "rgba(201,162,39,0.20)",
+          "--live": "#ff4f67"
+        },
+        preview: ["#0d1017", "#c9a227", "#f8df80", "#f5f7fb", "#ff4f67"]
+      }
+    };
+
+    const embedCode = document.getElementById("embedCode");
+    const themeSelect = document.getElementById("themeSelect");
+    const streamTitleInput = document.getElementById("streamTitleInput");
+    const loadBtn = document.getElementById("loadBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const playerStage = document.getElementById("playerStage");
+    const placeholder = document.getElementById("placeholder");
+    const currentTheme = document.getElementById("currentTheme");
+    const statusText = document.getElementById("statusText");
+    const streamHeadline = document.getElementById("streamHeadline");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const copySrcBtn = document.getElementById("copySrcBtn");
+    const themePreview = document.getElementById("themePreview");
+
+    let currentSrc = "";
+
+    function applyTheme(name) {
+      const theme = themes[name] || themes.bigscreen;
+      Object.entries(theme.vars).forEach(([key, value]) => {
+        document.documentElement.style.setProperty(key, value);
+      });
+      currentTheme.textContent = theme.label;
+      themeSelect.value = name;
+      renderThemePreview(theme.preview);
+      localStorage.setItem("stream_theme", name);
+    }
+
+    function renderThemePreview(colors) {
+      themePreview.innerHTML = "";
+      colors.forEach(color => {
+        const div = document.createElement("div");
+        div.className = "swatch";
+        div.style.background = color;
+        themePreview.appendChild(div);
+      });
+    }
+
+    function parseEmbedInput(raw) {
+      const text = raw.trim();
+
+      if (!text) {
+        throw new Error("Bitte zuerst einen iframe-Code oder eine src-URL einfügen.");
+      }
+
+      if (text.startsWith("<iframe")) {
+        const doc = new DOMParser().parseFromString(text, "text/html");
+        const iframe = doc.querySelector("iframe");
+
+        if (!iframe) {
+          throw new Error("Kein gültiger iframe gefunden.");
         }
 
-        // Funktion zum Wechseln des CSS-Filters
-        function setFilter(filterClass, btn) {
-            const iframe = document.getElementById('stream-frame');
-            if (iframe) iframe.className = filterClass;
+        return {
+          src: iframe.getAttribute("src") || "",
+          title: iframe.getAttribute("title") || "",
+          allow: iframe.getAttribute("allow") || "autoplay; encrypted-media; picture-in-picture; fullscreen",
+          referrerpolicy: iframe.getAttribute("referrerpolicy") || "origin-when-cross-origin"
+        };
+      }
 
-            const container = document.getElementById('filter-controls');
-            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+      if (text.startsWith("http://") || text.startsWith("https://")) {
+        return {
+          src: text,
+          title: "",
+          allow: "autoplay; encrypted-media; picture-in-picture; fullscreen",
+          referrerpolicy: "origin-when-cross-origin"
+        };
+      }
+
+      throw new Error("Bitte kompletten iframe-Code oder eine direkte http/https-URL einfügen.");
+    }
+
+    function isValidUrl(url) {
+      try {
+        const u = new URL(url);
+        return ["http:", "https:"].includes(u.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    function buildIframe(data) {
+      if (!isValidUrl(data.src)) {
+        throw new Error("Die iframe-Quelle ist ungültig.");
+      }
+
+      const iframe = document.createElement("iframe");
+      iframe.src = data.src;
+      iframe.title = streamTitleInput.value.trim() || data.title || "Live Stream Player";
+      iframe.allow = data.allow || "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.referrerPolicy = data.referrerpolicy || "origin-when-cross-origin";
+      iframe.allowFullscreen = true;
+      iframe.setAttribute("frameborder", "0");
+      iframe.setAttribute("scrolling", "no");
+      return iframe;
+    }
+
+    function loadStream() {
+      try {
+        const data = parseEmbedInput(embedCode.value);
+        const iframe = buildIframe(data);
+
+        playerStage.innerHTML = "";
+        playerStage.appendChild(iframe);
+
+        const customTitle = streamTitleInput.value.trim() || data.title || "Live Stream geladen";
+        streamHeadline.textContent = customTitle;
+        statusText.textContent = "Stream geladen";
+        currentSrc = data.src;
+
+        localStorage.setItem("stream_embed", embedCode.value);
+        localStorage.setItem("stream_title", streamTitleInput.value.trim());
+      } catch (error) {
+        statusText.textContent = error.message;
+        if (!document.getElementById("placeholder")) {
+          playerStage.innerHTML = `
+            <div class="placeholder" id="placeholder">
+              <div class="placeholder-box">
+                <div class="placeholder-icon">!</div>
+                <h2>Embed konnte nicht geladen werden</h2>
+                <p>${error.message}</p>
+              </div>
+            </div>
+          `;
         }
-    </script>
+      }
+    }
 
+    function resetPlayer() {
+      embedCode.value = "";
+      streamTitleInput.value = "";
+      currentSrc = "";
+      statusText.textContent = "Bereit";
+      streamHeadline.textContent = "Noch kein Stream geladen";
+      playerStage.innerHTML = `
+        <div class="placeholder" id="placeholder">
+          <div class="placeholder-box">
+            <div class="placeholder-icon">▶</div>
+            <h2 id="streamHeadline">Noch kein Stream geladen</h2>
+            <p>
+              Füge links deinen Embed-Code ein und starte den Player.
+              Die Oberfläche passt sich sofort an dein ausgewähltes Fußball-Farbprofil an.
+            </p>
+          </div>
+        </div>
+      `;
+      localStorage.removeItem("stream_embed");
+      localStorage.removeItem("stream_title");
+    }
+
+    async function copySrc() {
+      if (!currentSrc) {
+        statusText.textContent = "Keine src vorhanden";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(currentSrc);
+        statusText.textContent = "Src kopiert";
+      } catch {
+        statusText.textContent = "Kopieren nicht möglich";
+      }
+    }
+
+    function openFullscreen() {
+      const target = playerStage;
+      if (target.requestFullscreen) target.requestFullscreen();
+      else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+      else if (target.msRequestFullscreen) target.msRequestFullscreen();
+    }
+
+    loadBtn.addEventListener("click", loadStream);
+    clearBtn.addEventListener("click", resetPlayer);
+    copySrcBtn.addEventListener("click", copySrc);
+    fullscreenBtn.addEventListener("click", openFullscreen);
+    themeSelect.addEventListener("change", (e) => applyTheme(e.target.value));
+
+    embedCode.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        loadStream();
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("stream_theme") || "bigscreen";
+      const savedEmbed = localStorage.getItem("stream_embed") || "";
+      const savedTitle = localStorage.getItem("stream_title") || "";
+
+      applyTheme(savedTheme);
+      embedCode.value = savedEmbed;
+      streamTitleInput.value = savedTitle;
+
+      if (savedEmbed.trim()) {
+        loadStream();
+      }
+    });
+  </script>
 </body>
 </html>
